@@ -1,0 +1,10 @@
+{
+  "admin@example.com": {
+    "id": "1",
+    "email": "admin@example.com",
+    "password": "$2a$12$mZcFyoRC9nn8dHGUWP3Zre4E0innVdDepEXc8xP74fnydxVa6Xge6", 
+    "roles": ["admin"],
+    "two_fa": false,
+    "created_at": "2025-08-26T23:59:59Z"
+  }
+}

@@ -1,0 +1,16 @@
+os: auto
+theme: dark
+
+security:
+  csrf_secret: V25UtAUPrx1I3Y4h1qU23qEGQYRHJEJyOZJZaFfVXgM=
+  jwt_secret: xYGsgmMQJXHCO8zfBrXgy5VrNsNlnV3FbxvpqIYr6SE=
+
+paths:
+  users_file: settings/users.json
+  log_dir: logs
+
+display:
+  cpu: true
+  memory: true
+  disk: true
+  network: true

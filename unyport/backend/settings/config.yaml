@@ -1,0 +1,16 @@
+apps:
+  - name: TTYd
+    host: ttyd
+    port: 7681
+    type: terminal
+
+auth:
+  github:
+    client_id: "Iv1.abcdef1234567890"
+    client_secret: "shhhhhhhhhhhhhhhhh"
+    redirect_url: "https://mon-domaine.com/api/oauth/callback?provider=github"
+
+  gitlab:
+    client_id: "1234567890abcdef"
+    client_secret: "supersecretgitlabkey"
+    redirect_url: "https://mon-domaine.com/api/oauth/callback?provider=gitlab"

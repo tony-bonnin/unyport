@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UnyPort - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="msapplication-navbutton-color" content="#000000">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+
+  <script src="/vendor/chart.umd.min.js"></script>
+  <script src="/vendor/luxon.min.js"></script>
+  <script src="/vendor/chartjs-adapter-luxon.umd.min.js"></script>
+  <script src="/vendor/chartjs-plugin-streaming.umd.min.js"></script>
+
+  <script defer src="/app/utils.js"></script>
+  <script defer src="/app/auth.js"></script>
+  <script defer src="/app/sse.js"></script>
+  <script defer src="/app/chart.js"></script>
+  <script defer src="/app/app.js"></script>
+  <script defer src="/vendor/alpinejs-csp.min.js"></script>
+</head>
+
+<body>
+<div id="app" x-data="unyport">
+
+<!-- Loading -->
+<div id="loading" class="page" x-show="page === 'loading'">
+  <div class="spinner"></div>
+  <p>Vérification de la session...</p>
+</div>
+
+<!-- Login -->
+<div id="login" class="page" x-show="page === 'login'">
+  <a id="login-link" href="/" title="Login">
+    <img src="/media/img/logos/logo-unyport.png" alt="UnyPort Logo">
+  </a>
+  <div class="login-box">
+    <h2><i class="fa-solid fa-sliders"></i> <span>Uny</span>Port</h2>
+    <p class="login-error" x-show="loginError" x-text="loginError"></p>
+    <form id="loginForm" @submit.prevent="doLogin()">
+      <input type="email"    x-model="email"    placeholder="Email"/>
+      <input type="password" x-model="password" placeholder="Password"/>
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" name="remember_me" id="remember_me">
+          <span> Remember Me</span>
+        </label>
+      </div>
+      <button type="submit" :disabled="loginLoading">
+        <span x-show="!loginLoading">Login</span>
+        <span x-show="loginLoading">…</span>
+      </button>
+      <button type="button" class="oauth github"
+              @click="window.location.href='/api/oauth/login?provider=github'">
+        <img src="/media/img/logos/github_logo_icon.png" alt="GitHub">
+        Login with GitHub
+      </button>
+      <button type="button" class="oauth gitlab"
+              @click="window.location.href='/api/oauth/login?provider=gitlab'">
+        <img src="/media/img/logos/gitlab_logo_icon.png" alt="GitLab">
+        Login with GitLab
+      </button>
+      <div class="form-footer">
+        <a href="/auth/forgot-password" class="forgot-password">Forgot Password ?</a>
+        <a href="/auth/register" class="register-link">Sign Up</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard" class="page" x-show="page === 'dashboard'">
+
+  <nav class="sidebar">
+    <a id="root-link" href="/" title="Home">
+      <img src="/media/img/logos/logo-unyport-simple.png" alt="UnyPort Logo">
+    </a>
+    <div id="dynamic-apps">
+      <template x-for="app in apps" :key="app.name">
+        <a :href="app.path" target="_blank" :title="app.name">
+          <i :class="appIcon(app.type)"></i>
+        </a>
+      </template>
+    </div>
+    <a id="settings" title="Settings" @click.prevent="goSettings()">
+      <i class="fa-solid fa-gear"></i>
+    </a>
+    <span class="logout-container">
+      <a id="logout" title="Logout" @click.prevent="doLogout()">
+        <i class="fa-solid fa-power-off"></i>
+      </a>
+    </span>
+  </nav>
+
+  <div class="dashboard-main">
+
+  <div id="header">
+    <div class="h-left">
+      <div class="breadcrumb">
+        <span>UnyPort</span>
+        <span class="sep">/</span>
+        <span class="current">Dashboard</span>
+      </div>
+      <div class="sse-indicator">
+        <span class="sse-dot" :class="sseConnected ? 'live' : 'dead'"></span>
+        <span x-text="sseConnected ? 'live' : 'offline'"></span>
+      </div>
+    </div>
+    <div class="h-right">
+      <span class="h-meta" x-text="sys.os_release || '—'"></span>
+      <div class="h-divider"></div>
+      <button class="h-btn" @click="toggleTheme()" :title="theme === 'dark' ? 'Thème clair' : 'Thème sombre'">
+        <i x-show="theme === 'dark'"  class="fa-solid fa-sun"></i>
+        <i x-show="theme === 'light'" class="fa-solid fa-moon"></i>
+      </button>
+      <div class="h-divider"></div>
+      <div class="h-avatar" :title="userEmail" x-text="userInitial"></div>
+      <span class="h-username" x-text="userName"></span>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="system">
+
+      <!-- R1 : système + cpu + mémoire + stockage -->
+      <div class="raw-1">
+
+        <div class="card">
+          <h3>
+            <img x-show="osLogo" :src="osLogo" class="os-logo" alt="">
+            système
+            <span class="sse-dot" :class="sseConnected ? 'live' : 'dead'"></span>
+          </h3>
+          <dl class="kv">
+            <dt>OS</dt>      <dd x-text="sys.os_release  || '—'"></dd>
+            <dt>Kernel</dt>  <dd x-text="sys.kernel      || '—'"></dd>
+            <dt>Uptime</dt>  <dd x-text="uptime"></dd>
+            <dt>Board</dt>   <dd x-text="sys.board_name  || '—'"></dd>
+            <dt>Vendor</dt>  <dd x-text="sys.board_vendor|| '—'"></dd>
+            <dt>Date</dt>    <dd x-text="sys.date        || '—'"></dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3>
+            <img x-show="cpuLogo" :src="cpuLogo" class="cpu-logo" alt="">
+            cpu
+          </h3>
+          <div class="big-val"><span x-text="cpuPct"></span><span class="unit">%</span></div>
+          <div class="bar-wrap"><div class="bar cpu-bar" :class="cpuBarClass"></div></div>
+          <dl class="kv">
+            <dt>modèle</dt>  <dd x-text="cleanCPU(sys.cpu_model)"></dd>
+            <dt>cœurs</dt>   <dd x-text="sys.cpu_cores || '—'"></dd>
+            <dt>fréq moy</dt><dd x-text="fmtFreq(sys.cpu_freq_avg_mhz)"></dd>
+            <dt>fréq max</dt><dd x-text="fmtFreq(sys.cpu_freq_max_mhz)"></dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><i class="fa-solid fa-memory"></i> mémoire</h3>
+          <div class="big-val"><span x-text="fmtMB(sys.mem_used)"></span></div>
+          <div class="bar-wrap"><div class="bar mem-bar" :class="memBarClass"></div></div>
+          <div class="pct-label" x-text="memPct + '% · ' + fmtMB(sys.mem_total) + ' total'"></div>
+          <dl class="kv">
+            <dt>utilisé</dt><dd x-text="fmtMB(sys.mem_used)"></dd>
+            <dt>libre</dt>  <dd x-text="fmtMB(sys.mem_free)"></dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><i class="fa-solid fa-hard-drive"></i> stockage</h3>
+          <dl class="kv">
+            <dt>/ root</dt>  <dd>—</dd>
+            <dt>/home</dt>   <dd>—</dd>
+            <dt>/var</dt>    <dd>—</dd>
+            <dt>read</dt>    <dd>—</dd>
+            <dt>write</dt>   <dd>—</dd>
+          </dl>
+        </div>
+
+      </div>
+
+      <!-- R2 : charts live -->
+      <div class="raw-1">
+        <div class="card chart-lg">
+          <h3><i class="fa-solid fa-chart-line"></i> fréquence cpu <span class="live-tag">live · 30s</span></h3>
+          <canvas id="chartFreq" height="55"></canvas>
+        </div>
+        <div class="card chart-md">
+          <h3><i class="fa-solid fa-wave-square"></i> mémoire <span class="live-tag">live · 30s</span></h3>
+          <canvas id="chartMem" height="55"></canvas>
+        </div>
+        <div class="card chart-sm">
+          <h3>cpu gauge</h3>
+          <canvas id="cpuGauge" height="55"></canvas>
+        </div>
+      </div>
+
+      <!-- R3 : réseau + processus + apps + sécurité -->
+      <div class="raw-3">
+
+        <div class="card">
+          <h3><i class="fa-solid fa-network-wired"></i> réseau</h3>
+          <div class="net-stats">
+            <div class="ns"><div class="ns-lbl">↓ rx</div><div class="ns-val">—</div></div>
+            <div class="ns"><div class="ns-lbl">↑ tx</div><div class="ns-val">—</div></div>
+          </div>
+          <dl class="kv">
+            <dt>iface</dt>    <dd>—</dd>
+            <dt>ip</dt>       <dd>—</dd>
+            <dt>rx total</dt> <dd>—</dd>
+            <dt>tx total</dt> <dd>—</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><i class="fa-solid fa-microchip"></i> top processus</h3>
+          <div class="proc-list">
+            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
+            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
+            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
+            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
+            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fa-solid fa-th"></i> apps</h3>
+          <div class="apps-icons">
+            <template x-for="app in apps" :key="app.name">
+              <a :href="app.path" target="_blank" :title="app.name" class="app-icon">
+                <i :class="appIcon(app.type)"></i>
+              </a>
+            </template>
+          </div>
+          <dl class="kv">
+            <dt>proxy</dt><dd x-text="apps.length + ' actifs'"></dd>
+            <dt>auth</dt> <dd>JWT cookie</dd>
+          </dl>
+        </div>
+
+        <div class="card">
+          <h3><i class="fa-solid fa-shield-halved"></i> sécurité</h3>
+          <div class="sec-list">
+            <div class="sec-row"><span>CSRF</span><span class="badge badge-ok">actif</span></div>
+            <div class="sec-row"><span>JWT</span><span class="badge badge-ok">HS256</span></div>
+            <div class="sec-row"><span>CSP</span><span class="badge badge-ok">strict</span></div>
+            <div class="sec-row"><span>TLS</span><span class="badge badge-warn">off</span></div>
+            <div class="sec-row"><span>2FA</span><span class="badge badge-warn">off</span></div>
+            <div class="sec-row"><span>OAuth</span><span class="badge badge-ok">actif</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- R4 : thermique + I/O + logs -->
+      <div class="raw-3">
+
+        <div class="card">
+          <h3><i class="fa-solid fa-temperature-half"></i> thermique</h3>
+          <div class="thermal-grid">
+            <div class="th-item"><div class="th-lbl">CPU pkg</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-cpu"></div></div></div>
+            <div class="th-item"><div class="th-lbl">Core avg</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-core"></div></div></div>
+            <div class="th-item"><div class="th-lbl">Board</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-board"></div></div></div>
+            <div class="th-item"><div class="th-lbl">NVMe</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-nvme"></div></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fa-solid fa-database"></i> disques i/o</h3>
+          <dl class="kv">
+            <dt>sda read</dt>   <dd>—</dd>
+            <dt>sda write</dt>  <dd>—</dd>
+            <dt>nvme read</dt>  <dd>—</dd>
+            <dt>nvme write</dt> <dd>—</dd>
+            <dt>utilisation</dt><dd>—</dd>
+          </dl>
+        </div>
+
+        <div class="card card-logs">
+          <h3><i class="fa-solid fa-terminal"></i> logs récents</h3>
+          <div class="log-list">
+            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
+            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
+            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
+            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-warn">WARN</span><span class="log-msg">—</span></div>
+            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
