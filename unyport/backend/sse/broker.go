@@ -35,8 +35,27 @@ func NewBroker(logger *slog.Logger) *Broker {
 }
 
 func (b *Broker) loop() {
+	var prevSnap Snapshot
 	for {
 		snap := collect()
+
+		// Calcul débit réseau (bytes/s) entre deux snapshots
+		if prevSnap.Timestamp.IsZero() {
+			snap.NetRXBps = 0
+			snap.NetTXBps = 0
+		} else {
+			dt := snap.Timestamp.Sub(prevSnap.Timestamp).Seconds()
+			if dt > 0 {
+				if snap.NetRXBytes >= prevSnap.NetRXBytes {
+					snap.NetRXBps = uint64(float64(snap.NetRXBytes-prevSnap.NetRXBytes) / dt)
+				}
+				if snap.NetTXBytes >= prevSnap.NetTXBytes {
+					snap.NetTXBps = uint64(float64(snap.NetTXBytes-prevSnap.NetTXBytes) / dt)
+				}
+			}
+		}
+		prevSnap = snap
+
 		b.mu.Lock()
 		b.ring[b.head] = snap
 		b.head = (b.head + 1) % ringSize
@@ -128,8 +147,11 @@ type SystemInfo struct {
 	CPUModel   string `json:"cpu_model"`
 	CPUVendor  string `json:"cpu_vendor"`
 	CPUCores   int    `json:"cpu_cores"`
-	BoardName  string `json:"board_name"`
+	BoardName   string `json:"board_name"`
 	BoardVendor string `json:"board_vendor"`
+	XenRole     string `json:"xen_role"`
+	NetIface    string `json:"net_iface"`
+	NetIP       string `json:"net_ip"` // "Dom0", "DomU", ou ""
 	// Métriques courantes (pour la compatibilité avec l'ancien front)
 	CPUUsage    float64 `json:"cpu_usage"`
 	CPUFreqAvg  int     `json:"cpu_freq_avg_mhz"`
@@ -145,8 +167,9 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 	pretty, version := getOSRelease()
 	kernel := readFirstFile("/proc/sys/kernel/osrelease")
 	uptime := readFirstFile("/proc/uptime")
-	board  := readFirstFile("/sys/devices/virtual/dmi/id/board_name")
+	board   := readFirstFile("/sys/devices/virtual/dmi/id/board_name")
 	bvendor := readFirstFile("/sys/devices/virtual/dmi/id/board_vendor")
+	xenRole := detectXenRole()
 
 	b.mu.RLock()
 	var snap Snapshot
@@ -166,6 +189,9 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 		CPUCores:    cores,
 		BoardName:   strings.TrimSpace(board),
 		BoardVendor: strings.TrimSpace(bvendor),
+		XenRole:     xenRole,
+		NetIface:    snap.NetIface,
+		NetIP:       snap.NetIP,
 		CPUUsage:    snap.CPUUsage,
 		CPUFreqAvg:  snap.CPUFreqAvg,
 		CPUFreqMax:  snap.CPUFreqMax,

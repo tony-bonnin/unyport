@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -18,6 +19,10 @@ type Snapshot struct {
 	MemFree     uint64    `json:"mem_free_mb"`
 	NetRXBytes  uint64    `json:"net_rx_bytes"`
 	NetTXBytes  uint64    `json:"net_tx_bytes"`
+	NetRXBps    uint64    `json:"net_rx_bps"`
+	NetTXBps    uint64    `json:"net_tx_bps"`
+	NetIface    string    `json:"net_iface"`
+	NetIP       string    `json:"net_ip"`
 }
 
 // collect lit /proc et retourne un Snapshot.
@@ -31,6 +36,7 @@ func collect() Snapshot {
 	freqAvg, freqMax := readFreqs()
 	memTotal, memFree := readMem()
 	rxBytes, txBytes := readNetBytes()
+	netIface, netIP := readMainIface()
 
 	return Snapshot{
 		Timestamp:  time.Now(),
@@ -42,6 +48,8 @@ func collect() Snapshot {
 		MemUsed:    (memTotal - memFree) / 1024,
 		NetRXBytes: rxBytes,
 		NetTXBytes: txBytes,
+		NetIface:   netIface,
+		NetIP:      netIP,
 	}
 }
 
@@ -90,21 +98,48 @@ func cpuPercent(t1, t2 map[string]cpuTimes) float64 {
 
 func readFreqs() (avg, max int) {
 	entries, err := os.ReadDir("/sys/devices/system/cpu/")
-	if err != nil {
+	if err == nil {
+		var freqs []int
+		for _, e := range entries {
+			name := e.Name()
+			if !strings.HasPrefix(name, "cpu") || len(name) <= 3 {
+				continue
+			}
+			base := "/sys/devices/system/cpu/" + name + "/cpufreq/"
+			if cur := readIntFile(base + "scaling_cur_freq"); cur > 0 {
+				freqs = append(freqs, cur/1000)
+			}
+			if m := readIntFile(base + "cpuinfo_max_freq"); m/1000 > max {
+				max = m / 1000
+			}
+		}
+		if len(freqs) > 0 {
+			s := 0
+			for _, f := range freqs {
+				s += f
+			}
+			avg = s / len(freqs)
+			return
+		}
+	}
+
+	// Fallback : lire "cpu MHz" dans /proc/cpuinfo
+	data, err2 := os.ReadFile("/proc/cpuinfo")
+	if err2 != nil {
 		return
 	}
 	var freqs []int
-	for _, e := range entries {
-		name := e.Name()
-		if !strings.HasPrefix(name, "cpu") || len(name) <= 3 {
-			continue
-		}
-		base := "/sys/devices/system/cpu/" + name + "/cpufreq/"
-		if cur := readIntFile(base + "scaling_cur_freq"); cur > 0 {
-			freqs = append(freqs, cur/1000)
-		}
-		if m := readIntFile(base + "cpuinfo_max_freq"); m/1000 > max {
-			max = m / 1000
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, "cpu MHz") || strings.HasPrefix(line, "cpu MHz\t") {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) == 2 {
+				if f, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64); err == nil {
+					freqs = append(freqs, int(f))
+					if int(f) > max {
+						max = int(f)
+					}
+				}
+			}
 		}
 	}
 	if len(freqs) > 0 {
@@ -151,6 +186,47 @@ func readNetBytes() (rx, tx uint64) {
 	return
 }
 
+func readMainIface() (iface, ip string) {
+	// 1. Trouve l'interface principale via /proc/net/dev (celle avec le plus de trafic, hors lo)
+	data, _ := os.ReadFile("/proc/net/dev")
+	var bestRx uint64
+	for _, line := range strings.Split(string(data), "\n")[2:] {
+		fields := strings.Fields(line)
+		if len(fields) < 10 {
+			continue
+		}
+		name := strings.Trim(fields[0], ":")
+		if name == "lo" {
+			continue
+		}
+		rx := parseU64(fields[1])
+		// Prend l'interface avec le plus de RX, ou la première non-lo si rx=0
+		if iface == "" || rx > bestRx {
+			bestRx = rx
+			iface = name
+		}
+	}
+	if iface == "" {
+		return
+	}
+
+	// 2. Trouve l'IP via net.Interfaces()
+	ifaces, _ := net.Interfaces()
+	for _, itf := range ifaces {
+		if itf.Name != iface {
+			continue
+		}
+		addrs, _ := itf.Addrs()
+		for _, a := range addrs {
+			if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.To4() != nil {
+				ip = ipnet.IP.String()
+				return
+			}
+		}
+	}
+	return
+}
+
 // ---- Helpers ----
 
 func readIntFile(path string) int {
@@ -192,7 +268,6 @@ func sum(v []uint64) uint64 {
 	return s
 }
 
-// readFirstFile lit le premier fichier accessible parmi les chemins donnés.
 func readFirstFile(paths ...string) string {
 	for _, p := range paths {
 		data, err := os.ReadFile(p)
@@ -242,4 +317,17 @@ func getOSRelease() (pretty, version string) {
 	if pretty == "" { pretty = "unknown" }
 	if version == "" { version = "unknown" }
 	return
+}
+
+// ---- Xen Role ----
+
+func detectXenRole() string {
+	data, err := os.ReadFile("/proc/xen/capabilities")
+	if err != nil {
+		return ""
+	}
+	if strings.Contains(string(data), "control_d") {
+		return "Dom0"
+	}
+	return "DomU"
 }

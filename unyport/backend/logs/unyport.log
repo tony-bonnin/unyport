@@ -204,3 +204,36 @@ time=2026-05-02T21:11:37.323Z level=INFO msg="middleware chain ready" chain=Secu
 time=2026-05-02T21:11:37.323Z level=INFO msg=listening addr=:8800
 time=2026-05-02T21:11:37.323Z level=INFO msg="unyport listening" addr=:8800
 time=2026-05-02T21:16:48.051Z level=INFO msg="login ok" email=admin@example.com
+time=2026-05-02T22:15:55.138Z level=INFO msg="login ok" email=admin@example.com
+time=2026-05-02T22:22:42.712Z level=INFO msg="shutdown requested"
+time=2026-05-02T22:22:42.712Z level=ERROR msg="server error" err="http: Server closed"
+time=2026-05-02T22:22:47.712Z level=ERROR msg="shutdown error" err="context deadline exceeded"
+time=2026-05-02T22:23:01.458Z level=INFO msg=startup os=alpine theme=dark
+time=2026-05-02T22:23:01.475Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-05-02T22:23:01.475Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux
+time=2026-05-02T22:23:01.475Z level=INFO msg=listening addr=:8800
+time=2026-05-02T22:23:01.475Z level=INFO msg="unyport listening" addr=:8800
+time=2026-05-02T22:52:25.533Z level=INFO msg="shutdown requested"
+time=2026-05-02T22:52:25.533Z level=ERROR msg="server error" err="http: Server closed"
+time=2026-05-02T22:52:30.535Z level=ERROR msg="shutdown error" err="context deadline exceeded"
+time=2026-05-02T22:52:35.256Z level=INFO msg=startup os=alpine theme=dark
+time=2026-05-02T22:52:35.287Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-05-02T22:52:35.287Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux
+time=2026-05-02T22:52:35.287Z level=INFO msg=listening addr=:8800
+time=2026-05-02T22:52:35.287Z level=INFO msg="unyport listening" addr=:8800
+time=2026-05-02T22:56:42.473Z level=INFO msg="login ok" email=admin@example.com
+time=2026-05-02T23:05:35.089Z level=INFO msg="shutdown requested"
+time=2026-05-02T23:05:35.089Z level=ERROR msg="server error" err="http: Server closed"
+time=2026-05-02T23:05:39.581Z level=INFO msg=startup os=alpine theme=dark
+time=2026-05-02T23:05:39.597Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-05-02T23:05:39.597Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux
+time=2026-05-02T23:05:39.597Z level=INFO msg=listening addr=:8800
+time=2026-05-02T23:05:39.597Z level=INFO msg="unyport listening" addr=:8800
+time=2026-05-02T23:54:26.145Z level=INFO msg="shutdown requested"
+time=2026-05-02T23:54:26.145Z level=ERROR msg="server error" err="http: Server closed"
+time=2026-05-02T23:54:29.976Z level=INFO msg=startup os=alpine theme=dark
+time=2026-05-02T23:54:29.994Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-05-02T23:54:29.994Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux
+time=2026-05-02T23:54:29.994Z level=INFO msg=listening addr=:8800
+time=2026-05-02T23:54:29.994Z level=INFO msg="unyport listening" addr=:8800
+time=2026-05-02T23:56:53.938Z level=INFO msg="login ok" email=admin@example.com

@@ -12,6 +12,16 @@ function fmtMB(mb) {
   return v >= 1024 ? (v / 1024).toFixed(1) + ' GiB' : Math.round(v) + ' MiB';
 }
 
+function fmtBytes(b) {
+  const v = Number(b);
+  if (!Number.isFinite(v) || v <= 0) return '—';
+  if (v >= 1e12) return (v / 1e12).toFixed(2) + ' TiB';
+  if (v >= 1e9) return (v / 1e9).toFixed(2) + ' GiB';
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + ' MiB';
+  if (v >= 1e3) return (v / 1e3).toFixed(0) + ' KiB';
+  return Math.round(v) + ' B';
+}
+
 function formatUptime(str) {
   const secs = parseInt(String(str).split(' ')[0], 10);
   if (!Number.isFinite(secs)) return '—';
@@ -61,7 +71,7 @@ function cpuLogo(vendor) {
 
 function appIcon(type) {
   const map = {
-    terminal: 'bi bi-terminal-fill',
+    terminal: 'fa-solid fa-terminal',
     database: 'fa-solid fa-database',
     code: 'fa-solid fa-file-code',
     editor: 'fa-solid fa-file-code',

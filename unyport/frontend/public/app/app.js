@@ -11,6 +11,10 @@ document.addEventListener('alpine:init', () => {
     sys: {}, uptime: '—', cpuPct: 0, memPct: 0, sseConnected: false,
     apps: [],
     _sse: null,
+    netRxPct: 0,
+    netTxPct: 0,
+    netRxVal: '0 B/s',
+    netTxVal: '0 B/s',
     userEmail: '',
     userName: '',
     userInitial: '?',
@@ -21,8 +25,23 @@ document.addEventListener('alpine:init', () => {
     get cpuBarClass() { return this.cpuPct > 80 ? 'crit' : this.cpuPct > 60 ? 'warn' : ''; },
     get memBarClass() { return this.memPct > 85 ? 'crit' : this.memPct > 65 ? 'warn' : ''; },
 
+    // ── Xen context ──
+    get isXen() { return !!this.sys.xen_role; },
+    get isDom0() { return this.sys.xen_role === 'Dom0'; },
+    get isDomU() { return this.sys.xen_role === 'DomU'; },
+
+    // Infos board : masquées sous Xen (DMI non fiable en VM)
+    get showBoard() { return !this.isXen; },
+
+    // Label plateforme affiché dans la card système
+    get platformLabel() {
+      if (this.isDom0) return 'Xen Dom0 — Hyperviseur';
+      if (this.isDomU) return 'Xen DomU — Machine virtuelle';
+      return null;
+    },
+
     // ── Helpers exposés au template ──
-    fmtFreq, fmtMB, cleanCPU, appIcon,
+    fmtFreq, fmtMB, fmtBytes, cleanCPU, appIcon,
 
     // ── Init (appelé automatiquement par Alpine) ──
     async init() {
@@ -81,12 +100,14 @@ document.addEventListener('alpine:init', () => {
       await this._loadApps();
       await this._loadSysInfo();
       await this.$nextTick();
-      // Rescan FA après qu'Alpine a injecté les <i>
       if (window.FontAwesome) window.FontAwesome.dom.i2svg();
       initCharts();
+      // Pré-remplit les charts avec la valeur courante
+      if (this.sys.cpu_freq_avg_mhz) pushFreq(this.sys.cpu_freq_avg_mhz);
+      if (this.sys.mem_used) pushMem(this.sys.mem_used);
       // Petit délai pour que le cookie soit bien enregistré par le navigateur
       // avant d'ouvrir la connexion EventSource
-      setTimeout(() => this._startSSE(), 200);
+      setTimeout(() => this._startSSE(), 500);
     },
 
     async _loadApps() {
@@ -126,13 +147,25 @@ document.addEventListener('alpine:init', () => {
         mem_total: snap.mem_total_mb,
         mem_used: snap.mem_used_mb,
         mem_free: snap.mem_free_mb,
+        net_iface: snap.net_iface || this.sys.net_iface,
+        net_ip: snap.net_ip || this.sys.net_ip,
+        net_rx_bytes: snap.net_rx_bytes,
+        net_tx_bytes: snap.net_tx_bytes,
+        net_rx_bps: snap.net_rx_bps,
+        net_tx_bps: snap.net_tx_bps,
       };
       this.cpuPct = Math.round(Math.max(0, Math.min(100, snap.cpu_usage || 0)));
       this.memPct = this.sys.mem_total > 0
         ? Math.round((this.sys.mem_used / this.sys.mem_total) * 100) : 0;
       document.documentElement.style.setProperty('--cpu-pct', this.cpuPct + '%');
+      const cpuColor = this.cpuPct > 80 ? '#ff4444' : this.cpuPct > 60 ? '#ff9e3b' : '#5a5880';
+      document.documentElement.style.setProperty('--cpu-color', cpuColor);
       document.documentElement.style.setProperty('--mem-pct', this.memPct + '%');
+      // Couleur mémoire dynamique : vert → orange → rouge
+      const memColor = this.memPct > 85 ? '#ff4444' : this.memPct > 65 ? '#ff9e3b' : '#22c9a0';
+      document.documentElement.style.setProperty('--mem-color', memColor);
       updateGauge(this.cpuPct);
+      _updateNetGauge(this, snap.net_rx_bps || 0, snap.net_tx_bps || 0);
       pushFreq(snap.cpu_freq_avg_mhz);
       pushMem(snap.mem_used_mb);
     },

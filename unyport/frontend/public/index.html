@@ -136,12 +136,28 @@
             <span class="sse-dot" :class="sseConnected ? 'live' : 'dead'"></span>
           </h3>
           <dl class="kv">
-            <dt>OS</dt>      <dd x-text="sys.os_release  || '—'"></dd>
-            <dt>Kernel</dt>  <dd x-text="sys.kernel      || '—'"></dd>
-            <dt>Uptime</dt>  <dd x-text="uptime"></dd>
-            <dt>Board</dt>   <dd x-text="sys.board_name  || '—'"></dd>
-            <dt>Vendor</dt>  <dd x-text="sys.board_vendor|| '—'"></dd>
-            <dt>Date</dt>    <dd x-text="sys.date        || '—'"></dd>
+            <dt>OS</dt>     <dd x-text="sys.os_release || '—'"></dd>
+            <dt>Kernel</dt> <dd x-text="sys.kernel     || '—'"></dd>
+            <dt>Uptime</dt> <dd x-text="uptime"></dd>
+            <dt>Date</dt>   <dd x-text="sys.date       || '—'"></dd>
+            <template x-if="showBoard">
+              <dt>Board</dt>
+            </template>
+            <template x-if="showBoard">
+              <dd x-text="sys.board_name || '—'"></dd>
+            </template>
+            <template x-if="showBoard">
+              <dt>Vendor</dt>
+            </template>
+            <template x-if="showBoard">
+              <dd x-text="sys.board_vendor || '—'"></dd>
+            </template>
+            <template x-if="platformLabel">
+              <dt>Xen</dt>
+            </template>
+            <template x-if="platformLabel">
+              <dd x-text="platformLabel"></dd>
+            </template>
           </dl>
         </div>
 
@@ -185,18 +201,18 @@
       </div>
 
       <!-- R2 : charts live -->
-      <div class="raw-1">
+      <div class="raw-1 row-charts">
         <div class="card chart-lg">
           <h3><i class="fa-solid fa-chart-line"></i> fréquence cpu <span class="live-tag">live · 30s</span></h3>
-          <canvas id="chartFreq" height="55"></canvas>
+          <canvas id="chartFreq"></canvas>
         </div>
         <div class="card chart-md">
           <h3><i class="fa-solid fa-wave-square"></i> mémoire <span class="live-tag">live · 30s</span></h3>
-          <canvas id="chartMem" height="55"></canvas>
+          <canvas id="chartMem"></canvas>
         </div>
         <div class="card chart-sm">
-          <h3>cpu gauge</h3>
-          <canvas id="cpuGauge" height="55"></canvas>
+          <h3><i class="fa-solid fa-network-wired"></i> réseau</h3>
+          <canvas id="netGauge"></canvas>
         </div>
       </div>
 
@@ -206,14 +222,14 @@
         <div class="card">
           <h3><i class="fa-solid fa-network-wired"></i> réseau</h3>
           <div class="net-stats">
-            <div class="ns"><div class="ns-lbl">↓ rx</div><div class="ns-val">—</div></div>
-            <div class="ns"><div class="ns-lbl">↑ tx</div><div class="ns-val">—</div></div>
+            <div class="ns"><div class="ns-lbl">↓ rx</div><div class="ns-val" x-text="netRxVal"></div></div>
+            <div class="ns"><div class="ns-lbl">↑ tx</div><div class="ns-val" x-text="netTxVal"></div></div>
           </div>
           <dl class="kv">
-            <dt>iface</dt>    <dd>—</dd>
-            <dt>ip</dt>       <dd>—</dd>
-            <dt>rx total</dt> <dd>—</dd>
-            <dt>tx total</dt> <dd>—</dd>
+            <dt>iface</dt>    <dd x-text="sys.net_iface    || '—'"></dd>
+            <dt>ip</dt>       <dd x-text="sys.net_ip       || '—'"></dd>
+            <dt>rx total</dt> <dd x-text="fmtBytes(sys.net_rx_bytes)"></dd>
+            <dt>tx total</dt> <dd x-text="fmtBytes(sys.net_tx_bytes)"></dd>
           </dl>
         </div>
 
