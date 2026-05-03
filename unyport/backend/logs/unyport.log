@@ -237,3 +237,6 @@ time=2026-05-02T23:54:29.994Z level=INFO msg="middleware chain ready" chain=Secu
 time=2026-05-02T23:54:29.994Z level=INFO msg=listening addr=:8800
 time=2026-05-02T23:54:29.994Z level=INFO msg="unyport listening" addr=:8800
 time=2026-05-02T23:56:53.938Z level=INFO msg="login ok" email=admin@example.com
+time=2026-05-03T09:20:23.341Z level=INFO msg="login ok" email=admin@example.com
+time=2026-05-03T11:29:21.618Z level=INFO msg="login ok" email=admin@example.com
+time=2026-05-03T21:21:01.776Z level=INFO msg="login ok" email=admin@example.com
