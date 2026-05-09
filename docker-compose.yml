@@ -7,7 +7,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./unyport:/app/unyport
-      - ./logs:/var/log/unyport
       - go-cache:/root/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     ports:

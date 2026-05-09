@@ -1,5 +1,5 @@
 <div align="center">
-<img width="33%" alt="logo-unyport-icon" src="https://github.com/user-attachments/assets/b531cdfd-c183-4b6e-9efc-963af99335f9" />
+<img width="33%" alt="logo-unyport-icon" src="git_assets/img/logo.jpg" />
 </div>
 
 <br><br>
@@ -12,7 +12,7 @@
 
 <br><br>
 
-<img width="2077" height="1797" alt="Capture d&#39;écran 2026-05-08 232427" src="https://github.com/user-attachments/assets/5e2cc6e3-20fc-44fe-8006-09f874400724" />
+<img width="2077" height="1797" alt="Capture d&#39;écran 2026-05-08 232427" src="git_assets/img/login.png" />
 
 
 → **[dashboard.trinity-net.com](https://dashboard.trinity-net.com)**
@@ -107,15 +107,17 @@ Access : `https://your-host:PORT`
 
 🟥 **Live Demo**
 
+```
 Running on TRINITY infrastructure — Alpine Linux v3.23 · Xen Type-1 · Data Disk Mode
 Host    :  TRINITY Dom0
 Kernel  :  6.18.9-0-lts
 Memory  :  103M / 210M
 Uptime  :  6d 12m
+```
 
 <br><br>
 
-<img width="1570" height="1241" alt="Capture d&#39;écran 2026-05-09 045725" src="https://github.com/user-attachments/assets/2634455f-ebda-47b1-ac38-e0a9fbf9b52d" />
+<img width="1570" height="1241" alt="Capture d&#39;écran 2026-05-09 045725" src="git_assets/img/dashboard.png" />
 
 
 → [dashboard.trinity-net.com](https://dashboard.trinity-net.com)
@@ -139,6 +141,6 @@ UnyPort is the control plane of the TRINITY sovereign infrastructure stack.
 
 **A system you understand is a system you control.**
 
-<img src="https://user-images.githubusercontent.com/45216746/226208297-32a0371b-83db-4a0e-ae33-70e74ca2b2e5.png" width="2%">
+<img src="git_assets/img/flag.png" width="2%">
 
 </div>
