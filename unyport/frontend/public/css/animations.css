@@ -1,0 +1,153 @@
+/* ============================================================
+   animations.css — TRINITY · Keyframes, transitions globales
+   ============================================================ */
+
+@keyframes sidebarIn {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+.sidebar {
+  animation: sidebarIn .25s cubic-bezier(.4,0,.2,1) both;
+}
+
+.nav-item {
+  transition: background .12s ease, color .12s ease, padding-left .12s ease;
+}
+
+.res-card,
+.chart-card,
+.panel,
+.settings-card,
+.nm-node {
+  transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.res-card:hover,
+.chart-card:hover,
+.settings-card:hover {
+  transform: translateY(-1px);
+  box-shadow: rgba(62, 58, 171, 0.16) 0px 10px 36px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stat-block {
+  animation: fadeUp .3s ease both;
+}
+.stat-block:nth-child(1) { animation-delay: .04s; }
+.stat-block:nth-child(2) { animation-delay: .08s; }
+.stat-block:nth-child(3) { animation-delay: .12s; }
+.stat-block:nth-child(4) { animation-delay: .16s; }
+
+.topbar-dropdown {
+  transform-origin: top right;
+  animation: dropdownIn .15s cubic-bezier(.4,0,.2,1) both;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: scale(.96) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.modal {
+  animation: modalIn .2s cubic-bezier(.4,0,.2,1) both;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.97) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.modal-overlay {
+  animation: overlayIn .18s ease both;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.btn-primary,
+.btn-ghost,
+.btn-login,
+.btn-primary-sm,
+.btn-ghost-sm {
+  transition: background .12s ease, box-shadow .12s ease, transform .1s ease, opacity .12s ease;
+}
+
+.btn-primary:active,
+.btn-ghost:active,
+.btn-login:active {
+  transform: scale(.98);
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
+.live-dot {
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+
+.action-tile {
+  transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
+}
+
+.action-tile:hover {
+  transform: translateY(-2px);
+}
+
+.lbu-status.dirty .lbu-dot {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.main-inner > div[x-show] {
+  animation: pageFadeIn .2s ease both;
+}
+
+.mobile-menu.is-open {
+  animation: slideInLeft .25s cubic-bezier(.4,0,.2,1) both;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.mobile-menu-overlay.is-open {
+  animation: overlayIn .2s ease both;
+}
+
+.topbar-chevron {
+  transition: transform .18s ease;
+}
+
+.role-badge {
+  transition: background .15s ease, color .15s ease;
+}
+
+.form-row input,
+.form-row textarea,
+.form-row select,
+.photo-url-input,
+.input-sm,
+.color-hex {
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.form-row input:focus,
+.form-row textarea:focus,
+.photo-url-input:focus,
+.color-hex:focus {
+  box-shadow: 0 0 0 3px rgba(62, 58, 171, .12);
+}

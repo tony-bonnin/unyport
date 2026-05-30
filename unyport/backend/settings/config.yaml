@@ -7,7 +7,7 @@ apps:
 auth:
   github:
     client_id: "Iv1.abcdef1234567890"
-    client_secret: "shhhhhhhhhhhhhhhhh"
+    client_secret: "supersecretgithubkey"
     redirect_url: "https://mon-domaine.com/api/oauth/callback?provider=github"
 
   gitlab:

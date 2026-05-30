@@ -1,0 +1,379 @@
+/* ============================================================
+   tokens.css — TRINITY · Design tokens
+   Palette, dark mode, role colors, font-face
+   ============================================================ */
+
+@font-face {
+  font-family: 'Archivo Black';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/webfonts/ArchivoBlack-Regular.ttf') format('truetype');
+}
+
+/* ============================================================
+   TRINITY — TOKENS
+   Palette resserrée autour de #3e3aab (brand)
+   Esprit : plat, aéré, lisible, contrasté.
+   ============================================================ */
+:root {
+  /* Brand — TRINITY indigo */
+  --brand:          #3e3aab;
+  --brand-700:      #322f8c;
+  --brand-600:      #4a46c4;
+  --brand-500:      #6864d4;
+  --brand-100:      #ecebf8;
+  --brand-50:       #f4f3fb;
+
+  /* Sidebar (full brand) */
+  --side-bg:        #ffffff;
+  --side-bg-deep:   #f4f5fa;
+  --side-active:    var(--brand-100);
+  --side-hover:     #f4f3fb;
+  --side-text:      #454b5f;
+  --side-text-dim:  #8b91a2;
+  --side-text-on:   var(--brand);
+  --side-border:    var(--border);
+  --sidebar-w:      236px;
+
+  /* Workspace */
+  --bg:             #f6f7fb;
+  --surface:        #ffffff;
+  --surface-sunk:   #f1f2f7;
+
+  /* Text */
+  --text:           #1a1d29;
+  --text-soft:      #3a3f52;
+  --text-muted:     #6b7080;
+  --text-dim:       #9aa0b0;
+
+  /* Border */
+  --border:         #e7e9ef;
+  --border-strong:  #d6d9e2;
+
+  /* Topbar */
+  --topbar-h:       56px;
+
+  /* Accents (très sobres, juste pour les tuiles d'action) */
+  --tile-blue:      #2563eb;
+  --tile-indigo:    #3e3aab;
+  --tile-orange:    #ea580c;
+  --tile-purple:    #7c3aed;
+  --tile-green:     #16a34a;
+  --tile-red:       #dc2626;
+  --tile-yellow:    #d97706;
+
+  /* States */
+  --ok:             #16a34a;
+  --ok-soft:        #e8f6ed;
+  --ok-line:        #c4e7cf;
+  --warn:           #d97706;
+  --warn-soft:      #fbf3e0;
+  --warn-line:      #f0d89a;
+  --err:            #dc2626;
+  --err-soft:       #fbeaea;
+  --err-line:       #f1bdbd;
+
+  /* Shadow — minimal, presque plat */
+  --shadow:         0 1px 2px rgba(20,22,40,.04);
+
+  /* Radius */
+  --r-xs:  4px;
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  12px;
+
+  /* Content */
+  --content-max: 1180px;
+
+  /* Bars dynamiques */
+  --cpu-pct:    0%;
+  --mem-pct:    0%;
+  --cpu-color:  var(--brand);
+  --mem-color:  var(--ok);
+}
+
+/* ============================================================
+   DARK MODE — [data-theme="dark"]
+   Philosophie : fond profond, surfaces étagées, contraste doux.
+   Les tokens brand/role/accents sont retenus — juste désaturés.
+   ============================================================ */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Workspace */
+  --bg:             #0f1117;
+  --surface:        #181b24;
+  --surface-sunk:   #13161e;
+  --surface-2:      #1e2230;
+
+  /* Text */
+  --text:           #e8eaf2;
+  --text-soft:      #b8bdd0;
+  --text-muted:     #7a8099;
+  --text-dim:       #4e5470;
+
+  /* Border */
+  --border:         #252a3a;
+  --border-strong:  #2e3448;
+
+  /* Sidebar */
+  --side-bg:        #181b24;
+  --side-bg-deep:   #13161e;
+  --side-active:    rgba(62, 58, 171, .18);
+  --side-hover:     rgba(255, 255, 255, .04);
+  --side-text:      #8b91b0;
+  --side-text-dim:  #4e5470;
+  --side-text-on:   var(--brand-500);
+  --side-border:    var(--border);
+
+  /* States — légèrement plus lumineux sur fond sombre */
+  --ok:             #22c55e;
+  --ok-soft:        #052e16;
+  --ok-line:        #14532d;
+  --warn:           #f59e0b;
+  --warn-soft:      #1c1400;
+  --warn-line:      #3a2800;
+  --err:            #f87171;
+  --err-soft:       #2d0a0a;
+  --err-line:       #7f1d1d;
+
+  /* Shadow plus visible sur fond sombre */
+  --shadow:         0 1px 3px rgba(0,0,0,.4);
+
+  /* Accents tiles */
+  --tile-blue:      #3b82f6;
+  --tile-orange:    #f97316;
+  --tile-purple:    #a78bfa;
+  --tile-green:     #22c55e;
+  --tile-red:       #f87171;
+  --tile-yellow:    #fbbf24;
+}
+
+/* Dark — surcharges brand par rôle */
+[data-theme="dark"][data-role="dom0"] {
+  --brand:        #6864d4;
+  --brand-700:    #4a46c4;
+  --brand-600:    #7b78dc;
+  --brand-500:    #9490e4;
+  --brand-100:    rgba(104,100,212,.15);
+  --brand-50:     rgba(104,100,212,.08);
+  --side-active:  rgba(104,100,212,.18);
+  --side-hover:   rgba(104,100,212,.07);
+  --side-text-on: #9490e4;
+}
+
+[data-theme="dark"][data-role="domu"] {
+  --brand:        #d45c82;
+  --brand-700:    #bf3460;
+  --brand-600:    #e0789a;
+  --brand-500:    #e898b4;
+  --brand-100:    rgba(212, 92, 130, .15);
+  --brand-50:     rgba(212, 92, 130, .08);
+  --side-active:  rgba(212, 92, 130, .18);
+  --side-hover:   rgba(212, 92, 130, .07);
+  --side-text-on: #e898b4;
+}
+
+[data-theme="dark"][data-role="container"] {
+  --brand:        #de8d50;
+  --brand-700:    #c96e28;
+  --brand-600:    #e8a472;
+  --brand-500:    #f0b98e;
+  --brand-100:    rgba(222,141,80,.15);
+  --brand-50:     rgba(222,141,80,.08);
+  --side-active:  rgba(222,141,80,.18);
+  --side-hover:   rgba(222,141,80,.07);
+  --side-text-on: #f0b98e;
+}
+
+[data-theme="dark"][data-role="alpine"] {
+  --brand:        #4d8cb0;
+  --brand-700:    #336d96;
+  --brand-600:    #6aa3c4;
+  --brand-500:    #88bbd4;
+  --brand-100:    rgba(77,140,176,.15);
+  --brand-50:     rgba(77,140,176,.08);
+  --side-active:  rgba(77,140,176,.18);
+  --side-hover:   rgba(77,140,176,.07);
+  --side-text-on: #88bbd4;
+}
+
+/* Dark — composants spécifiques qui ont des couleurs hardcodées */
+[data-theme="dark"] .stat-blue    { background: rgba(62,58,171,.15); color: var(--brand-500); }
+[data-theme="dark"] .stat-green   { background: rgba(34,197,94,.1);  color: #4ade80; }
+[data-theme="dark"] .stat-orange  { background: rgba(249,115,22,.1); color: #fb923c; }
+[data-theme="dark"] .stat-purple  { background: rgba(167,139,250,.1); color: #c4b5fd; }
+[data-theme="dark"] .stat-indigo  { background: rgba(62,58,171,.15); color: var(--brand-500); }
+
+[data-theme="dark"] .action-blue   { color: #60a5fa; }
+[data-theme="dark"] .action-indigo { color: #a78bfa; }
+[data-theme="dark"] .action-orange { color: #fb923c; }
+[data-theme="dark"] .action-purple { color: #c4b5fd; }
+
+[data-theme="dark"] .action-tile {
+  background: rgba(255, 255, 255, .02);
+  border-color: rgba(255, 255, 255, .12);
+}
+
+[data-theme="dark"] .action-tile:hover {
+  background: rgba(255, 255, 255, .045);
+  border-color: rgba(255, 255, 255, .22);
+}
+
+[data-theme="dark"] .action-tile:has(.action-blue):hover {
+  background: rgba(96, 165, 250, .12);
+  border-color: rgba(96, 165, 250, .45);
+}
+
+[data-theme="dark"] .action-tile:has(.action-indigo):hover {
+  background: rgba(74, 222, 128, .11);
+  border-color: rgba(74, 222, 128, .42);
+}
+
+[data-theme="dark"] .action-tile:has(.action-orange):hover {
+  background: rgba(251, 146, 60, .12);
+  border-color: rgba(251, 146, 60, .42);
+}
+
+[data-theme="dark"] .action-tile:has(.action-purple):hover {
+  background: rgba(196, 181, 253, .12);
+  border-color: rgba(196, 181, 253, .42);
+}
+
+[data-theme="dark"] .action-tile-body strong {
+  color: #f2f4ff;
+}
+
+[data-theme="dark"] .action-tile-body span {
+  color: #b7bfd6;
+}
+
+[data-theme="dark"] .res-blue   { background: rgba(59,130,246,.12); color: #60a5fa; }
+[data-theme="dark"] .res-indigo { background: rgba(99, 102,241,.12); color: #818cf8; }
+[data-theme="dark"] .res-orange { background: rgba(249,115, 22,.12); color: #fb923c; }
+[data-theme="dark"] .res-green  { background: rgba(34, 197, 94,.12); color: #4ade80; }
+[data-theme="dark"] .res-red    { background: rgba(248, 113,113,.12); color: #fca5a5; }
+
+[data-theme="dark"] .hyp-status           { background: rgba(34,197,94,.07); border-color: rgba(34,197,94,.2); }
+[data-theme="dark"] .hyp-status strong    { color: #4ade80; }
+[data-theme="dark"] .hyp-status p         { color: #4ade80; opacity: .7; }
+
+[data-theme="dark"] .ver-ok    { background: rgba(34,197,94,.12);   color: #4ade80; }
+[data-theme="dark"] .ver-patch { background: rgba(245,158,11,.12);  color: #fbbf24; }
+[data-theme="dark"] .ver-minor { background: rgba(249,115,22,.12);  color: #fb923c; }
+[data-theme="dark"] .ver-major { background: rgba(248,113,113,.12); color: #fca5a5; }
+[data-theme="dark"] .ver-error { background: rgba(255,255,255,.05); color: #6b7280; }
+
+[data-theme="dark"] .lbu-status.dirty { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.25); }
+[data-theme="dark"] .lbu-status.clean { background: rgba(34,197,94,.06);  border-color: rgba(34,197,94,.2); }
+
+[data-theme="dark"] .metric-badge.badge-up   { background: rgba(34,197,94,.12); color: #4ade80; border-color: rgba(34,197,94,.25); }
+[data-theme="dark"] .metric-badge.badge-down { background: rgba(248,113,113,.12); color: #fca5a5; border-color: rgba(248,113,113,.25); }
+
+[data-theme="dark"] .htop-bar-wrap      { background: rgba(255,255,255,.06); }
+[data-theme="dark"] .htop-bar-mem-cache { background: rgba(62,58,171,.35); }
+
+[data-theme="dark"] .disk-bar-bg  { background: rgba(255,255,255,.06); }
+[data-theme="dark"] .temp-bar-bg  { background: rgba(255,255,255,.06); }
+
+[data-theme="dark"] .core-bar-wrap { background: rgba(255,255,255,.06); }
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  background: var(--surface-sunk);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+[data-theme="dark"] input::placeholder { color: var(--text-dim); }
+
+/* Transition dark/light douce */
+body, .sidebar, .topbar, .panel, .res-card, .chart-card, .stat-block,
+.action-tile, .hyp-dl, .hyp-info-card, .lbu-status, .ver-badge {
+  transition: background-color .2s ease, border-color .2s ease, color .15s ease;
+}
+
+/* ============================================================
+   ROLE COLORS — 4 familles chromatiques orthogonales
+   Reconnaissables en un coup d'œil, aucune confusion possible.
+
+   DOM0      #3e3aab  violet indigo   — hyperviseur souverain
+   DOMU      #b05a1a  ambre brûlé     — VM Xen guest, chaleur
+   CONTAINER #a0284a  framboise       — couche éphémère, applicatif
+   ALPINE    #28587c  bleu acier      — baremetal natif, DDM
+
+   Appliqué via data-role="dom0|domu|container|alpine" sur <html>.
+   ============================================================ */
+
+/* DOM0 — violet indigo TRINITY, référence imposée */
+[data-role="dom0"] {
+  --brand:        #3e3aab;
+  --brand-700:    #322f8c;
+  --brand-600:    #4a46c4;
+  --brand-500:    #6864d4;
+  --brand-100:    #ecebf8;
+  --brand-50:     #f4f3fb;
+  --side-active:  #ecebf8;
+  --side-hover:   #f4f3fb;
+  --side-text-on: #3e3aab;
+}
+
+/* DOMU — ambre brûlé, VM Xen guest, chaleur organique */
+[data-role="domu"] {
+  --brand:        #a0284a;
+  --brand-700:    #7e1e3a;
+  --brand-600:    #bf3460;
+  --brand-500:    #d45c82;
+  --brand-100:    #f8e4ec;
+  --brand-50:     #fdf1f5;
+  --side-active:  #f8e4ec;
+  --side-hover:   #fdf1f5;
+  --side-text-on: #a0284a;
+}
+
+/* CONTAINER — framboise, couche applicative éphémère */
+[data-role="container"] {
+  --brand:        #b05a1a;
+  --brand-700:    #8c4614;
+  --brand-600:    #c96e28;
+  --brand-500:    #de8d50;
+  --brand-100:    #faeee3;
+  --brand-50:     #fdf6f0;
+  --side-active:  #faeee3;
+  --side-hover:   #fdf6f0;
+  --side-text-on: #b05a1a;
+}
+
+/* ALPINE — bleu acier, baremetal natif, DDM */
+[data-role="alpine"] {
+  --brand:        #28587c;
+  --brand-700:    #1e4560;
+  --brand-600:    #336d96;
+  --brand-500:    #4d8cb0;
+  --brand-100:    #deedf6;
+  --brand-50:     #eef6fb;
+  --side-active:  #deedf6;
+  --side-hover:   #eef6fb;
+  --side-text-on: #28587c;
+}
+
+/* Transition douce lors du changement de rôle (ex: détection async) */
+html {
+  transition: none; /* pas de transition sur l'élément racine */
+}
+.sidebar-brand,
+.nav-item.active,
+.nav-item.active::before,
+.topbar-avatar,
+.stat-blue,
+.stats-strip,
+.panel,
+.res-card,
+.chart-card,
+.btn-primary,
+.chart-card-head i,
+.page-header h1 span {
+  transition: background-color .35s ease, color .35s ease,
+              border-color .35s ease, box-shadow .35s ease;
+}

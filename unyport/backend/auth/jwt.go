@@ -10,18 +10,26 @@ import (
 )
 
 const cookieName = "unyport_auth"
-const tokenTTL = time.Hour
+const jwtIssuer = "unyport"
 
 type Claims struct {
 	UserID string `json:"user_id"`
+	Role   string `json:"role"` // rôle indicatif; l'autorisation relit le store utilisateur.
 	jwt.RegisteredClaims
 }
 
 type JWTService struct {
-	key []byte
+	key          []byte
+	ttl          time.Duration
+	secureCookie bool
 }
 
 func NewJWTService(b64secret string) (*JWTService, error) {
+	return NewJWTServiceWithOpts(b64secret, time.Hour, false)
+}
+
+// NewJWTServiceWithOpts crée le service JWT avec TTL et flag Secure configurables.
+func NewJWTServiceWithOpts(b64secret string, ttl time.Duration, secureCookie bool) (*JWTService, error) {
 	if b64secret == "" {
 		return nil, errors.New("jwt_secret manquant dans settings.yaml")
 	}
@@ -32,15 +40,24 @@ func NewJWTService(b64secret string) (*JWTService, error) {
 	if len(key) < 32 {
 		return nil, errors.New("jwt_secret trop court (minimum 32 bytes)")
 	}
-	return &JWTService{key: key}, nil
+	if ttl <= 0 {
+		ttl = time.Hour
+	}
+	return &JWTService{key: key, ttl: ttl, secureCookie: secureCookie}, nil
 }
 
-func (j *JWTService) Issue(userID string) (string, time.Time, error) {
-	exp := time.Now().Add(tokenTTL)
+// Issue émet un token JWT pour l'utilisateur avec son rôle embarqué.
+func (j *JWTService) Issue(userID, role string) (string, time.Time, error) {
+	exp := time.Now().Add(j.ttl)
 	claims := &Claims{
 		UserID: userID,
+		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(exp),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now().Add(-5 * time.Second)),
+			Issuer:    jwtIssuer,
+			Subject:   userID,
 		},
 	}
 	tok, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(j.key)
@@ -54,15 +71,19 @@ func (j *JWTService) Parse(raw string) (*Claims, error) {
 			return nil, jwt.ErrSignatureInvalid
 		}
 		return j.key, nil
-	})
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithIssuer(jwtIssuer))
 	if err != nil || !tok.Valid {
 		return nil, errors.New("token invalide ou expiré")
+	}
+	if claims.UserID == "" {
+		return nil, errors.New("token invalide")
 	}
 	return claims, nil
 }
 
-func (j *JWTService) SetCookie(w http.ResponseWriter, userID string) error {
-	tok, exp, err := j.Issue(userID)
+// SetCookie émet un cookie JWT pour l'utilisateur avec son rôle.
+func (j *JWTService) SetCookie(w http.ResponseWriter, userID, role string) error {
+	tok, exp, err := j.Issue(userID, role)
 	if err != nil {
 		return err
 	}
@@ -71,7 +92,7 @@ func (j *JWTService) SetCookie(w http.ResponseWriter, userID string) error {
 		Value:    tok,
 		Expires:  exp,
 		HttpOnly: true,
-		Secure:   false, // true derrière TLS
+		Secure:   j.secureCookie,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	})
@@ -83,8 +104,9 @@ func (j *JWTService) ClearCookie(w http.ResponseWriter) {
 		Name:     cookieName,
 		Value:    "",
 		MaxAge:   -1,
+		Expires:  time.Unix(0, 0), // epoch — force suppression même si MaxAge ignoré
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   j.secureCookie,
 		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	})

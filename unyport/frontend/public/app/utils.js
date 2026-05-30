@@ -1,4 +1,7 @@
-// utils.js — helpers purs, zéro dépendance
+// utils.js — TRINITY · Xen/Alpine/DDM only
+// Aucune dépendance externe
+
+// ── Formatage ──────────────────────────────────────────────
 
 function fmtFreq(mhz) {
   const v = Number(mhz);
@@ -31,13 +34,14 @@ function formatUptime(str) {
   const m = Math.floor(r / 60);
   const s = r % 60;
   const parts = [];
-  if (d) parts.push(d + 'd');
+  if (d) parts.push(d + 'j');
   if (h) parts.push(h + 'h');
   if (m) parts.push(m + 'm');
   if (s || !parts.length) parts.push(s + 's');
   return parts.join(' ');
 }
 
+// Nettoie le modèle CPU pour l'affichage
 function cleanCPU(model) {
   if (!model) return '—';
   return String(model)
@@ -48,33 +52,41 @@ function cleanCPU(model) {
     .trim();
 }
 
-function osLogo(os) {
-  const map = {
-    alpine: '/media/img/logos/alpinelinux_logo_icon.png',
-    debian: 'https://upload.wikimedia.org/wikipedia/commons/0/04/Debian_logo.svg',
-    ubuntu: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/Ubuntu_logo.svg',
-    arch: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Archlinux-icon-crystal-64.svg',
-    fedora: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Fedora_logo.svg',
-  };
-  const k = String(os || '').toLowerCase();
-  for (const [key, url] of Object.entries(map)) {
-    if (k.includes(key)) return url;
-  }
-  return '';
+// ── Xen ────────────────────────────────────────────────────
+
+// Rôle Xen → label lisible
+function xenRoleLabel(role) {
+  if (role === 'Dom0') return 'Xen Dom0 · Hyperviseur';
+  if (role === 'DomU') return 'Xen DomU · VM';
+  return '—';
 }
 
-function cpuLogo(vendor) {
-  if (/intel/i.test(vendor)) return '/media/img/logos/intel_logo_icon.png';
-  if (/amd/i.test(vendor)) return '/media/img/logos/amd_logo_icon.png';
-  return '';
+// Badge couleur selon état VM
+function vmStatusClass(status) {
+  const s = String(status || '').toLowerCase();
+  if (s === 'running') return 'status-running';
+  if (s === 'halted' || s === 'stopped') return 'status-halted';
+  if (s === 'error' || s === 'crashed') return 'status-error';
+  return 'status-unknown';
 }
+
+// ── Apps proxy ─────────────────────────────────────────────
 
 function appIcon(type) {
   const map = {
-    terminal: 'fa-solid fa-terminal',
+    terminal: 'bi bi-terminal-fill',
     database: 'fa-solid fa-database',
     code: 'fa-solid fa-file-code',
     editor: 'fa-solid fa-file-code',
+    web: 'fa-solid fa-globe',
+    monitor: 'fa-solid fa-chart-line',
   };
-  return map[type] || 'fa-solid fa-circle';
+  return map[String(type)] || 'fa-solid fa-circle-nodes';
+}
+
+// ── LBU ────────────────────────────────────────────────────
+
+// Retourne true si le statut LBU indique des changements non commités
+function lbuDirty(status) {
+  return String(status || '').toLowerCase() !== 'clean';
 }

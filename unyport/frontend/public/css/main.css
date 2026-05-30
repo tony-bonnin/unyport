@@ -1,0 +1,32 @@
+/* ============================================================
+   main.css — TRINITY · Point d'entrée CSS unique
+   Paradigme : un @import par responsabilité, ordre strict.
+
+   Ordre de chargement :
+     1. tokens      — variables CSS, dark mode, couleurs de rôle
+     2. base        — reset, typographie, loading, login
+     3. layout      — dashboard root, sidebar, topbar, workspace
+     4. components  — stats strip, grilles, charts, cards
+     5. ui          — modals, badges, dropdown, avatar, settings
+     6. mobile      — hamburger, menu mobile, breakpoints
+     7. networkmap  — topologie réseau DOM/CSS (zéro SVG)
+     8. animations  — keyframes, transitions globales
+     9. metrics     — pages métriques, htop, disques, températures
+
+   Vendors chargés ici — une seule fois, avant tout le reste.
+   ============================================================ */
+
+/* ── Vendors ─────────────────────────────────────────────── */
+@import url('/vendor/fontawesome-7.min.css');
+@import url('/vendor/bootstrap-icon.min.css');
+
+/* ── TRINITY ─────────────────────────────────────────────── */
+@import url('./tokens.css');
+@import url('./base.css');
+@import url('./layout.css');
+@import url('./components.css');
+@import url('./ui.css');
+@import url('./mobile.css');
+@import url('./networkmap.css');
+@import url('./animations.css');
+@import url('./metrics.css');

@@ -1,5 +1,7 @@
 <div align="center">
-<img width="33%" alt="logo-unyport-icon" src="git_assets/img/logo.jpg" />
+<br><br>
+
+<img width="25%" alt="logo-unyport-icon" src="git_assets/img/logo.jpg" />
 </div>
 
 <br><br>
@@ -10,16 +12,26 @@
 
 `Go` `Single Binary` `Single Port` `Xen-aware` `Data Disk Mode` `OAuth`
 
+**Open source forever. No premium roadmap.**  
+UnyPort stays open source: no “pro” lock-in, no future premium tier.  
+Paid services are limited to **support/integration/operations by TRINITY**.
+
 <br><br>
 
-<img width="2077" height="1797" alt="Capture d&#39;écran 2026-05-08 232427" src="git_assets/img/login.png" />
+<div align="center">
+
+<img width="75%" alt="Login Screenshot" src="git_assets/img/login.png" />
+
+</div>
 
 
 → **[dashboard.trinity-net.com](https://dashboard.trinity-net.com)**
 
+Legacy URL note: the previous address **dashboard.trinity-net.com** is still active.
+
 <br>
 
-🟥 **What is UnyPort**
+🟪 **What is UnyPort**
 
 UnyPort is a real-time system administration portal built in Go.
 Single binary. Single port. Zero runtime dependency.
@@ -27,11 +39,24 @@ Single binary. Single port. Zero runtime dependency.
 Designed specifically for Alpine Linux running in Data Disk Mode on Xen Type-1 hypervisors.
 Every metric is read directly from the kernel — no agent, no daemon, no bloat.
 
+Built in pure Go for deterministic deployment and low operational overhead on constrained hosts.
+The roadmap is intentionally split:
+
+- **V1 (current): Monitoring-first control plane**  
+  live host metrics, security posture, service/process visibility, and Xen-aware context.
+- **V2: Native orchestration layer**  
+  VM lifecycle and mobility workflows built on Data Disk Mode primitives (`xl`, `xl migrate`) rather than a XenAPI abstraction layer.
+
+In that model, **Data Disk Mode + `xl migrate`** is treated as a practical next-gen control plane approach ("xenapi.ng"): simpler, auditable, and aligned with minimal Dom0 operations.
+
+UnyPort is also the continuation of the Alpine ACF effort I contributed to for official Alpine Linux workflows.  
+That project is archived on Codeberg: [codeberg.org/trinity-labs/official](https://codeberg.org/trinity-labs/official).
+
 ---
 
 <br>
 
-🟪 **Features**
+⬛ **Features**
 
 | Module | Description |
 |---|---|
@@ -51,7 +76,7 @@ Every metric is read directly from the kernel — no agent, no daemon, no bloat.
 
 <br>
 
-🟦 **Architecture**
+⬛ **Architecture**
 
 | Layer | Detail |
 |---|---|
@@ -67,7 +92,7 @@ Every metric is read directly from the kernel — no agent, no daemon, no bloat.
 
 <br>
 
-🟨 **Why not Cockpit · Netdata · Portainer**
+⬛ **Why not Cockpit · Netdata · Portainer**
 
 | | UnyPort | Cockpit | Netdata | Portainer |
 |---|:---:|:---:|:---:|:---:|
@@ -83,11 +108,11 @@ Every metric is read directly from the kernel — no agent, no daemon, no bloat.
 
 <br>
 
-🟫 **Quick Start**
+⬛ **Quick Start**
 
 ```sh
 # Clone
-git clone https://github.com/tony-bonnin/unyport.git
+git clone https://codeberg.org/trinity-labs/unyport.git
 cd unyport
 
 # Run with Docker
@@ -105,22 +130,38 @@ Access : `https://your-host:PORT`
 
 <br>
 
-🟥 **Live Demo**
+⬛ **Live Demo**
 
 ```
-Running on TRINITY infrastructure — Alpine Linux v3.23 · Xen Type-1 · Data Disk Mode
+Running on TRINITY infrastructure — Alpine Linux v3.23.4 · Xen Type-1 · Data Disk Mode
 Host    :  TRINITY Dom0
-Kernel  :  6.18.9-0-lts
+Kernel  :  6.18.33-0-lts
 Memory  :  103M / 210M
 Uptime  :  6d 12m
 ```
 
+**Demo credentials**
+
+```text
+Email    : demo@unyport.app
+Password : aUniC0rnForUnyPort!
+```
+
+**Also available:** a **VM-on-demand demo** on [trinity-net.com](https://trinity-net.com), including **French Alpine Linux support** context and workflows.
+
 <br><br>
 
-<img width="1570" height="1241" alt="Capture d&#39;écran 2026-05-09 045725" src="git_assets/img/dashboard.png" />
+<div align="center">
 
+<img width="75%" alt="Dashboard Screenshot" src="git_assets/img/dashboard.png" />
 
-→ [dashboard.trinity-net.com](https://dashboard.trinity-net.com)
+<br><br>
+
+<img width="75%" alt="Dashboard Screenshot" src="git_assets/img/map.png" />
+
+<div>
+
+→ [demo.unyport.app](https://demo.unyport.app)
 
 ---
 
@@ -128,7 +169,12 @@ Uptime  :  6d 12m
 
 ⬛ **Part of TRINITY Edge Network**
 
-UnyPort is the control plane of the TRINITY sovereign infrastructure stack.
+UnyPort is only a small part of the TRINITY stack.
+
+TRINITY also covers the underlying platform:
+- minimalist and resilient Xen hypervisor operations (Dom0/DomU)
+- low-power hardware strategy and edge deployment constraints
+- Alpine-based sovereign infrastructure components beyond UnyPort
 
 → [trinity-net.com](https://trinity-net.com)
 → [gitlab.alpinelinux.org/trinity-labs](https://gitlab.alpinelinux.org/trinity-labs)

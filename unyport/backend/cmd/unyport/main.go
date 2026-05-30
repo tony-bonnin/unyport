@@ -31,18 +31,24 @@ func main() {
 	}
 
 	logger = initLogger(settings.Paths.LogDir)
-	logger.Info("startup", "os", settings.OS, "theme", settings.Theme)
+	logger.Info("startup", "platform", "alpine-xen", "theme", settings.Theme)
 
 	srv := server.New(cfg, settings, logger)
 
 	go func() {
-		if err := srv.ListenAndServe(); err != nil {
+		var err error
+		if settings.HTTP3.Enabled && settings.HTTP3.CertFile != "" {
+			err = srv.ListenAndServe(logger)
+		} else {
+			err = srv.ListenAndServeHTTP()
+		}
+		if err != nil {
 			logger.Error("server error", "err", err)
 		}
 	}()
 
-	fmt.Fprintf(os.Stderr, "\n  🚀 UnyPort is up on %s\n\n", srv.Addr)
-	logger.Info("unyport listening", "addr", srv.Addr)
+	fmt.Fprintf(os.Stderr, "\n  🚀 UnyPort is up on %s\n\n", srv.Addr())
+	logger.Info("unyport listening", "addr", srv.Addr())
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)

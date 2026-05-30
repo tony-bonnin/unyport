@@ -1,0 +1,57 @@
+.netmap-container{width:100%;overflow-x:auto;overflow-y:visible;padding:16px 0 32px;box-sizing:border-box;}
+.nm-empty{font-size:12px;color:var(--text-dim,#777);text-align:center;padding:24px 0;}
+.nm-level{display:flex;flex-direction:column;align-items:center;gap:0;}
+
+/* ── Card ── */
+.nm-card{display:flex;flex-direction:column;align-items:center;width:130px;min-width:130px;background:#fff;border:1px solid #d8dce8;border-radius:6px;padding:14px 8px 12px;box-shadow:2px 3px 8px rgba(0,0,0,.06);box-sizing:border-box;position:relative;z-index:2;}
+[data-theme="dark"] .nm-card{background:#1e2230;border-color:#2e3448;}
+.nm-card-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden;}
+.nm-card-label{font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:600;color:#333;text-align:center;max-width:114px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+[data-theme="dark"] .nm-card-label{color:#e8eaf2;}
+.nm-card-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#777;text-align:center;margin-top:3px;max-width:114px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+[data-theme="dark"] .nm-card-sub{color:#7a8099;}
+
+/* ── Grille CSS : 6 colonnes max, 130px + 28px gap = 158px/step ── */
+.nm-grid{display:grid;column-gap:28px;margin:0 auto;}
+.nm-grid-1{grid-template-columns:repeat(1,130px);width:130px;}
+.nm-grid-2{grid-template-columns:repeat(2,130px);width:288px;}
+.nm-grid-3{grid-template-columns:repeat(3,130px);width:446px;}
+.nm-grid-4{grid-template-columns:repeat(4,130px);width:604px;}
+.nm-grid-5{grid-template-columns:repeat(5,130px);width:762px;}
+.nm-grid-6{grid-template-columns:repeat(6,130px);width:920px;}
+
+/* Placement dans la grille (grid-column) */
+.nm-col-1{grid-column:1;}.nm-col-2{grid-column:2;}.nm-col-3{grid-column:3;}
+.nm-col-4{grid-column:4;}.nm-col-5{grid-column:5;}.nm-col-6{grid-column:6;}
+
+/* ── Zone connecteur (entre deux rangées) ── */
+.nm-connect{position:relative;height:42px;overflow:visible;margin:0 auto;}
+.nm-connect-1{width:130px;}.nm-connect-2{width:288px;}.nm-connect-3{width:446px;}
+.nm-connect-4{width:604px;}.nm-connect-5{width:762px;}.nm-connect-6{width:920px;}
+
+/* Éléments connecteurs — position absolue dans nm-connect */
+.nm-manche{position:absolute;width:2px;background:#d7d7d7;z-index:1;}
+.nm-bar   {position:absolute;height:2px;background:#d7d7d7;z-index:1;}
+.nm-drop  {position:absolute;width:2px;background:#d7d7d7;z-index:1;}
+.nm-arr-down{position:absolute;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #d7d7d7;}
+.nm-arr-up  {position:absolute;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:7px solid #d7d7d7;}
+[data-theme="dark"] .nm-manche,[data-theme="dark"] .nm-bar,[data-theme="dark"] .nm-drop{background:#4e5470;}
+[data-theme="dark"] .nm-arr-down{border-top-color:#4e5470;}
+[data-theme="dark"] .nm-arr-up{border-bottom-color:#4e5470;}
+
+/* Manche traversant (parent plusieurs rangées au-dessus) — pointillés */
+.nm-manche-thru{background:linear-gradient(to bottom,#d7d7d7 33%,transparent 50%);background-size:2px 6px;background-repeat:repeat-y;opacity:0.7;}
+[data-theme="dark"] .nm-manche-thru{background:linear-gradient(to bottom,#4e5470 50%,transparent 50%);background-size:2px 6px;background-repeat:repeat-y;opacity:0.7;}
+
+/* ── Rangée host (centrée, pas de grille) ── */
+.nm-row{display:flex;justify-content:center;}
+.nm-level .nm-row:first-child { width: 100%; }
+.nm-level .nm-row:first-child .nm-card { width: 90%; }
+
+/* ── Lien latéral entre chunks ifaces (ligne horizontale simple) ── */
+.nm-lateral{position:absolute;height:2px;background:#d7d7d7;top:50%;}
+
+/* ── Responsive ── */
+@media(max-width:960px){.nm-grid-6{grid-template-columns:repeat(4,130px);width:604px;}.nm-connect-6{width:604px;}}
+@media(max-width:660px){.nm-grid-6,.nm-grid-5,.nm-grid-4{grid-template-columns:repeat(2,130px);width:288px;}.nm-connect-6,.nm-connect-5,.nm-connect-4{width:288px;}}
+@media(max-width:340px){.nm-grid-6,.nm-grid-5,.nm-grid-4,.nm-grid-3,.nm-grid-2{grid-template-columns:repeat(1,130px);width:130px;}}

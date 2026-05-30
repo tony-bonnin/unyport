@@ -1,0 +1,711 @@
+/* ============================================================
+   components.css — TRINITY · Stats strip, main grid,
+                    section heading, resources grid, charts,
+                    responsive breakpoints (desktop)
+   ============================================================ */
+.stats-strip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  overflow: hidden;
+  box-shadow: rgba(62, 58, 171, 0.12) 0px 8px 32px;
+}
+
+.stat-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  position: relative;
+}
+
+.stat-block + .stat-block::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 1px;
+  background: var(--border);
+}
+
+/* Cache l'élément stat-divider du HTML (legacy) */
+.stat-divider { display: none; }
+
+.stat-icon {
+    width: 2.66rem;
+    height: 2.66rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+/* Icône du stat-block "Rôle de l'hôte" — suit --brand selon data-role */
+.stat-role {
+    background: var(--brand-100);
+    color: var(--brand);
+}
+
+.stat-blue {
+    background: #f1f1ff;
+    color: #736dfe;
+}
+.stat-green {
+    background: #eeffce;
+    color: #8cd009;
+}
+.stat-orange {
+    background: #fef0da;
+    color: #ffa30e;
+}
+.stat-purple {
+    background: #f7f3ff;
+    color: #8741ff;
+}
+.stat-indigo {
+    background: #eceeff;
+    color: var(--role-dom0, #3e3aab);
+}
+
+/* ── Icônes custom Alpine Linux et Xen Project ───────────── */
+/* Utilisées via .icon-alpine et .icon-xen sur un <i> ou <span>    */
+/* mask-image : la couleur vient de color/background (CSP-safe)     */
+
+.icon-alpine,
+.icon-xen {
+  display: inline-block;
+  width: 1em; height: 1em;
+  background-color: transparent;
+}
+
+/* Alpine Linux — logo officiel PNG (/media/img/logos/logo-alpine-linux-simple-white-purple.png) */
+.icon-alpine {
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-color: transparent !important;
+  background-image: url('/media/img/logos/logo-alpine-linux-simple-white-purple.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Xen Project — logo TRINITY (xen.png dans /assets/) */
+.icon-xen {
+  -webkit-mask-image: none;
+  mask-image: none;
+  background-color: transparent !important;
+  background-image: url('/media/img/logos/logo-xen-simple.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+.ver-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.ver-ok      { background: #e6f9ed; color: #16a34a; }
+.ver-patch   { background: #fff7e6; color: #d97706; }
+.ver-minor   { background: #fff3cd; color: #b45309; }
+.ver-major   { background: #fde8e8; color: #dc2626; }
+.ver-error   { background: #f0f0f4; color: #9ca3af; }
+.ver-checking { background: var(--surface-2, #f4f4f8); color: var(--text-muted); }
+
+.stat-body { min-width: 0; }
+
+.stat-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-unit {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* ============================================================
+   MAIN GRID — actions à gauche, hyperviseur à droite
+   ============================================================ */
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.panel-head {
+  margin-bottom: 18px;
+}
+
+.panel-head h2 {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: -.005em;
+}
+
+/* Actions — vraies tuiles TeamViewer */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.action-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  transition: border-color .15s, background .15s;
+  cursor: pointer;
+  min-height: 138px;
+}
+
+.action-tile:hover {
+  border-color: var(--brand-500);
+  background: var(--brand-50);
+}
+
+.action-tile:has(.action-blue):hover {
+    border-color: var(--tile-blue);
+    background: #edf1fb;
+}
+
+a.action-tile:has(.action-blue):hover .action-tile-icon {
+    background: var(--tile-blue);
+    color: white;
+}
+
+a.action-tile:has(.action-indigo):hover {
+    background: #effff8;
+    border: 1px solid #46ce93;
+}
+
+a.action-tile:has(.action-indigo):hover .action-tile-icon {
+    background: #46ce93;
+    color: white;
+}
+
+a.action-tile:has(.action-orange):hover {
+    background: #fff0f0f8;
+    border: 1px solid #ff6060;
+}
+
+a.action-tile:has(.action-orange):hover .action-tile-icon {
+    background: #ff6060;
+    color: white;
+}
+
+a.action-tile:has(.action-purple):hover {
+    background: #e9e3ff;
+    border-color: #876aff;
+}
+
+a.action-tile:has(.action-purple):hover .action-tile-icon {
+    background: #876aff;
+    color: white;
+}
+
+.action-tile-icon {
+    width: 2.6rem;
+    height: 2.5rem;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.action-blue {
+    color: var(--tile-blue);
+    border: 1px solid;
+}
+.action-indigo {
+    color: #46ce93;
+    border: 1px solid;
+}
+.action-orange {
+    color: #ff6060;
+    border: 1px solid;
+}
+.action-purple {
+    color: #876aff;
+    border: 1px solid;
+}
+
+.action-tile-body strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.action-tile-body span {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Hypervisor */
+.panel-hyp { display: flex; flex-direction: column; }
+
+.hyp-status {
+    display: flex;
+    align-items: center;
+    gap: 1.66rem;
+    padding: 1.6rem;
+    border: 1px solid #02aa3e66;
+    border-radius: var(--r-sm);
+    margin-bottom: 0.66rem;
+}
+
+.hyp-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(22,163,74,.18);
+  flex-shrink: 0;
+}
+
+.hyp-status strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: #15803d;
+}
+
+.hyp-status p {
+  font-size: 12px;
+  color: #16a34a;
+  margin-top: 1px;
+}
+
+.hyp-dl {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.hyp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 36px;
+  gap: 14px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+
+.hyp-row:last-child { border-bottom: none; }
+
+.hyp-row dt {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.hyp-row dd {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.hyp-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--r-sm);
+    color: var(--brand);
+    font-size: 0.75rem;
+    font-weight: 650;
+    transition: background .15s;
+    border: 1px solid;
+}
+
+.btn-primary:hover { background: var(--brand-700); color: white; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: border-color .15s, background .15s;
+}
+
+.btn-ghost:hover {
+  background: var(--surface-sunk);
+  border-color: var(--text-muted);
+}
+
+/* ============================================================
+   SECTION HEADING
+   ============================================================ */
+
+.section-head {
+    margin: 1.66rem 0 0.66rem 0.66rem;
+}
+
+   .section-head h2 {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.section-head p {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* ============================================================
+   RESOURCES GRID
+   ============================================================ */
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.res-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  transition: border-color .15s;
+  box-shadow: var(--shadow);
+}
+
+.res-card:hover { border-color: var(--border-strong); }
+
+.res-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.res-card-head h3 {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: .005em;
+}
+
+.res-icon {
+    width: 2.33rem;
+    height: 2.33rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+/* res-* : brand unifié — couleurs arbitraires par catégorie supprimées.
+   Les états sémantiques (LBU clean/dirty) utilisent res-ok / res-warn. */
+.res-blue,
+.res-indigo,
+.res-purple,
+.res-orange,
+.res-ok,
+.res-warn,
+.res-err {
+    color: #666 !important;
+    opacity: 0.33;
+    border: 1px solid #c3c3c3 !important;
+    background: #f8f8f8;
+}
+
+.res-primary {
+  font-size: 26px;
+  font-weight: 750;
+  color: var(--text);
+  letter-spacing: -.025em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.res-primary small {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.res-bar-wrap {
+  height: 5px;
+  background: var(--surface-sunk);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.res-bar { height: 100%; border-radius: inherit; }
+
+.cpu-bar { width: var(--cpu-pct); background: var(--cpu-color); transition: width .4s ease, background .4s ease; }
+
+.mem-bar { width: var(--mem-pct); background: var(--mem-color); transition: width .4s ease, background .4s ease; }
+
+.res-kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  align-items: center;
+}
+
+.res-kv dt {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.res-kv dd {
+  font-size: 12px;
+  color: var(--text-soft);
+  font-weight: 600;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
+.res-net-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.res-net-block {
+  background: var(--surface-sunk);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+}
+
+.res-net-block span {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.res-net-block strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 3px;
+  letter-spacing: -.01em;
+}
+
+/* ============================================================
+   CHARTS
+   ============================================================ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.3fr .9fr;
+  gap: 14px;
+}
+
+
+/* 2 colonnes égales — CPU + Fréquence */
+.charts-2col {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Mémoire — pleine largeur, hauteur réduite */
+.chart-mem-full {
+  height: 200px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+}
+
+.chart-card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.chart-card-head i {
+  font-size: 12px;
+  color: var(--brand);
+}
+
+.chart-card-head h3 {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.chart-card canvas {
+  flex: 1;
+  width: 100% !important;
+  min-height: 0;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1440px) {
+  :root { --content-max: 1080px; }
+}
+
+@media (max-width: 1280px) {
+  .resources-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid { grid-template-columns: 1fr 1fr; }
+  .chart-sm { grid-column: span 2; }
+}
+
+@media (max-width: 1100px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .action-grid { grid-template-columns: repeat(4, 1fr); }
+  .stats-strip { grid-template-columns: repeat(2, 1fr); }
+  .stat-block + .stat-block::before { display: none; }
+  .stat-block:nth-child(odd)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 22%;
+    bottom: 22%;
+    width: 1px;
+    background: var(--border);
+  }
+}
+
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  #app { height: auto; min-height: 100vh; }
+  .main-inner { width: calc(100% - 32px); gap: 20px; }
+  .stats-strip { grid-template-columns: 1fr; }
+  .stat-block + .stat-block::before { display: none; }
+  .action-grid { grid-template-columns: 1fr 1fr; }
+  .resources-grid { grid-template-columns: 1fr; }
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-sm { grid-column: auto; }
+}
+
+@media (max-width: 700px) {
+.login-left { display: none; }
+.login-right {
+    padding: 2.33rem;
+    background: url(/media/img/logos/logo-unyport-white-full.png) no-repeat #3e3aab;
+    color: white;
+    background-size: 10rem;
+    background-position: center 2rem;
+}
+.login-box-header h2 {
+    color: white;
+}
+.login-box-header p {
+    color: #ffffff73;
+}
+#login .field label {
+    color: #ffffffb3;
+}
+label.remember-me span {
+    color: #ffffffad;
+}
+.btn-login {
+    background: #1a177b;
+}
+.btn-login:hover {
+    background: #211f6b;
+}
+.oauth-divider {
+    color: #fdfdfd40;
+    font-size: 0.66rem;
+    margin: 2rem auto 1.66rem;
+    }
+.oauth-divider::before, .oauth-divider::after {
+    background: #ffffff2b;
+}
+  .action-grid { grid-template-columns: 1fr; }
+}
+/* ============================================================

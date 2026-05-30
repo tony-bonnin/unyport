@@ -1,0 +1,446 @@
+/* ============================================================
+   mobile.css — TRINITY · Hamburger, mobile menu, breakpoints
+   ============================================================ */
+:root {
+  --role-dom0:      #3e3aab;
+  --role-domu:      #a0284a;
+  --role-container: #b05a1a;
+  --role-alpine:    #28587c;
+}
+
+/* Remplacement des couleurs fixes [data-role] par les vars */
+[data-role="dom0"]      { --current-role-color: var(--role-dom0); }
+[data-role="domu"]      { --current-role-color: var(--role-domu); }
+[data-role="container"] { --current-role-color: var(--role-container); }
+[data-role="alpine"]    { --current-role-color: var(--role-alpine); }
+
+/* ============================================================
+   PAGE SETTINGS — layout sections
+   ============================================================ */
+.settings-section {
+  margin-bottom: 40px;
+}
+
+.settings-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.settings-section-head h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+
+.settings-section-head p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.settings-section-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .settings-grid { grid-template-columns: 1fr; }
+}
+
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+}
+
+.settings-card h3 {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--text);
+  margin: 0 0 4px;
+}
+
+.settings-card-desc {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   LOGO PREVIEW
+   ============================================================ */
+.logo-preview {
+  width: 80px;
+  height: 48px;
+  border-radius: var(--r-sm);
+  background: var(--surface-sunk);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.logo-preview-placeholder {
+  font-size: 20px;
+  color: var(--text-dim);
+}
+
+.sidebar-brand-img {
+  max-height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ============================================================
+   COLOR GRID — éditeur couleurs de rôle
+   ============================================================ */
+.color-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  transition: background .15s;
+}
+
+.color-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.color-info label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.color-info span {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+/* input[type=color] — native color picker, stylisé */
+.color-picker {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  padding: 2px;
+  background: var(--surface);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker::-webkit-color-swatch { border-radius: 3px; border: none; }
+
+.color-hex {
+  width: 82px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.color-hex:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+/* ============================================================
+   HAMBURGER — visible mobile uniquement
+   ============================================================ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
+  transition: background .1s;
+}
+.hamburger:hover { background: var(--surface-sunk); }
+.hamburger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--text-soft);
+  border-radius: 2px;
+  transition: transform .2s, opacity .2s;
+}
+
+/* ============================================================
+   MOBILE MENU — overlay + panneau
+   ============================================================ */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(2px);
+  z-index: 500;
+  display: none;
+}
+
+.mobile-menu-overlay.is-open { display: block; }
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(320px, 88vw);
+  background: var(--side-bg);
+  z-index: 501;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 4px 0 24px rgba(0,0,0,.18);
+  transform: translateX(-100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+
+.mobile-menu.is-open {
+  display: flex;
+  transform: translateX(0);
+}
+
+/* Alpine x-show remet display:block — on force flex quand visible */
+.mobile-menu[style="display: none;"] { display: none !important; }
+.mobile-menu:not([style*="display: none"]) { display: flex !important; }
+
+/* ── Header ── */
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+
+.mobile-menu-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.mobile-menu-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: rgba(255,255,255,.08);
+  color: var(--side-text);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .1s;
+}
+.mobile-menu-close:hover { background: rgba(255,255,255,.15); }
+
+/* ── User strip ── */
+.mobile-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  cursor: pointer;
+  transition: background .1s;
+  flex-shrink: 0;
+}
+.mobile-menu-user:hover { background: var(--side-hover); }
+
+.mobile-menu-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mobile-menu-user-info {
+  flex: 1;
+  min-width: 0;
+}
+.mobile-menu-user-info strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--side-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-menu-user-chevron {
+  font-size: 11px;
+  color: var(--side-text-dim);
+}
+
+/* ── Nav ── */
+.mobile-menu-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.mobile-nav-section {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--side-text-dim);
+  padding: 12px 16px 4px;
+}
+
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--side-text);
+  cursor: pointer;
+  transition: background .1s;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+}
+.mobile-nav-item:hover { background: var(--side-hover); }
+.mobile-nav-item.active {
+  color: #fff;
+  background: rgba(255,255,255,.1);
+  font-weight: 650;
+}
+
+.mobile-nav-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: rgba(255,255,255,.06);
+  flex-shrink: 0;
+  transition: background .1s;
+}
+.mobile-nav-item.active .mobile-nav-icon { background: rgba(255,255,255,.15); }
+
+.mobile-nav-empty {
+  font-size: 12.5px;
+  color: var(--side-text-dim);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-nav-logout { color: #ff8080; }
+.mobile-nav-logout .mobile-nav-icon { background: rgba(255,80,80,.1); color: #ff8080; }
+
+/* ── Footer ── */
+.mobile-menu-footer {
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding: 8px 0;
+  flex-shrink: 0;
+}
+
+/* ── Transitions Alpine x-transition ──
+   On utilise des classes CSS, pas de :style inline */
+.mobile-overlay-enter        { transition: opacity .2s ease; }
+.mobile-overlay-enter-start  { opacity: 0; }
+.mobile-overlay-enter-end    { opacity: 1; }
+.mobile-overlay-leave        { transition: opacity .2s ease; }
+.mobile-overlay-leave-start  { opacity: 1; }
+.mobile-overlay-leave-end    { opacity: 0; }
+
+.mobile-menu-enter        { transition: transform .25s cubic-bezier(.4,0,.2,1); }
+.mobile-menu-enter-start  { transform: translateX(-100%); }
+.mobile-menu-enter-end    { transform: translateX(0); }
+.mobile-menu-leave        { transition: transform .22s cubic-bezier(.4,0,.2,1); }
+.mobile-menu-leave-start  { transform: translateX(0); }
+.mobile-menu-leave-end    { transform: translateX(-100%); }
+
+/* ============================================================
+   BREAKPOINTS MOBILE
+   ============================================================ */
+
+
+@media (max-width: 480px) {
+  .stats-strip  { grid-template-columns: 1fr; }
+  .action-grid  { grid-template-columns: 1fr; }
+  .modal        { width: calc(100vw - 16px); }
+  .modal-admin  { width: calc(100vw - 16px); }
+  .modal-tabs   { overflow-x: auto; }
+  .main-inner   { padding: 0 12px 24px; }
+}
+
+/* Transitions x-show sur mobile menu — Alpine CSP compatible
+   Alpine pose display:none/block, on anime via opacity + transform */
+.mobile-menu-overlay {
+  transition: opacity .2s ease;
+}
+.mobile-menu-overlay[style*="display: none"] { opacity: 0; }
+
+.mobile-menu {
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}

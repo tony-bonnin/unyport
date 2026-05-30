@@ -1,5 +1,4 @@
-os: auto
-theme: dark
+theme: lights
 
 security:
   csrf_secret: V25UtAUPrx1I3Y4h1qU23qEGQYRHJEJyOZJZaFfVXgM=
@@ -14,3 +13,27 @@ display:
   memory: true
   disk: true
   network: true
+
+security_extra:
+  rate_limit_login: 5
+  session_timeout_mins: 60
+  https: false
+  trusted_origins: []
+
+mail:
+  enabled: false
+  from: no-reply@unyport.app
+  sendmail_path: /usr/sbin/sendmail
+
+# HTTP/3 (QUIC) — désactivé par défaut
+# Requiert un certificat TLS valide (TLS 1.3 obligatoire pour QUIC)
+# Pour générer un certificat auto-signé (test uniquement) :
+#   openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 \
+#     -keyout /etc/ssl/trinity/key.pem -out /etc/ssl/trinity/cert.pem \
+#     -days 365 -nodes -subj "/CN=trinity.local"
+http3:
+  enabled: false
+  cert_file: /etc/ssl/trinity/cert.pem
+  key_file: /etc/ssl/trinity/key.pem
+  port: 8443
+  redirect_http: true   # redirige :8800 → :8443

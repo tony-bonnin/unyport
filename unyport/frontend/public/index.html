@@ -2,14 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UnyPort - Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="msapplication-navbutton-color" content="#000000">
+  <title>UnyPort | TRINITY Labs · Xen Alpine Linux - v0.1-beta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#3e3aab">
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/main.css">
 
   <script src="/vendor/chart.umd.min.js"></script>
   <script src="/vendor/luxon.min.js"></script>
@@ -20,303 +17,1519 @@
   <script defer src="/app/auth.js"></script>
   <script defer src="/app/sse.js"></script>
   <script defer src="/app/chart.js"></script>
+  <script defer src="/app/networkmap.js"></script>
+  <script defer src="/app/metrics.js"></script>
   <script defer src="/app/app.js"></script>
   <script defer src="/vendor/alpinejs-csp.min.js"></script>
 </head>
 
 <body>
-<div id="app" x-data="unyport">
+<div id="app" x-data="unyport" x-cloak>
 
-<!-- Loading -->
-<div id="loading" class="page" x-show="page === 'loading'">
-  <div class="spinner"></div>
-  <p>Vérification de la session...</p>
-</div>
-
-<!-- Login -->
-<div id="login" class="page" x-show="page === 'login'">
-  <a id="login-link" href="/" title="Login">
-    <img src="/media/img/logos/logo-unyport.png" alt="UnyPort Logo">
-  </a>
-  <div class="login-box">
-    <h2><i class="fa-solid fa-sliders"></i> <span>Uny</span>Port</h2>
-    <p class="login-error" x-show="loginError" x-text="loginError"></p>
-    <form id="loginForm" @submit.prevent="doLogin()">
-      <input type="email"    x-model="email"    placeholder="Email"/>
-      <input type="password" x-model="password" placeholder="Password"/>
-      <div class="form-options">
-        <label class="remember-me">
-          <input type="checkbox" name="remember_me" id="remember_me">
-          <span> Remember Me</span>
-        </label>
+  <!-- ===================================================== -->
+  <!-- LOADING                                                -->
+  <!-- ===================================================== -->
+  <div id="loading" class="page page-loading" x-show="page === 'loading'">
+    <div class="loading-panel">
+      <div class="loading-logo">
+        <img src="/media/img/logos/logo-unyport-simple.png" alt="TRINITY">
       </div>
-      <button type="submit" :disabled="loginLoading">
-        <span x-show="!loginLoading">Login</span>
-        <span x-show="loginLoading">…</span>
-      </button>
-      <button type="button" class="oauth github"
-              @click="window.location.href='/api/oauth/login?provider=github'">
-        <img src="/media/img/logos/github_logo_icon.png" alt="GitHub">
-        Login with GitHub
-      </button>
-      <button type="button" class="oauth gitlab"
-              @click="window.location.href='/api/oauth/login?provider=gitlab'">
-        <img src="/media/img/logos/gitlab_logo_icon.png" alt="GitLab">
-        Login with GitLab
-      </button>
-      <div class="form-footer">
-        <a href="/auth/forgot-password" class="forgot-password">Forgot Password ?</a>
-        <a href="/auth/register" class="register-link">Sign Up</a>
-      </div>
-    </form>
+      <div class="spinner"></div>
+      <span>Connecting to infrastructure…</span>
+    </div>
   </div>
-  <footer>
-    <p>© 2023–2026 UnyPort — Official Control Panel for TRINITY Edge Network</p>
-  </footer>
-</div>
 
-<!-- Dashboard -->
-<div id="dashboard" class="page" x-show="page === 'dashboard'">
+  <!-- ===================================================== -->
+  <!-- LOGIN                                                  -->
+  <!-- ===================================================== -->
+  <div id="login" class="page page-login" x-show="page === 'login'">
+    <div class="login-left">
+      <div class="login-brand">
+        <img src="/media/img/logos/logo-unyport-white-full.png" alt="UnyPort">
+      </div>
+      <div class="login-tagline">
+        <h1>Infrastructure<br>reduced to the essentials.</h1>
+        <p>Xen Console · Alpine Linux · TRINITY<br>Minimal. Secure. Predictable.</p>
+      </div>
+      <div class="login-badges">
+        <span class="badge">Alpine Linux</span>
+        <span class="badge">Xen Hypervisor</span>
+        <span class="badge">TRINITY Edge Networks</span>
+      </div>
+    </div>
 
-  <nav class="sidebar">
-    <a id="root-link" href="/" title="Home">
-      <img src="/media/img/logos/logo-unyport-simple.png" alt="UnyPort Logo">
-    </a>
-    <div id="dynamic-apps">
+    <div class="login-right">
+      <div class="login-box">
+        <div class="login-box-header">
+          <h2>Sign in</h2>
+          <p>Access to Unyport console</p>
+        </div>
+
+        <p class="login-error" x-show="loginError">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span x-text="loginError"></span>
+        </p>
+
+        <form id="loginForm" @submit.prevent="doLogin()">
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" x-model="email" placeholder="demo@unyport.app" autocomplete="email">
+          </div>
+
+          <div class="field">
+            <label>Password</label>
+            <div class="input-with-action">
+              <input :type="loginPasswordVisible ? 'text' : 'password'" x-model="password" placeholder="••••••••••••••••••••••••" autocomplete="current-password">
+              <button
+                type="button"
+                class="input-action-btn"
+                :title="loginPasswordVisible ? 'Hide password' : 'Show password'"
+                @click="loginPasswordVisible = !loginPasswordVisible"
+              >
+                <i :class="loginPasswordVisible ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye'"></i>
+              </button>
+            </div>
+          </div>
+
+          <label class="remember-me">
+            <input type="checkbox" id="remember_me">
+            <span>Stay signed in</span>
+          </label>
+
+          <button type="submit" class="btn-login" :disabled="loginLoading" title="Sign in to UnyPort">
+            <span x-show="!loginLoading">Sign in</span>
+            <span x-show="loginLoading">Signing in…</span>
+          </button>
+
+          <div class="oauth-divider"><span>or continue with</span></div>
+
+          <div class="oauth-row">
+            <button type="button" class="oauth" title="Sign in with GitHub" @click="window.location.href='/api/oauth/login?provider=github'">
+              <img src="/media/img/logos/github_logo_icon.png" alt="GitHub">
+              <span>GitHub</span>
+            </button>
+            <button type="button" class="oauth" title="Sign in with GitLab" @click="window.location.href='/api/oauth/login?provider=gitlab'">
+              <img src="/media/img/logos/gitlab_logo_icon.png" alt="GitLab">
+              <span>GitLab</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- DASHBOARD                                              -->
+  <!-- ===================================================== -->
+  <div id="app-shell" class="page page-dashboard" x-show="page === 'app'">
+
+    <!-- ============== SIDEBAR ============== -->
+    <aside class="sidebar">
+
+      <div class="sidebar-brand">
+        <a href="/dashboard" title="Go to dashboard" @click.prevent="navigate('/dashboard')">
+          <img x-show="brandingHasLogo" :src="brandingLogoSrc" alt="Logo" class="sidebar-brand-img">
+          <img x-show="!brandingHasLogo" src="/media/img/logos/logo-unyport-white-full.png" alt="Logo Unyport White" class="sidebar-brand-img">
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+
+        <a href="/dashboard" class="nav-item" title="Dashboard overview" :class="currentPage === 'dashboard'  ? 'active' : ''" @click.prevent="navigate('/dashboard')">
+          <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
+          <span>Dashboard</span>
+        </a>
+
+        <template x-if="isOperator">
+          <div>
+            <div class="nav-section-title">Infrastructure</div>
+
+            <a href="/hypervisor" class="nav-item" :title="hostMenuTitle" :class="currentPage === 'hypervisor' ? 'active' : ''" @click.prevent="navigate('/hypervisor')">
+              <span class="nav-icon"><i :class="hostPageIcon"></i></span>
+              <span x-text="hostPageTitle"></span>
+            </a>
+
+            <a href="/resources" class="nav-item" title="View host CPU, memory and processes" :class="currentPage === 'resources'  ? 'active' : ''" @click.prevent="navigate('/resources')">
+              <span class="nav-icon"><i class="fa-solid fa-server"></i></span>
+              <span>Host resources</span>
+            </a>
+
+            <a href="/network" class="nav-item" title="View network interfaces and neighbors" :class="currentPage === 'network'    ? 'active' : ''" @click.prevent="navigate('/network')">
+              <span class="nav-icon"><i class="fa-solid fa-network-wired"></i></span>
+              <span>Network</span>
+            </a>
+
+            <a href="/storage" class="nav-item" title="View storage usage and mounts" :class="currentPage === 'storage'    ? 'active' : ''" @click.prevent="navigate('/storage')">
+              <span class="nav-icon"><i class="fa-solid fa-hard-drive"></i></span>
+              <span>Storage</span>
+            </a>
+          </div>
+        </template>
+
+        <div class="nav-section-title">Applications</div>
+
+        <div class="nav-empty" x-show="apps.length === 0">
+          <i class="fa-solid fa-circle-minus"></i>
+          <span>No applications</span>
+        </div>
+
+        <template x-for="app in apps" :key="app.name">
+          <a :href="app.path" target="_blank" class="nav-item" :title="'Open ' + app.name">
+            <span class="nav-icon"><i :class="_appIcon(app.type)"></i></span>
+            <span x-text="app.name"></span>
+          </a>
+        </template>
+
+        <div>
+          <div class="nav-section-title">Administration</div>
+
+          <template x-if="isAdmin">
+            <a class="nav-item" title="Manage local users" @click.prevent="openAdminUsers()">
+              <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+              <span>Users</span>
+            </a>
+          </template>
+
+          <a href="/security" class="nav-item" title="View security status" :class="currentPage === 'security'   ? 'active' : ''" @click.prevent="navigate('/security')">
+            <span class="nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
+            <span>Security</span>
+          </a>
+
+          <a href="/settings" class="nav-item" title="Open application settings" :class="currentPage === 'settings'   ? 'active' : ''" @click.prevent="navigate('/settings')">
+            <span class="nav-icon"><i class="fa-solid fa-gear"></i></span>
+            <span>Settings</span>
+          </a>
+        </div>
+
+      </nav>
+
+      <div class="sidebar-footer">
+
+        <div x-show="showLbu">
+          <div class="lbu-status dirty" x-show="showLbuDirty">
+            <div class="lbu-dot"></div>
+            <div class="lbu-text">
+              <strong x-text="lbuText"></strong>
+              <span x-text="lbuSubText"></span>
+            </div>
+          </div>
+          <div class="lbu-status clean" x-show="showLbuClean">
+            <div class="lbu-dot"></div>
+            <div class="lbu-text">
+              <strong x-text="lbuText"></strong>
+              <span x-text="lbuSubText"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-user" title="Open your profile" @click="openProfile()">
+          <div class="sidebar-user-avatar">
+            <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+            <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+            <span class="role-badge role-sticker" :class="roleBadgeClass" :title="roleBadgeLabel" x-text="roleStickerLabel"></span>
+          </div>
+          <div class="sidebar-user-info">
+            <strong x-text="userName"></strong>
+            <span class="credential-dot credential-dot-inline" x-show="userDefaultCredentials" title="Default credentials in use"></span>
+          </div>
+          <i class="fa-solid fa-ellipsis-vertical sidebar-user-more"></i>
+        </div>
+
+        <a class="nav-item nav-logout" title="Sign out of UnyPort" @click.prevent="doLogout()">
+          <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+          <span>Sign out</span>
+        </a>
+
+      </div>
+
+    </aside>
+
+    <!-- ============== WORKSPACE ============== -->
+    <section class="workspace">
+
+      <header id="topbar">
+
+        <div class="topbar-left">
+          <button class="hamburger" @click="openMobileMenu()" type="button" aria-label="Open menu" title="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+          <span class="topbar-page-title" x-text="getPageTitle()"></span>
+        </div>
+
+        <div class="topbar-center">
+          <button class="topbar-search" type="button" title="Search is not available yet">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Search a machine, application or action</span>
+            <kbd>Ctrl + K</kbd>
+          </button>
+        </div>
+
+        <div class="topbar-right">
+
+          <div class="live-badge" :class="sseConnected ? 'live' : 'dead'" :title="sseConnected ? 'Live metrics stream connected' : 'Live metrics stream disconnected'">
+            <span class="live-dot"></span>
+            <span x-show="sseConnected">Live</span>
+            <span x-show="!sseConnected">Offline</span>
+          </div>
+
+          <button class="topbar-btn" type="button" title="Notifications">
+            <i class="fa-regular fa-bell"></i>
+          </button>
+
+          <div class="topbar-user-wrap" @click.outside="closeDropdown()">
+            <button class="topbar-user" type="button" title="Open user menu" @click="toggleDropdown()">
+              <div class="topbar-avatar">
+                <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+                <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+                <span class="role-badge role-sticker" :class="roleBadgeClass" :title="roleBadgeLabel" x-text="roleStickerLabel"></span>
+              </div>
+              <div class="topbar-user-meta">
+                <span class="topbar-user-name" x-text="userName"></span>
+              </div>
+              <span class="credential-dot topbar-credential-dot" x-show="userDefaultCredentials" title="Default credentials in use"></span>
+              <i class="fa-solid fa-chevron-down topbar-chevron" :class="dropdownOpen ? 'open' : ''"></i>
+            </button>
+
+            <div class="topbar-dropdown" x-show="dropdownOpen" x-transition>
+              <div class="topbar-dropdown-head">
+                <div class="topbar-avatar topbar-avatar-lg">
+                  <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+                  <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+                </div>
+                <div>
+                  <strong x-text="userName"></strong>
+                  <span x-text="userEmail"></span>
+                </div>
+              </div>
+              <div class="topbar-dropdown-sep"></div>
+              <button class="topbar-dropdown-item" title="Open your profile settings" @click="openProfileMenu()">
+                <i class="fa-regular fa-user"></i>
+                <span>My profile</span>
+              </button>
+              <button class="topbar-dropdown-item" title="Switch light or dark theme" @click="toggleThemeMenu()">
+                <i class="fa-regular fa-moon" x-show="themeIsLight"></i>
+                <i class="fa-regular fa-sun" x-show="themeIsDark"></i>
+                <span x-text="themeToggleLabel"></span>
+              </button>
+              <template x-if="isAdmin">
+                <button class="topbar-dropdown-item" title="Manage user accounts" @click="openAdminUsersMenu()">
+                  <i class="fa-solid fa-users"></i>
+                  <span>Manage users</span>
+                </button>
+              </template>
+              <div class="topbar-dropdown-sep"></div>
+              <button class="topbar-dropdown-item topbar-dropdown-danger" title="Sign out of UnyPort" @click="doLogout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Sign out</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </header>
+
+      <main class="main-scroll">
+        <div class="main-inner">
+
+          <div class="message-container" x-show="userDefaultCredentials">
+            <div class="default-credential-warning">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Default credentials are still active. Change the password before exposing this instance.</span>
+            </div>
+          </div>
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: DASHBOARD                                 -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'dashboard'">
+
+            <div class="page-header">
+              <h1>Hello, <span x-text="userName"></span></h1>
+              <p>Current state of your infrastructure.</p>
+            </div>
+
+            <div class="stats-strip">
+              <div class="stat-block">
+                <div class="stat-icon stat-blue"><i :class="statHostIcon"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="sysHostname"></div>
+                  <div class="stat-label"><span x-text="roleWithRuntime"></span></div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-green"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="uptime"></div>
+                  <div class="stat-label">Uptime</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-orange"><i class="fa-solid fa-microchip"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value"><span x-text="cpuPct"></span><span class="stat-unit">%</span></div>
+                  <div class="stat-label">CPU load</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-purple"><i class="fa-solid fa-memory"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value"><span x-text="memPct"></span><span class="stat-unit">%</span></div>
+                  <div class="stat-label">Memory used</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-head">
+              <h2 x-text="hostPageTitle"></h2>
+              <p x-text="hostPageSubtitle"></p>
+            </div>
+
+            <div class="main-grid">
+
+              <div class="panel panel-actions">
+                <div class="panel-head"><h2>Quick actions</h2></div>
+                <div class="action-grid">
+
+                  <a href="/resources" class="action-tile" title="Open host resources" @click.prevent="navigate('/resources')">
+                    <div class="action-tile-icon action-blue"><i class="fa-solid fa-gauge-high"></i></div>
+                    <div class="action-tile-body">
+                      <strong>Resources</strong>
+                      <span>CPU, memory, load and processes.</span>
+                    </div>
+                  </a>
+
+                  <a href="/network" class="action-tile" title="Open network map" @click.prevent="navigate('/network')">
+                    <div class="action-tile-icon action-orange"><i class="fa-solid fa-network-wired"></i></div>
+                    <div class="action-tile-body">
+                      <strong>Network</strong>
+                      <span>Interfaces, traffic and topology.</span>
+                    </div>
+                  </a>
+
+                  <a href="/storage" class="action-tile" title="Open storage details" @click.prevent="navigate('/storage')">
+                    <div class="action-tile-icon action-purple"><i class="fa-solid fa-hard-drive"></i></div>
+                    <div class="action-tile-body">
+                      <strong>Storage</strong>
+                      <span>Volumes and Data Disk Mode.</span>
+                    </div>
+                  </a>
+
+                  <a href="/security" class="action-tile" title="Open security page" @click.prevent="navigate('/security')">
+                    <div class="action-tile-icon action-indigo"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="action-tile-body">
+                      <strong>Security</strong>
+                      <span>Auth, sessions and access logs.</span>
+                    </div>
+                  </a>
+
+                </div>
+              </div>
+
+              <div class="panel panel-hyp">
+                <div class="panel-head"><h2>Host status</h2></div>
+
+                <div class="hyp-status">
+                  <div class="hyp-status-dot"></div>
+                  <div>
+                    <strong x-text="sysHostname"></strong>
+                    <p>Management panel · Alpine Xen</p>
+                  </div>
+                </div>
+
+                <dl class="hyp-dl">
+                  <div class="hyp-row"><dt>OS</dt><dd>
+                    <span x-text="alpineVerDisplay"></span>
+                    <span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span>
+                  </dd></div>
+                  <div class="hyp-row"><dt>Kernel</dt><dd>
+                    <span x-text="kernelLts || kernelShort || sysKernel || '—'"></span>
+                    <span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span>
+                  </dd></div>
+                  <div class="hyp-row"><dt>Xen role</dt><dd x-text="xenLabel || '—'"></dd></div>
+                  <div class="hyp-row"><dt>IP address</dt><dd x-text="netIpDisplay"></dd></div>
+                  <div class="hyp-row"><dt>Interface</dt><dd x-text="netIfaceDisplay"></dd></div>
+                </dl>
+
+                <div class="hyp-actions">
+                  <a href="/hypervisor" class="btn-primary" :title="hostMenuTitle" @click.prevent="navigate('/hypervisor')">
+                    <i class="fa-solid fa-server"></i>
+                    <span x-text="isXenDom0 ? 'View machines' : 'View host'"></span>
+                  </a>
+                  <a href="/security" class="btn-ghost" title="Review security settings" @click.prevent="navigate('/security')">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Security</span>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="section-head">
+              <h2>Host resources</h2>
+              <p>Current system state — Alpine Linux.</p>
+            </div>
+
+            <div class="resources-grid">
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-blue"><i class="fa-solid fa-server"></i></div>
+                  <h3>System</h3>
+                </div>
+                <div class="res-primary" x-text="uptime"></div>
+                <dl class="res-kv">
+                  <dt>OS</dt><dd><span x-text="alpineVerDisplay"></span><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span></dd>
+                  <dt>Kernel</dt><dd><span x-text="kernelLts || sysKernel || '—'"></span><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span></dd>
+                  <dt>Date</dt><dd x-text="sysDate || '—'"></dd>
+                </dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div>
+                  <h3>CPU</h3>
+                </div>
+                <div class="res-primary"><span x-text="cpuPct"></span><small>%</small></div>
+                <div class="res-bar-wrap"><div class="res-bar cpu-bar"></div></div>
+                <dl class="res-kv">
+                  <dt>Model</dt><dd x-text="cpuModelClean"></dd>
+                  <dt>Cores</dt><dd x-text="cpuCoresDisplay"></dd>
+                  <dt>Frequency</dt><dd x-text="cpuFreqFmt"></dd>
+                </dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div>
+                  <h3>Memory</h3>
+                </div>
+                <div class="res-primary" x-text="memUsedFmt"></div>
+                <div class="res-bar-wrap"><div class="res-bar mem-bar"></div></div>
+                <dl class="res-kv">
+                  <dt>Used</dt><dd><span x-text="memPct"></span>%</dd>
+                  <dt>Total</dt><dd x-text="memTotalFmt"></dd>
+                  <dt>Free</dt><dd x-text="memFreeFmt"></dd>
+                </dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-orange"><i class="fa-solid fa-network-wired"></i></div>
+                  <h3>Network</h3>
+                </div>
+                <div class="res-net-row">
+                  <div class="res-net-block"><span>↓ RX</span><strong x-text="netRxVal"></strong></div>
+                  <div class="res-net-block"><span>↑ TX</span><strong x-text="netTxVal"></strong></div>
+                </div>
+                <dl class="res-kv">
+                  <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
+                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
+                </dl>
+              </div>
+            </div>
+
+            <div class="section-head">
+              <h2>Real-time activity</h2>
+              <p>System load and traffic visualisation.</p>
+            </div>
+
+            <div class="charts-grid charts-2col">
+              <div class="chart-card">
+                <div class="chart-card-head">
+                  <i class="fa-solid fa-heart-pulse"></i>
+                  <h3>CPU frequency</h3>
+                </div>
+                <canvas id="chartFreq"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="chart-card-head">
+                  <i class="fa-solid fa-memory"></i>
+                  <h3>Memory</h3>
+                </div>
+                <canvas id="chartMem"></canvas>
+              </div>
+            </div>
+
+            <div class="section-head">
+              <h2>Network topology</h2>
+              <p>Host interfaces and ARP neighbors — updated live.</p>
+            </div>
+            <div class="netmap-card">
+              <div id="netmap-container-dash" class="netmap-container"></div>
+            </div>
+
+          </div><!-- /page dashboard -->
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: HYPERVISOR                                -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'hypervisor'">
+            <div class="page-header">
+              <h1><i :class="hostPageIcon"></i> <span x-text="hostPageTitle"></span></h1>
+              <p x-text="hostPageSubtitle"></p>
+            </div>
+
+            <div class="stats-strip">
+              <div class="stat-block">
+                <div class="stat-icon stat-blue"><i :class="statHostIcon"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="sysHostname"></div>
+                  <div class="stat-label"><span x-text="roleWithRuntime"></span></div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-green"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="uptime"></div>
+                  <div class="stat-label">Uptime</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-orange"><i class="fa-solid fa-microchip"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="cpuPct + '%'"></div>
+                  <div class="stat-label">CPU load</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-purple"><i class="fa-solid fa-memory"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="memPct + '%'"></div>
+                  <div class="stat-label">Memory used</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-head"><h2>System</h2><p>OS and hardware identification.</p></div>
+            <div class="hyp-detail-grid">
+              <div class="hyp-info-card">
+                <div class="hyp-info-card-head">
+                  <div class="res-icon res-blue"><i class="fa-solid fa-server"></i></div>
+                  <h3>Operating system</h3>
+                </div>
+                <dl class="res-kv">
+                  <dt>Distribution</dt><dd><span x-text="alpineVerDisplay"></span><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span></dd>
+                  <dt>Kernel</dt><dd><span x-text="kernelLts || sysKernel || '—'"></span><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span></dd>
+                </dl>
+              </div>
+              <div class="hyp-info-card">
+                <div class="hyp-info-card-head">
+                  <div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div>
+                  <h3>Processor</h3>
+                </div>
+                <dl class="res-kv">
+                  <dt>Model</dt><dd x-text="cpuModelClean"></dd>
+                  <dt>Vendor</dt><dd x-text="sysCpuVendor || '—'"></dd>
+                  <dt>Cores</dt><dd x-text="cpuCoresDisplay"></dd>
+                  <dt>Max frequency</dt><dd x-text="sysCpuFreqMax ? _fmtFreq(sysCpuFreqMax) : '—'"></dd>
+                </dl>
+              </div>
+              <div class="hyp-info-card">
+                <div class="hyp-info-card-head">
+                  <div class="res-icon res-orange"><i class="fa-solid fa-cubes"></i></div>
+                  <h3>Xen / Virtualization</h3>
+                </div>
+	                <dl class="res-kv">
+	                  <dt>Role</dt><dd x-text="xenLabel || '—'"></dd>
+	                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
+	                  <dt x-show="showXenInfo">Xen</dt><dd x-show="showXenInfo" x-text="xenInfo.xen_version || '—'"></dd>
+	                  <dt x-show="showXenInfo">Scheduler</dt><dd x-show="showXenInfo" x-text="xenInfo.scheduler || '—'"></dd>
+	                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
+	                  <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
+	                </dl>
+	              </div>
+	              <div class="hyp-info-card" x-show="showXenInfo">
+	                <div class="hyp-info-card-head">
+	                  <div class="res-icon res-purple"><i class="fa-solid fa-chart-pie"></i></div>
+	                  <h3>Xen resources</h3>
+	                </div>
+	                <dl class="res-kv">
+		                  <dt>Domains</dt><dd x-text="xenInfo.domain_count || 0"></dd>
+		                  <dt>Host CPUs</dt><dd x-text="xenCPUCount || '—'"></dd>
+		                  <dt>vCPUs</dt><dd x-text="xenInfo.total_vcpus || 0"></dd>
+		                  <dt>Total memory</dt><dd x-text="_fmtMB((xenInfo.total_memory_mb || 0) * 1024)"></dd>
+		                  <dt>Memory</dt><dd><span x-text="_fmtMB(xenMemoryUsedMB * 1024)"></span> / <span x-text="_fmtMB((xenInfo.total_memory_mb || 0) * 1024)"></span></dd>
+		                  <dt>Usage</dt><dd x-text="xenMemoryPct + '%'"></dd>
+	                </dl>
+	              </div>
+	              <div class="hyp-info-card" x-show="showLbu">
+                <div class="hyp-info-card-head">
+                  <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                  </div>
+                  <h3>LBU — Persistence</h3>
+                </div>
+                <dl class="res-kv">
+                  <dt>State</dt><dd x-text="lbuText"></dd>
+                  <dt>Archive</dt><dd x-text="lbuArchive || '—'"></dd>
+                  <dt>Mode</dt><dd>Data Disk (semi-persistent)</dd>
+                  <dt>Protected paths</dt><dd>/etc/apk/protected-paths.d</dd>
+                </dl>
+              </div>
+            </div>
+
+	            <div class="section-head"><h2>Virtual machines</h2><p>Live domains from the Xen xl toolstack.</p></div>
+	            <div class="proc-table-wrap" x-show="showXenDomains">
+	              <table class="proc-table">
+	                <thead>
+	                  <tr>
+	                    <th>ID</th>
+	                    <th>Name</th>
+	                    <th>State</th>
+	                    <th>vCPUs</th>
+	                    <th>Memory</th>
+	                    <th>CPU</th>
+	                  </tr>
+	                </thead>
+	                <tbody>
+	                  <template x-for="dom in xenDomains" :key="dom.domid">
+	                    <tr>
+	                      <td class="proc-pid" x-text="dom.domid"></td>
+	                      <td x-text="dom.name"></td>
+	                      <td><span class="badge" x-text="dom.state || '—'"></span></td>
+	                      <td x-text="dom.vcpus"></td>
+	                      <td x-text="_fmtMB((dom.mem_mb || 0) * 1024)"></td>
+	                      <td x-text="pct1(dom.cpu_pct)"></td>
+	                    </tr>
+	                  </template>
+	                </tbody>
+	              </table>
+	            </div>
+	            <div class="placeholder-card" x-show="!showXenDomains">
+	              <i class="fa-solid fa-terminal placeholder-icon"></i>
+	              <h3>No Xen domains reported</h3>
+	              <p>The xl toolstack is unavailable or this host is not a Xen Dom0.</p>
+	            </div>
+
+          </div><!-- /page hypervisor -->
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: HOST RESOURCES                            -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'resources'">
+            <div class="page-header">
+              <h1><i class="fa-solid fa-server"></i> Host resources</h1>
+              <p>CPU, memory, load and process metrics — live.</p>
+            </div>
+
+            <div class="stats-strip">
+              <div class="stat-block">
+                <div class="stat-icon stat-blue"><i class="fa-solid fa-gauge-high"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="sysLoadAvg.load1"></div>
+                  <div class="stat-label">Load avg 1m</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-green"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="sysLoadAvg.load5"></div>
+                  <div class="stat-label">Load avg 5m</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-orange"><i class="fa-solid fa-chart-area"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="sysLoadAvg.load15"></div>
+                  <div class="stat-label">Load avg 15m</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-purple"><i class="fa-solid fa-temperature-half"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="cpuTempFmt"></div>
+                  <div class="stat-label">CPU temperature</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-head"><h2>Top processes</h2><p>Sorted by memory usage.</p></div>
+            <div class="proc-table-wrap">
+              <table class="proc-table">
+                <thead>
+                  <tr><th>PID</th><th>Name</th><th>State</th><th>Memory</th></tr>
+                </thead>
+                <tbody>
+                  <template x-for="p in sysTopProcs" :key="p.pid">
+                    <tr>
+                      <td class="proc-pid" x-text="p.pid"></td>
+                      <td class="proc-name" x-text="p.name"></td>
+                      <td><span class="proc-state" :class="'state-' + p.state" x-text="p.state"></span></td>
+                      <td class="proc-mem" x-text="p.mem_mb + ' MiB'"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section-head"><h2>CPU</h2><p>Per-core usage and frequency.</p></div>
+            <div class="metric-card">
+              <div class="metric-card-head">
+                <div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div>
+                <h3 x-text="cpuModelClean"></h3>
+                <span class="metric-badge" x-text="cpuPct + '% avg'"></span>
+              </div>
+              <div class="res-bar-wrap res-bar-wrap-lg"><div class="res-bar cpu-bar"></div></div>
+              <div id="per-core-grid" class="per-core-grid"></div>
+            </div>
+
+            <div class="section-head"><h2>Memory</h2><p>RAM usage breakdown.</p></div>
+            <div class="resources-grid">
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div>
+                  <h3>RAM</h3>
+                </div>
+                <div class="res-primary" x-text="memUsedFmt + ' / ' + memTotalFmt"></div>
+                <div class="res-bar-wrap"><div class="res-bar mem-bar"></div></div>
+                <dl class="res-kv">
+                  <dt>Used</dt><dd><span x-text="memUsedFmt"></span> (<span x-text="memPct"></span>%)</dd>
+                  <dt>Cached</dt><dd x-text="_fmtMB(sysMemCachedMb)"></dd>
+                  <dt>Free</dt><dd x-text="memFreeFmt"></dd>
+                  <dt>Total</dt><dd x-text="memTotalFmt"></dd>
+                </dl>
+              </div>
+              <div class="res-card" x-show="sysCPUTemps.length > 0">
+                <div class="res-card-head">
+                  <div class="res-icon res-orange"><i class="fa-solid fa-temperature-half"></i></div>
+                  <h3>Thermal zones</h3>
+                </div>
+                <div class="temp-grid">
+                  <template x-for="t in sysCPUTemps" :key="t.zone">
+                    <div class="temp-row">
+                      <span class="temp-label" x-text="t.label"></span>
+                      <div class="temp-bar-wrap">
+                        <div class="temp-bar" :class="t.temp_c > 80 ? 'crit' : t.temp_c > 60 ? 'warn' : ''"></div>
+                      </div>
+                      <span class="temp-value" x-text="t.temp_c + '°C'"></span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /page resources -->
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: NETWORK                                   -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'network'">
+            <div class="page-header">
+              <h1><i class="fa-solid fa-network-wired"></i> Network</h1>
+              <p>Interfaces, throughput and ARP neighbors — live.</p>
+            </div>
+
+            <div class="stats-strip">
+              <div class="stat-block">
+                <div class="stat-icon stat-blue"><i class="fa-solid fa-arrow-down"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="netRxVal"></div>
+                  <div class="stat-label">RX throughput</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-orange"><i class="fa-solid fa-arrow-up"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="netTxVal"></div>
+                  <div class="stat-label">TX throughput</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-green"><i class="fa-solid fa-network-wired"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="netIfaceDisplay"></div>
+                  <div class="stat-label">Main interface</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-purple"><i class="fa-solid fa-location-dot"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="netIpDisplay"></div>
+                  <div class="stat-label">IP address</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-head"><h2>Interfaces</h2><p>All active network interfaces with live throughput.</p></div>
+            <div class="resources-grid" id="net-ifaces-grid">
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-blue"><i class="fa-solid fa-network-wired"></i></div>
+                  <h3 x-text="netIfaceDisplay"></h3>
+                  <span class="metric-badge badge-up">UP</span>
+                </div>
+                <div class="res-net-row">
+                  <div class="res-net-block"><span>↓ RX</span><strong x-text="netRxVal"></strong></div>
+                  <div class="res-net-block"><span>↑ TX</span><strong x-text="netTxVal"></strong></div>
+                </div>
+                <dl class="res-kv">
+                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
+                  <dt>RX total</dt><dd x-text="_fmtBytes(sysNetRxBytes)"></dd>
+                  <dt>TX total</dt><dd x-text="_fmtBytes(sysNetTxBytes)"></dd>
+                </dl>
+              </div>
+            </div>
+
+            <div class="section-head"><h2>Network topology</h2><p>Host interfaces and ARP neighbors — updated live.</p></div>
+            <div class="netmap-card">
+              <div id="netmap-container" class="netmap-container"></div>
+            </div>
+
+          </div><!-- /page network -->
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: STORAGE                                   -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'storage'">
+            <div class="page-header">
+              <h1><i class="fa-solid fa-hard-drive"></i> Storage</h1>
+              <p>Mounted volumes and Data Disk Mode persistence state.</p>
+            </div>
+
+            <div class="stats-strip">
+              <div class="stat-block">
+                <div class="stat-icon" :class="lbuState === 'clean' ? 'stat-green' : 'stat-orange'">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                </div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="lbuText"></div>
+                  <div class="stat-label">LBU state</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-blue"><i class="fa-solid fa-hard-drive"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="sysDisks.length"></div>
+                  <div class="stat-label">Mounted volumes</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-purple"><i class="fa-solid fa-database"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="diskTotalFmt"></div>
+                  <div class="stat-label">Total capacity</div>
+                </div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-icon stat-orange"><i class="fa-solid fa-file-zipper"></i></div>
+                <div class="stat-body">
+                  <div class="stat-value" x-text="lbuArchive || '—'"></div>
+                  <div class="stat-label">LBU archive</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-head"><h2>Volumes</h2><p>Mounted filesystems with usage breakdown.</p></div>
+            <div class="resources-grid" x-show="sysDisks.length > 0">
+              <template x-for="d in sysDisks" :key="d.mount">
+                <div class="res-card">
+                  <div class="res-card-head">
+                    <div class="res-icon" :class="d.pal">
+                      <i class="fa-solid fa-hard-drive"></i>
+                    </div>
+                    <h3 x-text="d.device"></h3>
+                  </div>
+                  <div class="res-primary" x-text="_fmtMB(d.used_mb) + ' / ' + _fmtMB(d.total_mb)"></div>
+                  <div class="res-bar-wrap">
+                    <div class="res-bar disk-bar" :class="d.bar_cls"></div>
+                  </div>
+                  <dl class="res-kv">
+                    <dt>Used</dt><dd><span x-text="_fmtMB(d.used_mb)"></span> (<span x-text="d.used_pct"></span>%)</dd>
+                    <dt>Free</dt><dd x-text="_fmtMB(d.free_mb)"></dd>
+                    <dt>Total</dt><dd x-text="_fmtMB(d.total_mb)"></dd>
+                    <dt>Mount</dt><dd x-text="d.mount"></dd>
+                    <dt>FS</dt><dd x-text="d.fstype"></dd>
+                  </dl>
+                </div>
+              </template>
+            </div>
+            <div class="placeholder-card" x-show="sysDisks.length === 0">
+              <i class="fa-solid fa-hard-drive placeholder-icon"></i>
+              <h3>No volumes detected</h3>
+              <p>Waiting for filesystem data from the host.</p>
+            </div>
+
+            <div class="section-head" x-show="showLbu"><h2>LBU — Data Disk Mode</h2><p>Alpine Linux Backup persistence state.</p></div>
+            <div class="resources-grid" x-show="showLbu">
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                  </div>
+                  <h3>LBU state</h3>
+                </div>
+                <div class="res-primary" x-text="lbuText"></div>
+                <div class="lbu-status" :class="lbuState">
+                  <div class="lbu-dot"></div>
+                  <div class="lbu-text">
+                    <strong x-text="lbuText"></strong>
+                    <span x-text="lbuSubText"></span>
+                  </div>
+                </div>
+                <dl class="res-kv res-kv-mt">
+                  <dt>State</dt><dd x-text="lbuState"></dd>
+                  <dt>Archive</dt><dd x-text="lbuArchive || '—'"></dd>
+                  <dt>Paths</dt><dd>/etc/apk/protected-paths.d</dd>
+                </dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-blue"><i class="fa-solid fa-circle-info"></i></div>
+                  <h3>Data Disk Mode</h3>
+                </div>
+                <div class="res-primary">Semi-persistent</div>
+                <dl class="res-kv">
+                  <dt>Mode</dt><dd>Data Disk (LBU)</dd>
+                  <dt>OS</dt><dd><span x-text="alpineVerDisplay"></span><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span></dd>
+                  <dt>Kernel</dt><dd><span x-text="kernelLts || sysKernel || '—'"></span><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span></dd>
+                  <dt>Uptime</dt><dd x-text="uptime"></dd>
+                </dl>
+              </div>
+            </div>
+
+          </div><!-- /page storage -->
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: SECURITY                                  -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'security'">
+            <div class="page-header">
+              <h1><i class="fa-solid fa-shield-halved"></i> Security</h1>
+              <p>Kernel hardening, exposed services and process status.</p>
+            </div>
+
+            <div class="settings-section-actions security-actions">
+              <button class="btn-ghost" title="Refresh security status" @click="loadSecurity()" :disabled="securityLoading">
+                <i class="fa-solid fa-rotate"></i>
+                <span x-show="!securityLoading">Refresh</span>
+                <span x-show="securityLoading">Refreshing...</span>
+              </button>
+            </div>
+
+            <p class="form-error" x-show="securityError" x-text="securityError"></p>
+
+            <div class="resources-grid">
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-ok"><i class="fa-solid fa-circle-check"></i></div>
+                  <h3>Passed</h3>
+                </div>
+                <div class="res-primary" x-text="securitySummary.ok || 0"></div>
+                <dl class="res-kv"><dt>Status</dt><dd>OK checks</dd></dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-warn"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                  <h3>Warnings</h3>
+                </div>
+                <div class="res-primary" x-text="securitySummary.warn || 0"></div>
+                <dl class="res-kv"><dt>Status</dt><dd>Review needed</dd></dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-err"><i class="fa-solid fa-circle-xmark"></i></div>
+                  <h3>Critical</h3>
+                </div>
+                <div class="res-primary" x-text="securitySummary.critical || 0"></div>
+                <dl class="res-kv"><dt>Status</dt><dd>Immediate attention</dd></dl>
+              </div>
+              <div class="res-card">
+                <div class="res-card-head">
+                  <div class="res-icon res-blue"><i class="fa-solid fa-user-lock"></i></div>
+                  <h3>Auth</h3>
+                </div>
+                <div class="res-primary" x-text="userDefaultCredentials ? 'Default' : 'Custom'"></div>
+                <dl class="res-kv"><dt>Credentials</dt><dd x-text="userDefaultCredentials ? 'Change password' : 'Hardened'"></dd></dl>
+              </div>
+            </div>
+
+            <div class="section-head"><h2>Hardening checks</h2><p>Kernel, network and authentication posture.</p></div>
+            <div class="resources-grid" x-show="securityChecks.length > 0">
+              <template x-for="check in securityChecks" :key="check.key">
+                <div class="res-card security-card">
+                  <div class="res-card-head">
+                    <div class="res-icon" :class="securityStatusClass(check.status)">
+                      <i :class="securityIconClass(check.status)"></i>
+                    </div>
+                    <h3 x-text="check.label"></h3>
+                  </div>
+                  <div class="res-primary security-primary" x-text="check.status"></div>
+                  <dl class="res-kv">
+                    <dt>Category</dt><dd x-text="check.category"></dd>
+                    <dt>Detail</dt><dd :title="check.detail" x-text="check.detail"></dd>
+                  </dl>
+                </div>
+              </template>
+            </div>
+
+            <div class="section-head"><h2>Security services</h2><p>OpenRC status for auth, firewall, audit and time services.</p></div>
+            <div class="proc-table-wrap">
+              <table class="proc-table">
+                <thead><tr><th>Service</th><th>State</th><th>Status</th><th>Runlevels</th><th>Detail</th></tr></thead>
+                <tbody>
+                  <template x-for="svc in securityServices" :key="svc.name">
+                    <tr>
+                      <td x-text="svc.name"></td>
+                      <td x-text="svc.state"></td>
+                      <td><span class="badge" :class="securityStatusClass(svc.status)" x-text="svc.status"></span></td>
+                      <td x-text="(svc.runlevels || []).join(', ') || '—'"></td>
+                      <td x-text="svc.detail"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section-head"><h2>Processes and listeners</h2><p>Runtime signals from /proc.</p></div>
+            <div class="hyp-detail-grid">
+              <div class="hyp-info-card">
+                <div class="hyp-info-card-head">
+                  <div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div>
+                  <h3>Watched processes</h3>
+                </div>
+                <dl class="res-kv">
+                  <template x-for="proc in securityProcesses" :key="proc.name">
+                    <div class="security-kv-row">
+                      <dt x-text="proc.name"></dt>
+                      <dd :title="proc.detail" x-text="proc.count"></dd>
+                    </div>
+                  </template>
+                </dl>
+              </div>
+              <div class="hyp-info-card">
+                <div class="hyp-info-card-head">
+                  <div class="res-icon res-orange"><i class="fa-solid fa-network-wired"></i></div>
+                  <h3>TCP listeners</h3>
+                </div>
+                <dl class="res-kv">
+                  <template x-for="listener in securityListeners.slice(0, 10)" :key="listener.proto + '-' + listener.port">
+                    <div class="security-kv-row">
+                      <dt x-text="listener.proto"></dt>
+                      <dd :title="listener.detail" x-text="':' + listener.port"></dd>
+                    </div>
+                  </template>
+                </dl>
+              </div>
+            </div>
+          </div><!-- /page security -->
+
+          <!-- ═══════════════════════════════════════════════ -->
+          <!-- PAGE: SETTINGS                                  -->
+          <!-- ═══════════════════════════════════════════════ -->
+          <div x-show="currentPage === 'settings'">
+            <div class="page-header">
+              <h1><i class="fa-solid fa-gear"></i> Settings</h1>
+              <p>Instance configuration — branding, colors and advanced options.</p>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-head">
+                <div>
+                  <h2>Branding</h2>
+                  <p>Customize the logo and role colors of this TRINITY instance.</p>
+                </div>
+                <div class="settings-section-actions">
+                  <button class="btn-ghost" x-show="canEditBranding" title="Restore default branding colors and logo" @click="resetBranding()">Reset defaults</button>
+                  <button class="btn-primary" x-show="canEditBranding" title="Save branding changes" @click="saveBranding()" :disabled="brandingSaving">
+                    <span x-show="!brandingSaving">Save branding</span>
+                    <span x-show="brandingSaving">Saving…</span>
+                  </button>
+                </div>
+              </div>
+
+              <p class="form-error"   x-show="brandingError"   x-text="brandingError"></p>
+              <p class="form-success" x-show="brandingSuccess" x-text="brandingSuccess"></p>
+
+              <div class="settings-grid">
+
+                <div class="settings-card">
+                  <h3>Logo</h3>
+                  <p class="settings-card-desc">Replace the default UnyPort logo. PNG, SVG or WebP, max 2 MB.</p>
+                  <div class="photo-widget">
+                    <div class="logo-preview">
+                      <img x-show="brandingHasLogoPreview" :src="brandingLogoEffective" alt="Logo preview" class="logo-preview-img">
+                      <div class="logo-preview-placeholder" x-show="!brandingHasLogoPreview">
+                        <i class="fa-solid fa-image"></i>
+                      </div>
+                    </div>
+                    <div class="photo-actions">
+                      <label class="btn-ghost photo-upload-label" :class="{ disabled: !canEditBranding }" :title="canEditBranding ? 'Upload a logo image' : 'Administrator role required'">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Upload file</span>
+                        <input type="file" accept="image/*" class="photo-file-input" :disabled="!canEditBranding" @change="setBrandingLogoFromFile($event)">
+                      </label>
+                      <div class="photo-url-row">
+                        <input type="url" x-model="brandingLogoUrlInput" placeholder="https://example.com/logo.png" class="photo-url-input" :disabled="!canEditBranding" :title="canEditBranding ? 'Logo image URL' : 'Administrator role required'" @keydown.enter="applyBrandingLogoUrl()">
+                        <button class="btn-ghost-sm" :title="canEditBranding ? 'Use this logo URL' : 'Administrator role required'" :disabled="!canEditBranding" @click="applyBrandingLogoUrl()">Apply</button>
+                      </div>
+                      <button class="btn-danger-text" x-show="brandingHasLogoPreview && canEditBranding" title="Remove custom logo" @click="removeBrandingLogo()">
+                        <i class="fa-solid fa-trash"></i> Remove logo
+                      </button>
+                      <p class="form-error" x-show="brandingLogoError" x-text="brandingLogoError"></p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <h3>Role colors</h3>
+                  <p class="settings-card-desc">Colors applied to each Xen / Alpine host role.</p>
+                  <div class="color-grid">
+                    <div class="color-row">
+                      <div class="color-swatch" id="swatch-dom0"></div>
+                      <div class="color-info"><label>Dom0</label><span>Xen hypervisor host</span></div>
+                      <input type="color" x-model="brandingColorDom0" class="color-picker" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Dom0 color' : 'Administrator role required'" @input="updateSwatches()">
+                      <input type="text"  x-model="brandingColorDom0" class="color-hex" maxlength="7" placeholder="#3e3aab" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Dom0 color hex value' : 'Administrator role required'" @input="updateSwatches()">
+                    </div>
+                    <div class="color-row">
+                      <div class="color-swatch" id="swatch-domu"></div>
+                      <div class="color-info"><label>DomU</label><span>Xen virtual machine</span></div>
+                      <input type="color" x-model="brandingColorDomU" class="color-picker" :disabled="!canEditBranding" :title="canEditBranding ? 'Set DomU color' : 'Administrator role required'" @input="updateSwatches()">
+                      <input type="text"  x-model="brandingColorDomU" class="color-hex" maxlength="7" placeholder="#a0284a" :disabled="!canEditBranding" :title="canEditBranding ? 'Set DomU color hex value' : 'Administrator role required'" @input="updateSwatches()">
+                    </div>
+                    <div class="color-row">
+                      <div class="color-swatch" id="swatch-container"></div>
+                      <div class="color-info"><label>Container</label><span>Docker / LXC environment</span></div>
+                      <input type="color" x-model="brandingColorContainer" class="color-picker" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Container color' : 'Administrator role required'" @input="updateSwatches()">
+                      <input type="text"  x-model="brandingColorContainer" class="color-hex" maxlength="7" placeholder="#b05a1a" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Container color hex value' : 'Administrator role required'" @input="updateSwatches()">
+                    </div>
+                    <div class="color-row">
+                      <div class="color-swatch" id="swatch-alpine"></div>
+                      <div class="color-info"><label>Alpine</label><span>Baremetal Alpine Linux</span></div>
+                      <input type="color" x-model="brandingColorAlpine" class="color-picker" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Alpine color' : 'Administrator role required'" @input="updateSwatches()">
+                      <input type="text"  x-model="brandingColorAlpine" class="color-hex" maxlength="7" placeholder="#28587c" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Alpine color hex value' : 'Administrator role required'" @input="updateSwatches()">
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-head">
+                <div>
+                  <h2>OAuth providers</h2>
+                  <p>GitHub and GitLab authentication configuration.</p>
+                </div>
+              </div>
+              <div class="placeholder-card">
+                <i class="fa-brands fa-github placeholder-icon"></i>
+                <h3>OAuth configuration</h3>
+                <p>GitHub and GitLab provider settings will appear here.</p>
+              </div>
+            </div>
+
+          </div><!-- /page settings -->
+
+        </div>
+      </main>
+
+    </section>
+
+  </div><!-- /app-shell -->
+
+  <!-- ===================================================== -->
+  <!-- MODAL: PROFILE                                         -->
+  <!-- ===================================================== -->
+  <div class="modal-overlay" x-show="profileOpen" @click.self="closeProfile()" x-transition>
+    <div class="modal modal-profile">
+
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-avatar">
+            <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+            <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+          </div>
+          <div>
+            <h2 x-text="userName"></h2>
+            <span class="role-badge" :class="roleBadgeClass" :title="'Current role: ' + roleBadgeLabel" x-text="roleBadgeLabel"></span>
+            <span class="modal-email" x-text="userEmail"></span>
+          </div>
+        </div>
+        <button class="modal-close" title="Close profile" @click="closeProfile()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab" title="Edit profile information" :class="profilePage === 'info' ? 'active' : ''" @click="profilePage = 'info'">
+          <i class="fa-regular fa-user"></i> Profile
+        </button>
+        <button class="modal-tab" title="Change your password" :class="profilePage === 'password' ? 'active' : ''" @click="profilePage = 'password'">
+          <i class="fa-solid fa-lock"></i> Password
+          <span class="credential-dot modal-tab-dot" x-show="userDefaultCredentials" title="Default credentials in use"></span>
+        </button>
+        <button class="modal-tab" title="Manage your public SSH key" :class="profilePage === 'ssh' ? 'active' : ''" @click="profilePage = 'ssh'">
+          <i class="fa-solid fa-key"></i> SSH key
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div x-show="profilePage === 'info'">
+          <div class="form-row">
+            <label>Profile photo</label>
+            <div class="photo-widget">
+              <div class="photo-preview">
+                <img x-show="hasPhotoPreview" :src="photoPreviewSrc" alt="Profile photo" class="photo-preview-img">
+                <div class="photo-preview-placeholder" x-show="!hasPhotoPreview">
+                  <span x-text="userAvatarDisplay"></span>
+                </div>
+              </div>
+              <div class="photo-actions">
+                <label class="btn-ghost photo-upload-label" :class="{ disabled: isViewer }" :title="isViewer ? 'Viewer role is read-only' : 'Upload a profile photo'">
+                  <i class="fa-solid fa-upload"></i>
+                  <span>Upload</span>
+                  <input type="file" accept="image/*" class="photo-file-input" :disabled="isViewer" @change="setPhotoFromFile($event)">
+                </label>
+                <div class="photo-url-row">
+                  <input type="url" x-model="profilePhotoUrlInput" placeholder="https://example.com/photo.jpg" class="photo-url-input" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Profile photo URL'" @keydown.enter="applyPhotoUrl()">
+                  <button class="btn-ghost-sm" :title="isViewer ? 'Viewer role is read-only' : 'Use this profile photo URL'" :disabled="isViewer" @click="applyPhotoUrl()">Apply</button>
+                </div>
+                <button class="btn-danger-text" x-show="hasPhotoPreview" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Remove profile photo'" @click="removePhoto()">
+                  <i class="fa-solid fa-trash"></i> Remove photo
+                </button>
+                <p class="form-error" x-show="profilePhotoError" x-text="profilePhotoError"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label>Initials <small>(fallback when no photo, max 2 chars)</small></label>
+            <input type="text" x-model="profileAvatar" placeholder="e.g. AD" maxlength="2" class="input-short" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Edit profile initials'">
+          </div>
+          <div class="form-row">
+            <label>Display name</label>
+            <input type="text" x-model="profileDisplayName" placeholder="e.g. Alice Dupont" maxlength="64" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Edit display name'">
+          </div>
+          <div class="form-row">
+            <label>Email</label>
+            <input type="email" x-model="profileEmail" autocomplete="email" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Change account email'">
+          </div>
+          <div class="form-row">
+            <label>Role</label>
+            <input type="text" :value="roleBadgeLabel" disabled class="input-disabled">
+          </div>
+
+          <p class="form-error"   x-show="profileError"   x-text="profileError"></p>
+          <p class="form-success" x-show="profileSuccess" x-text="profileSuccess"></p>
+
+          <div class="modal-actions">
+            <button class="btn-ghost" title="Discard profile changes" @click="closeProfile()">Cancel</button>
+            <button class="btn-primary" title="Save profile changes" @click="saveProfile()" :disabled="profileSaving || isViewer">
+              <span x-show="!profileSaving">Save</span>
+              <span x-show="profileSaving">Saving…</span>
+            </button>
+          </div>
+        </div>
+
+        <div x-show="profilePage === 'password'">
+          <div class="form-row">
+            <label>Current password</label>
+            <input type="password" x-model="pwdOld" autocomplete="current-password" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Current password'">
+          </div>
+	          <div class="form-row">
+	            <label>New password</label>
+		            <input type="password" x-model="pwdNew" autocomplete="new-password" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'New password'" :class="{ 'default-credential-password-input': userDefaultCredentials }">
+	          </div>
+          <div class="form-row">
+            <label>Confirm</label>
+            <input type="password" x-model="pwdConfirm" autocomplete="new-password" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Confirm new password'">
+          </div>
+          <p class="form-error"   x-show="pwdError"   x-text="pwdError"></p>
+          <p class="form-success" x-show="pwdSuccess" x-text="pwdSuccess"></p>
+          <div class="modal-actions">
+            <button class="btn-ghost" title="Cancel password change" @click="closeProfile()">Cancel</button>
+            <button class="btn-primary" title="Update your password" @click="savePassword()" :disabled="isViewer">Change password</button>
+          </div>
+        </div>
+
+        <div x-show="profilePage === 'ssh'">
+          <div class="form-row">
+            <label>Public SSH key</label>
+            <textarea x-model="profileSSHKey" rows="5" placeholder="ssh-ed25519 AAAA… user@host" class="input-mono" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Public SSH key'"></textarea>
+          </div>
+          <p class="form-hint">Paste your public key (~/.ssh/id_ed25519.pub). It will be stored in your profile and can be used by TRINITY services.</p>
+          <p class="form-error"   x-show="profileError"   x-text="profileError"></p>
+          <p class="form-success" x-show="profileSuccess" x-text="profileSuccess"></p>
+          <div class="modal-actions">
+            <button class="btn-ghost" title="Discard SSH key changes" @click="closeProfile()">Cancel</button>
+            <button class="btn-primary" title="Save SSH key" @click="saveProfile()" :disabled="profileSaving || isViewer">
+              <span x-show="!profileSaving">Save</span>
+              <span x-show="profileSaving">Saving…</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- MODAL: ADMIN USERS                                     -->
+  <!-- ===================================================== -->
+  <div class="modal-overlay" x-show="adminUsersOpen" @click.self="closeAdminUsers()" x-transition>
+    <div class="modal modal-admin">
+
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <i class="fa-solid fa-users modal-header-icon"></i>
+          <h2>User management</h2>
+        </div>
+        <button class="modal-close" title="Close user management" @click="closeAdminUsers()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="admin-users-list" x-show="!adminUsersLoading">
+          <template x-for="u in adminUsers" :key="u.email">
+            <div class="admin-user-row">
+              <div class="admin-user-avatar" x-text="u.avatar"></div>
+              <div class="admin-user-info">
+                <strong x-text="u.display_name"></strong>
+                <span x-text="u.email"></span>
+              </div>
+              <span class="role-badge"
+                :title="'User role: ' + u.role"
+                :class="u.role === 'admin' ? 'role-admin' : u.role === 'operator' ? 'role-operator' : 'role-viewer'"
+                x-text="u.role === 'admin' ? 'Admin' : u.role === 'operator' ? 'Operator' : 'Viewer'">
+              </span>
+              <div class="admin-user-actions">
+                <select class="select-role" title="Change this user's role" @change="adminSetRole(u.email, $event.target.value)">
+                  <option value="admin"    :selected="u.role === 'admin'">Admin</option>
+                  <option value="operator" :selected="u.role === 'operator'">Operator</option>
+                  <option value="viewer"   :selected="u.role === 'viewer'">Viewer</option>
+                </select>
+                <button class="btn-danger-sm" @click="adminDeleteUser(u.email)" :disabled="u.email === userEmail" title="Delete">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </template>
+          <p class="admin-users-empty" x-show="adminUsers.length === 0">No users found.</p>
+        </div>
+
+        <div class="spinner-wrap" x-show="adminUsersLoading">
+          <div class="spinner"></div>
+        </div>
+
+        <div class="admin-create-form">
+          <h3>Add a user</h3>
+          <div class="admin-create-row">
+            <input type="email" x-model="adminNewEmail" placeholder="email@domain.com" class="input-sm" title="New user email address">
+            <input type="password" x-model="adminNewPassword" placeholder="Password" class="input-sm" title="New user password">
+            <select x-model="adminNewRole" class="select-role" title="Role for the new user">
+              <option value="admin">Admin</option>
+              <option value="operator">Operator</option>
+              <option value="viewer">Viewer</option>
+            </select>
+            <button class="btn-primary-sm" title="Create user" @click="adminCreateUser()">
+              <i class="fa-solid fa-plus"></i> Create
+            </button>
+          </div>
+          <p class="form-error" x-show="adminCreateError" x-text="adminCreateError"></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- MOBILE MENU                                            -->
+  <!-- ===================================================== -->
+  <div class="mobile-menu-overlay" :class="mobileMenuOpen ? 'is-open' : ''" @click="closeMobileMenu()"></div>
+
+  <div class="mobile-menu" :class="mobileMenuOpen ? 'is-open' : ''" aria-hidden="true">
+
+    <div class="mobile-menu-header">
+      <img src="/media/img/logos/logo-unyport-white-full.png" alt="UnyPort" class="mobile-menu-logo">
+      <button class="mobile-menu-close" title="Close menu" @click="closeMobileMenu()" type="button">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="mobile-menu-user" title="Open your profile" @click="openProfile(); closeMobileMenu()">
+      <div class="mobile-menu-avatar">
+        <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+        <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+      </div>
+      <div class="mobile-menu-user-info">
+        <strong x-text="userName"></strong>
+        <span class="role-badge" :class="roleBadgeClass" :title="'Current role: ' + roleBadgeLabel" x-text="roleBadgeLabel"></span>
+      </div>
+      <i class="fa-solid fa-chevron-right mobile-menu-user-chevron"></i>
+    </div>
+
+    <nav class="mobile-menu-nav">
+
+      <a class="mobile-nav-item" title="Dashboard overview" :class="currentPage === 'dashboard' ? 'active' : ''" @click="navigateMobile('/dashboard')">
+        <span class="mobile-nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
+        <span>Dashboard</span>
+      </a>
+
+      <template x-if="isOperator">
+        <div>
+          <div class="mobile-nav-section">Infrastructure</div>
+          <a class="mobile-nav-item" :title="hostMenuTitle" :class="currentPage === 'hypervisor' ? 'active' : ''" @click="navigateMobile('/hypervisor')">
+            <span class="mobile-nav-icon"><i :class="hostPageIcon"></i></span>
+            <span x-text="hostPageTitle"></span>
+          </a>
+          <a class="mobile-nav-item" title="View host resources" :class="currentPage === 'resources' ? 'active' : ''" @click="navigateMobile('/resources')">
+            <span class="mobile-nav-icon"><i class="fa-solid fa-server"></i></span>
+            <span>Host resources</span>
+          </a>
+          <a class="mobile-nav-item" title="View network map" :class="currentPage === 'network' ? 'active' : ''" @click="navigateMobile('/network')">
+            <span class="mobile-nav-icon"><i class="fa-solid fa-network-wired"></i></span>
+            <span>Network</span>
+          </a>
+          <a class="mobile-nav-item" title="View storage details" :class="currentPage === 'storage' ? 'active' : ''" @click="navigateMobile('/storage')">
+            <span class="mobile-nav-icon"><i class="fa-solid fa-hard-drive"></i></span>
+            <span>Storage</span>
+          </a>
+        </div>
+      </template>
+
+      <div class="mobile-nav-section">Applications</div>
+
+      <div class="mobile-nav-empty" x-show="apps.length === 0">
+        <i class="fa-solid fa-circle-minus"></i> No applications
+      </div>
+
       <template x-for="app in apps" :key="app.name">
-        <a :href="app.path" target="_blank" :title="app.name">
-          <i :class="appIcon(app.type)"></i>
+        <a :href="app.path" target="_blank" class="mobile-nav-item" :title="'Open ' + app.name" @click="closeMobileMenu()">
+          <span class="mobile-nav-icon"><i :class="_appIcon(app.type)"></i></span>
+          <span x-text="app.name"></span>
         </a>
       </template>
-    </div>
-    <a id="settings" title="Settings" @click.prevent="goSettings()">
-      <i class="fa-solid fa-gear"></i>
-    </a>
-    <span class="logout-container">
-      <a id="logout" title="Logout" @click.prevent="doLogout()">
-        <i class="fa-solid fa-power-off"></i>
+
+      <div>
+        <div class="mobile-nav-section">Administration</div>
+        <template x-if="isAdmin">
+          <a class="mobile-nav-item" title="Manage users" @click="openAdminUsers(); closeMobileMenu()">
+            <span class="mobile-nav-icon"><i class="fa-solid fa-users"></i></span>
+            <span>Users</span>
+          </a>
+        </template>
+        <a class="mobile-nav-item" title="View security status" :class="currentPage === 'security' ? 'active' : ''" @click="navigateMobile('/security')">
+          <span class="mobile-nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
+          <span>Security</span>
+        </a>
+        <a class="mobile-nav-item" title="Open settings" :class="currentPage === 'settings' ? 'active' : ''" @click="navigateMobile('/settings')">
+          <span class="mobile-nav-icon"><i class="fa-solid fa-gear"></i></span>
+          <span>Settings</span>
+        </a>
+      </div>
+
+    </nav>
+
+    <div class="mobile-menu-footer">
+      <a class="mobile-nav-item mobile-nav-logout" title="Sign out of UnyPort" @click="doLogout()">
+        <span class="mobile-nav-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+        <span>Sign out</span>
       </a>
-    </span>
-  </nav>
-
-  <div class="dashboard-main">
-
-  <div id="header">
-    <div class="h-left">
-      <div class="breadcrumb">
-        <span>UnyPort</span>
-        <span class="sep">/</span>
-        <span class="current">Dashboard</span>
-      </div>
-      <div class="sse-indicator">
-        <span class="sse-dot" :class="sseConnected ? 'live' : 'dead'"></span>
-        <span x-text="sseConnected ? 'live' : 'offline'"></span>
-      </div>
     </div>
-    <div class="h-right">
-      <span class="h-meta" x-text="sys.os_release || '—'"></span>
-      <div class="h-divider"></div>
-      <button class="h-btn" @click="toggleTheme()" :title="theme === 'dark' ? 'Thème clair' : 'Thème sombre'">
-        <i x-show="theme === 'dark'"  class="fa-solid fa-sun"></i>
-        <i x-show="theme === 'light'" class="fa-solid fa-moon"></i>
-      </button>
-      <div class="h-divider"></div>
-      <div class="h-avatar" :title="userEmail" x-text="userInitial"></div>
-      <span class="h-username" x-text="userName"></span>
-    </div>
+
   </div>
 
-  <div id="content">
-    <div id="system">
-
-      <!-- R1 : système + cpu + mémoire + stockage -->
-      <div class="raw-1">
-
-        <div class="card">
-          <h3>
-            <img x-show="osLogo" :src="osLogo" class="os-logo" alt="">
-            système
-            <span class="sse-dot" :class="sseConnected ? 'live' : 'dead'"></span>
-          </h3>
-          <dl class="kv">
-            <dt>OS</dt>     <dd x-text="sys.os_release || '—'"></dd>
-            <dt>Kernel</dt> <dd x-text="sys.kernel     || '—'"></dd>
-            <dt>Uptime</dt> <dd x-text="uptime"></dd>
-            <dt>Date</dt>   <dd x-text="sys.date       || '—'"></dd>
-            <template x-if="showBoard">
-              <dt>Board</dt>
-            </template>
-            <template x-if="showBoard">
-              <dd x-text="sys.board_name || '—'"></dd>
-            </template>
-            <template x-if="showBoard">
-              <dt>Vendor</dt>
-            </template>
-            <template x-if="showBoard">
-              <dd x-text="sys.board_vendor || '—'"></dd>
-            </template>
-            <template x-if="platformLabel">
-              <dt>Xen</dt>
-            </template>
-            <template x-if="platformLabel">
-              <dd x-text="platformLabel"></dd>
-            </template>
-          </dl>
-        </div>
-
-        <div class="card">
-          <h3>
-            <img x-show="cpuLogo" :src="cpuLogo" class="cpu-logo" alt="">
-            cpu
-          </h3>
-          <div class="big-val"><span x-text="cpuPct"></span><span class="unit">%</span></div>
-          <div class="bar-wrap"><div class="bar cpu-bar" :class="cpuBarClass"></div></div>
-          <dl class="kv">
-            <dt>modèle</dt>  <dd x-text="cleanCPU(sys.cpu_model)"></dd>
-            <dt>cœurs</dt>   <dd x-text="sys.cpu_cores || '—'"></dd>
-            <dt>fréq moy</dt><dd x-text="fmtFreq(sys.cpu_freq_avg_mhz)"></dd>
-            <dt>fréq max</dt><dd x-text="fmtFreq(sys.cpu_freq_max_mhz)"></dd>
-          </dl>
-        </div>
-
-        <div class="card">
-          <h3><i class="fa-solid fa-memory"></i> mémoire</h3>
-          <div class="big-val"><span x-text="fmtMB(sys.mem_used)"></span></div>
-          <div class="bar-wrap"><div class="bar mem-bar" :class="memBarClass"></div></div>
-          <div class="pct-label" x-text="memPct + '% · ' + fmtMB(sys.mem_total) + ' total'"></div>
-          <dl class="kv">
-            <dt>utilisé</dt><dd x-text="fmtMB(sys.mem_used)"></dd>
-            <dt>libre</dt>  <dd x-text="fmtMB(sys.mem_free)"></dd>
-          </dl>
-        </div>
-
-        <div class="card">
-          <h3><i class="fa-solid fa-hard-drive"></i> stockage</h3>
-          <dl class="kv">
-            <dt>/ root</dt>  <dd>—</dd>
-            <dt>/home</dt>   <dd>—</dd>
-            <dt>/var</dt>    <dd>—</dd>
-            <dt>read</dt>    <dd>—</dd>
-            <dt>write</dt>   <dd>—</dd>
-          </dl>
-        </div>
-
-      </div>
-
-      <!-- R2 : charts live -->
-      <div class="raw-1 row-charts">
-        <div class="card chart-lg">
-          <h3><i class="fa-solid fa-chart-line"></i> fréquence cpu <span class="live-tag">live · 30s</span></h3>
-          <canvas id="chartFreq"></canvas>
-        </div>
-        <div class="card chart-md">
-          <h3><i class="fa-solid fa-wave-square"></i> mémoire <span class="live-tag">live · 30s</span></h3>
-          <canvas id="chartMem"></canvas>
-        </div>
-        <div class="card chart-sm">
-          <h3><i class="fa-solid fa-network-wired"></i> réseau</h3>
-          <canvas id="netGauge"></canvas>
-        </div>
-      </div>
-
-      <!-- R3 : réseau + processus + apps + sécurité -->
-      <div class="raw-3">
-
-        <div class="card">
-          <h3><i class="fa-solid fa-network-wired"></i> réseau</h3>
-          <div class="net-stats">
-            <div class="ns"><div class="ns-lbl">↓ rx</div><div class="ns-val" x-text="netRxVal"></div></div>
-            <div class="ns"><div class="ns-lbl">↑ tx</div><div class="ns-val" x-text="netTxVal"></div></div>
-          </div>
-          <dl class="kv">
-            <dt>iface</dt>    <dd x-text="sys.net_iface    || '—'"></dd>
-            <dt>ip</dt>       <dd x-text="sys.net_ip       || '—'"></dd>
-            <dt>rx total</dt> <dd x-text="fmtBytes(sys.net_rx_bytes)"></dd>
-            <dt>tx total</dt> <dd x-text="fmtBytes(sys.net_tx_bytes)"></dd>
-          </dl>
-        </div>
-
-        <div class="card">
-          <h3><i class="fa-solid fa-microchip"></i> top processus</h3>
-          <div class="proc-list">
-            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
-            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
-            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
-            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
-            <div class="proc-row"><span>—</span><span class="badge bdm">—</span></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3><i class="fa-solid fa-th"></i> apps</h3>
-          <div class="apps-icons">
-            <template x-for="app in apps" :key="app.name">
-              <a :href="app.path" target="_blank" :title="app.name" class="app-icon">
-                <i :class="appIcon(app.type)"></i>
-              </a>
-            </template>
-          </div>
-          <dl class="kv">
-            <dt>proxy</dt><dd x-text="apps.length + ' actifs'"></dd>
-            <dt>auth</dt> <dd>JWT cookie</dd>
-          </dl>
-        </div>
-
-        <div class="card">
-          <h3><i class="fa-solid fa-shield-halved"></i> sécurité</h3>
-          <div class="sec-list">
-            <div class="sec-row"><span>CSRF</span><span class="badge badge-ok">actif</span></div>
-            <div class="sec-row"><span>JWT</span><span class="badge badge-ok">HS256</span></div>
-            <div class="sec-row"><span>CSP</span><span class="badge badge-ok">strict</span></div>
-            <div class="sec-row"><span>TLS</span><span class="badge badge-warn">off</span></div>
-            <div class="sec-row"><span>2FA</span><span class="badge badge-warn">off</span></div>
-            <div class="sec-row"><span>OAuth</span><span class="badge badge-ok">actif</span></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- R4 : thermique + I/O + logs -->
-      <div class="raw-3">
-
-        <div class="card">
-          <h3><i class="fa-solid fa-temperature-half"></i> thermique</h3>
-          <div class="thermal-grid">
-            <div class="th-item"><div class="th-lbl">CPU pkg</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-cpu"></div></div></div>
-            <div class="th-item"><div class="th-lbl">Core avg</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-core"></div></div></div>
-            <div class="th-item"><div class="th-lbl">Board</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-board"></div></div></div>
-            <div class="th-item"><div class="th-lbl">NVMe</div><div class="th-val">— °C</div><div class="bar-wrap"><div class="bar th-nvme"></div></div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3><i class="fa-solid fa-database"></i> disques i/o</h3>
-          <dl class="kv">
-            <dt>sda read</dt>   <dd>—</dd>
-            <dt>sda write</dt>  <dd>—</dd>
-            <dt>nvme read</dt>  <dd>—</dd>
-            <dt>nvme write</dt> <dd>—</dd>
-            <dt>utilisation</dt><dd>—</dd>
-          </dl>
-        </div>
-
-        <div class="card card-logs">
-          <h3><i class="fa-solid fa-terminal"></i> logs récents</h3>
-          <div class="log-list">
-            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
-            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
-            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
-            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-warn">WARN</span><span class="log-msg">—</span></div>
-            <div class="log-row"><span class="log-ts">—</span><span class="badge badge-info">INFO</span><span class="log-msg">—</span></div>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-</div>
+</div><!-- /app -->
 </body>
 </html>
