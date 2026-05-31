@@ -1,8 +1,8 @@
 theme: lights
 
 security:
-  csrf_secret: V25UtAUPrx1I3Y4h1qU23qEGQYRHJEJyOZJZaFfVXgM=
-  jwt_secret: xYGsgmMQJXHCO8zfBrXgy5VrNsNlnV3FbxvpqIYr6SE=
+  csrf_secret: NgYe5AckxwcYYvCY9h1FocZ5+8sC/ey2VXLKjwPnRHc=
+  jwt_secret: 7I5gnKTsKiu/Kvw2ICppyHbMPLbBicwR6pj7ZLH+2bM=
 
 paths:
   users_file: settings/users.json

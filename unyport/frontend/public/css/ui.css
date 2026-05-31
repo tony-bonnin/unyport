@@ -262,8 +262,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid rgb(220 38 38 / 14%);
+  padding: 1rem 1.66rem;
   border-radius: var(--r-sm);
   background: #fef2f2;
   color: #e70404;

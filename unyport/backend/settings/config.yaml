@@ -7,10 +7,10 @@ apps:
 auth:
   github:
     client_id: "Iv1.abcdef1234567890"
-    client_secret: "supersecretgithubkey"
+    client_secret: "21115ae4c8a25d7ce1f669c87857383f34661a732aff06a940e9813bdbdd3bee"
     redirect_url: "https://mon-domaine.com/api/oauth/callback?provider=github"
 
   gitlab:
     client_id: "1234567890abcdef"
-    client_secret: "supersecretgitlabkey"
+    client_secret: "6abcf2745a2a5714e4caff87dfc9667101a49535f75c5efe8a9f9375a24da96b"
     redirect_url: "https://mon-domaine.com/api/oauth/callback?provider=gitlab"
