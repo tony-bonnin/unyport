@@ -1,7 +1,15 @@
-<div align="center">
+<div align="right">
+
+<img width="5%" alt="logo-unyport-icon" src="git_assets/img/logo.jpg" />
+
+</div>
+
 <br><br>
 
-<img width="25%" alt="logo-unyport-icon" src="git_assets/img/logo.jpg" />
+<div align="center">
+
+<img width="75%" alt="banner-unyport" src="git_assets/img/banner.png" />
+
 </div>
 
 <br><br>
