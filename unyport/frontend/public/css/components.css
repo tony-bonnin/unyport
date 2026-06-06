@@ -247,7 +247,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 .action-tile-icon {
     width: 2.6rem;
     height: 2.5rem;
-    border-radius: 2px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -300,6 +300,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
     border: 1px solid #02aa3e66;
     border-radius: var(--r-sm);
     margin-bottom: 0.66rem;
+    background: #02aa3e05;
 }
 
 .hyp-status-dot {
@@ -710,11 +711,11 @@ label.remember-me span {
 }
 
 .reboot-heatmap-band {
-  position: relative;
-  z-index: 1200;
-  width: 100%;
-  margin: 1.25rem 0 1.5rem;
-  padding: 0;
+    position: relative;
+    z-index: 1200;
+    width: 100%;
+    margin: 1.66rem 0 1.5rem;
+    padding: 0 0.66rem;
 }
 
 .reboot-heatmap-head {
@@ -753,9 +754,12 @@ label.remember-me span {
   color: var(--text-1);
 }
 
-.reboot-heatmap-head span {
-  color: var(--text-3);
-  font-size: 0.88rem;
+.reboot-heatmap-summary-count {
+  color: var(--brand);
+}
+
+.reboot-heatmap-summary-text {
+  color: var(--text-1);
 }
 
 .reboot-heatmap-legend {
@@ -1014,49 +1018,123 @@ label.remember-me span {
   font-size: 1rem;
 }
 
-.reboot-hover-popover {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 0.5rem);
-  z-index: 1000;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  max-width: 14rem;
-  min-width: max-content;
-  padding: 0.58rem 0.72rem;
+.reboot-hover-card {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 3200;
+  display: none;
+  flex-direction: column;
+  gap: 0.55rem;
+  width: min(18rem, calc(100vw - 2rem));
+  max-width: min(18rem, calc(100vw - 2rem));
+  padding: 1rem 1rem 6rem;
   border: 1px solid var(--line);
-  border-radius: 0.78rem;
-  background: rgba(15, 23, 42, 0.96);
-  color: #fff;
-  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.24);
+  border-radius: 4px;
+  background: #ffffff;
+  color: var(--text-1);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
   pointer-events: none;
-  opacity: 0;
-  transform: translate(-50%, 0.3rem);
   transition: opacity 160ms ease, transform 160ms ease;
-  white-space: nowrap;
+  white-space: normal;
 }
 
-.reboot-heatmap-item.tooltip-down .reboot-hover-popover {
-  top: calc(100% + 0.5rem);
-  bottom: auto;
+.reboot-hover-card.is-visible {
+  display: flex;
 }
 
-.reboot-hover-popover strong {
-  color: #fff;
-  font-size: 0.8rem;
+.reboot-hover-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.reboot-hover-card strong {
+  color: var(--text-1);
+  font-size: 0.84rem;
   font-weight: 700;
 }
 
-.reboot-hover-popover span {
-  color: rgba(255, 255, 255, 0.82);
+.reboot-hover-date-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.reboot-hover-date-wrap i {
+  opacity: 0.33;
+  font-size: 0.82rem;
+}
+
+.reboot-hover-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.6rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand) 12%, white);
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, white);
+  color: var(--brand);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reboot-hover-divider {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.reboot-hover-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.reboot-hover-card span {
+  color: var(--text-2);
   font-size: 0.76rem;
 }
 
-.reboot-heatmap-item:hover .reboot-hover-popover,
-.reboot-heatmap-item:focus-within .reboot-hover-popover {
-  opacity: 1;
-  transform: translate(-50%, 0);
+.reboot-hover-label {
+  color: var(--text-3) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.68rem !important;
+}
+
+[data-theme="dark"] .reboot-hover-card {
+  background: rgba(15, 23, 42, 0.96);
+  color: #fff;
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.32);
+  border-color: var(--line);
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .reboot-hover-card strong {
+  color: #fff;
+}
+
+[data-theme="dark"] .reboot-hover-card span {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+[data-theme="dark"] .reboot-hover-label {
+  color: rgba(255, 255, 255, 0.52) !important;
+}
+
+[data-theme="dark"] .reboot-hover-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+[data-theme="dark"] .reboot-hover-divider {
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 @media (max-width: 700px) {
@@ -1073,7 +1151,7 @@ label.remember-me span {
     grid-template-columns: 1fr;
   }
 
-  .reboot-hover-popover {
+  .reboot-hover-card {
     display: none;
   }
 

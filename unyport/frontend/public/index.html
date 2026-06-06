@@ -20,8 +20,10 @@
   <script defer src="/app/sse.js"></script>
   <script defer src="/app/chart.js"></script>
   <script defer src="/app/networkmap.js"></script>
+  <script defer src="/app/networkmap-hover.js"></script>
   <script defer src="/app/metrics.js"></script>
   <script defer src="/app/app.js"></script>
+  <script defer src="/app/heatmap-hover.js"></script>
   <script defer src="/app/logout.js?v=20260606b"></script>
   <script defer src="/vendor/alpinejs-csp.min.js"></script>
 </head>
@@ -391,7 +393,10 @@
                   <p>Timeline from <code>unyport.log</code> for <span x-text="rebootHeatmapYear"></span>.</p>
                 </div>
                 <div class="reboot-heatmap-meta">
-                  <strong x-text="rebootHeatmapSummaryLabel"></strong>
+                  <strong>
+                    <span class="reboot-heatmap-summary-count" x-text="rebootHeatmapSummaryCount"></span>
+                    <span class="reboot-heatmap-summary-text" x-text="rebootHeatmapSummaryText"></span>
+                  </strong>
                   <span>tracked this year</span>
                 </div>
                 <div class="reboot-heatmap-legend">
@@ -420,14 +425,14 @@
                         type="button"
                         :class="rebootHeatmapCellClass(cell)"
                         :aria-label="rebootHeatmapCellTitle(cell)"
+                        data-reboot-heatmap-cell="1"
+                        :data-reboot-date="cell.date || ''"
+                        :data-reboot-label="cell.label || cell.date || ''"
+                        :data-reboot-count="'' + (cell.count || 0)"
+                        :data-reboot-level="'' + (cell.level || 0)"
+                        :data-reboot-today="cell.date === rebootHeatmapToday ? '1' : '0'"
                         @click="openRebootHeatmapDetail(cell)">
                       </button>
-                      <template x-if="!cell.blank">
-                        <div class="reboot-hover-popover" aria-hidden="true">
-                          <strong x-text="cell.date || '—'"></strong>
-                          <span x-text="(cell.count || 0) + ' restart' + ((cell.count || 0) > 1 ? 's' : '')"></span>
-                        </div>
-                      </template>
                     </div>
                   </template>
                 </div>
@@ -452,7 +457,7 @@
                 <div class="action-grid">
 
                   <a href="/resources" class="action-tile" title="Open host resources" @click.prevent="navigate('/resources')">
-                    <div class="action-tile-icon action-blue"><i class="fa-solid fa-gauge-high"></i></div>
+                    <div class="action-tile-icon action-blue"><i class="fa-solid fa-heart-pulse"></i></div>
                     <div class="action-tile-body">
                       <strong>Resources</strong>
                       <span>CPU, memory, load and processes.</span>
@@ -907,6 +912,11 @@
               </div>
             </div>
 
+            <div class="section-head"><h2>Network topology</h2><p>Host interfaces and ARP neighbors — updated live.</p></div>
+            <div class="netmap-card">
+              <div id="netmap-container" class="netmap-container"></div>
+            </div>
+
             <div class="section-head"><h2>Interfaces</h2><p>All active network interfaces with live throughput.</p></div>
             <div class="resources-grid" id="net-ifaces-grid">
               <div class="res-card">
@@ -925,11 +935,6 @@
                   <dt>TX total</dt><dd x-text="_fmtBytes(sysNetTxBytes)"></dd>
                 </dl>
               </div>
-            </div>
-
-            <div class="section-head"><h2>Network topology</h2><p>Host interfaces and ARP neighbors — updated live.</p></div>
-            <div class="netmap-card">
-              <div id="netmap-container" class="netmap-container"></div>
             </div>
 
           </div><!-- /page network -->
@@ -1526,6 +1531,26 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="reboot-hover-card" class="reboot-hover-card" aria-hidden="true">
+    <div class="reboot-hover-head">
+      <strong class="reboot-hover-date-wrap"><i class="fa-solid fa-calendar-day"></i><span id="reboot-hover-date">—</span></strong>
+      <span id="reboot-hover-count" class="reboot-hover-badge">0 restart</span>
+    </div>
+    <hr class="reboot-hover-divider">
+    <div class="reboot-hover-meta">
+      <span class="reboot-hover-label">Day</span>
+      <span id="reboot-hover-day">—</span>
+    </div>
+    <div class="reboot-hover-meta">
+      <span class="reboot-hover-label">Level</span>
+      <span id="reboot-hover-level">—</span>
+    </div>
+    <div class="reboot-hover-meta">
+      <span class="reboot-hover-label">Status</span>
+      <span id="reboot-hover-status">—</span>
     </div>
   </div>
 

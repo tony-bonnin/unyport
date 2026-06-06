@@ -24,17 +24,43 @@ function _icoServerInner(p, cx, cy, fill, fa) { var sg = _el('g', { transform: '
 function _icoCubeInner(p, cx, cy, fill) { var cg = _el('g', { transform: 'translate(' + (cx - 16) + ',' + (cy - 16) + ')' }); cg.appendChild(_el('rect', { x: 4, y: 10, width: 20, height: 16, rx: 2, fill: fill })); cg.appendChild(_el('polygon', { points: '4,10 14,4 28,4 18,10', fill: fill, opacity: '0.7' })); cg.appendChild(_el('polygon', { points: '24,10 28,4 28,20 24,26', fill: fill, opacity: '0.5' })); p.appendChild(cg); }
 
 // Card HTML
-function _mkCard(drawFn, label, sub, tip) {
-  var card = _div('nm-card'); if (tip) card.title = tip;
+function _mkCard(drawFn, label, sub) {
+  var card = _div('nm-card');
   var icon = _div('nm-card-icon'); icon.appendChild(_mkSvg(drawFn)); card.appendChild(icon);
   var lbl = _div('nm-card-label'); lbl.textContent = _truncate(label, 16); card.appendChild(lbl);
   if (sub) { var s = _div('nm-card-sub'); s.textContent = _truncate(sub, 18); card.appendChild(s); }
   return card;
 }
+function _decorateCard(card, payload) {
+  if (!card || !payload) return card;
+  card.classList.add('nm-card-interactive');
+  card.setAttribute('tabindex', '0');
+  card.setAttribute('role', 'button');
+  card.setAttribute('data-nm-node', '1');
+  card.setAttribute('aria-label', payload.ariaLabel || payload.label || 'Network map node');
+  card.dataset.nmPayload = JSON.stringify(payload);
+  return card;
+}
 function _nbCard(nb) {
   var ip = nb.ip || '?', mac = nb.mac || '—', state = nb.state || '—', iface = nb.iface || '—';
-  return _mkCard(function (s, cx, cy) { if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); },
-    ip, nb.mac ? mac.substring(0, 17) : state, [ip, 'MAC: ' + mac, 'État: ' + state, 'Interface: ' + iface].join('\n'));
+  var card = _mkCard(function (s, cx, cy) { if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, ip, nb.mac ? mac.substring(0, 17) : state);
+  return _decorateCard(card, {
+    kind: 'neighbor',
+    title: ip,
+    label: ip,
+    subtitle: mac,
+    badge: state,
+    badgeTone: state === 'reachable' ? 'ok' : (state === 'stale' ? 'warn' : 'muted'),
+    summary: state === 'reachable' ? 'Reachable ARP neighbor' : (state === 'stale' ? 'Stale ARP neighbor' : 'Unknown neighbor state'),
+    ariaLabel: 'Neighbor ' + ip,
+    rows: [
+      { key: 'Type', value: 'Neighbor' },
+      { key: 'State', value: state },
+      { key: 'Interface', value: iface },
+      { key: 'IP address', value: ip },
+      { key: 'MAC address', value: mac }
+    ]
+  });
 }
 
 // Position X du centre de la colonne col (1-indexé)
@@ -90,8 +116,25 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
 
   // Host
   var hostRow = _div('nm-row');
-  var hostCard = _mkCard(function (s, cx, cy) { _icoHost(s, cx, cy, role); }, hostName || 'host', hostIP || '',
-    [hostName || 'host', 'Rôle: ' + role, 'IP: ' + (hostIP || '—')].join('\n'));
+  var hostCard = _mkCard(function (s, cx, cy) { _icoHost(s, cx, cy, role); }, hostName || 'host', hostIP || '');
+  _decorateCard(hostCard, {
+    kind: 'host',
+    title: hostName || 'Host',
+    label: hostName || 'host',
+    subtitle: hostIP || '—',
+    badge: role,
+    badgeTone: role === 'DomU' ? 'danger' : (role === 'Container' ? 'warn' : 'ok'),
+    summary: 'Primary host node',
+    ariaLabel: 'Host ' + (hostName || 'host'),
+    rows: [
+      { key: 'Type', value: 'Host' },
+      { key: 'Role', value: role || 'Alpine' },
+      { key: 'Runtime', value: hostRuntime || '—' },
+      { key: 'IP address', value: hostIP || '—' },
+      { key: 'Interfaces', value: String(ifaces.length) },
+      { key: 'Neighbors', value: String(neighbors.length) }
+    ]
+  });
   hostRow.appendChild(hostCard);
   root.appendChild(hostRow);
 
@@ -108,9 +151,25 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
       var idx = start + pos;
       var iface = ifaces[idx], up = iface.up !== false;
       var col = pos + 1;
-      var card = _mkCard(function (s, cx, cy) { up ? _icoIfaceUp(s, cx, cy) : _icoIfaceDn(s, cx, cy); },
-        iface.name, iface.ip || '—',
-        [iface.name, 'IP: ' + (iface.ip || '—'), 'État: ' + (up ? 'UP' : 'DOWN'), '↓ ' + _fmtBpsMap(iface.rx_bps || 0), '↑ ' + _fmtBpsMap(iface.tx_bps || 0)].join('\n'));
+      var card = _mkCard(function (s, cx, cy) { up ? _icoIfaceUp(s, cx, cy) : _icoIfaceDn(s, cx, cy); }, iface.name, iface.ip || '—');
+      _decorateCard(card, {
+        kind: 'interface',
+        title: iface.name,
+        label: iface.name,
+        subtitle: iface.ip || '—',
+        badge: up ? 'UP' : 'DOWN',
+        badgeTone: up ? 'ok' : 'warn',
+        summary: 'Live interface throughput',
+        ariaLabel: 'Interface ' + iface.name,
+        rows: [
+          { key: 'Type', value: 'Interface' },
+          { key: 'Status', value: up ? 'UP' : 'DOWN' },
+          { key: 'IP address', value: iface.ip || '—' },
+          { key: 'RX rate', value: _fmtBpsMap(iface.rx_bps || 0) },
+          { key: 'TX rate', value: _fmtBpsMap(iface.tx_bps || 0) },
+          { key: 'Neighbors', value: String((nbPerIface[iface.name] || []).length) }
+        ]
+      });
       card.classList.add('nm-col-' + col);
       card._col = col; card._ifaceName = iface.name;
       row.appendChild(card);

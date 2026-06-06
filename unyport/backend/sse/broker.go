@@ -482,32 +482,12 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		roleSlug = "domU"
 	}
 
-	// Fetch flux Atom public — plus stable que le HTML rendu des releases.
 	client := &http.Client{Timeout: 8 * time.Second}
-	resp, err := client.Get("https://github.com/trinity-labs/trinity-boot/releases.atom")
+	kernelVer, alpineVer, err := fetchLatestRepoVersions(client, roleSlug)
 	if err != nil {
 		http.Error(w, `{"error":"fetch_failed"}`, http.StatusBadGateway)
 		return
 	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 512*1024)) // max 512 KB
-	if err != nil {
-		http.Error(w, `{"error":"read_failed"}`, http.StatusBadGateway)
-		return
-	}
-	feed := string(body)
-
-	// Regex kernel : kernel-{role}-X.X.X-N-lts
-	kerPat := regexp.MustCompile(`kernel-` + regexp.QuoteMeta(roleSlug) + `-(\d+\.\d+\.\d+)-\d+-lts`)
-	// Regex alpine : alpine-{role}-X.X.X
-	alpPat := regexp.MustCompile(`alpine-` + regexp.QuoteMeta(roleSlug) + `-(\d+\.\d+\.\d+)`)
-
-	kernelVer := highestMatchedVersion(feed, kerPat)
-	if kernelVer != "" {
-		kernelVer += "-lts"
-	}
-	alpineVer := highestMatchedVersion(feed, alpPat)
 
 	type versionsResp struct {
 		KernelLts string `json:"kernel_lts"`
@@ -522,6 +502,59 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		Alpine:    strings.TrimSpace(alpineVer),
 		Role:      roleSlug,
 	})
+}
+
+func fetchLatestRepoVersions(client *http.Client, roleSlug string) (string, string, error) {
+	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/trinity-labs/trinity-boot/tags?per_page=100", nil)
+	if err != nil {
+		return "", "", err
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", "unyport-version-check")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return "", "", fmt.Errorf("github tags status %d", resp.StatusCode)
+	}
+
+	var tags []struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 1024*1024)).Decode(&tags); err != nil {
+		return "", "", err
+	}
+
+	names := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		if strings.TrimSpace(tag.Name) != "" {
+			names = append(names, tag.Name)
+		}
+	}
+
+	kernelVer := highestVersionFromTagNames(names, regexp.MustCompile(`^kernel-`+regexp.QuoteMeta(roleSlug)+`-(\d+\.\d+\.\d+)-\d+-lts$`))
+	if kernelVer != "" {
+		kernelVer += "-lts"
+	}
+	alpineVer := highestVersionFromTagNames(names, regexp.MustCompile(`^alpine-`+regexp.QuoteMeta(roleSlug)+`-(\d+\.\d+\.\d+)$`))
+	return kernelVer, alpineVer, nil
+}
+
+func highestVersionFromTagNames(tagNames []string, pattern *regexp.Regexp) string {
+	best := ""
+	for _, tagName := range tagNames {
+		match := pattern.FindStringSubmatch(strings.TrimSpace(tagName))
+		if len(match) < 2 {
+			continue
+		}
+		if compareDotVersions(match[1], best) > 0 {
+			best = match[1]
+		}
+	}
+	return best
 }
 
 func highestMatchedVersion(input string, pattern *regexp.Regexp) string {

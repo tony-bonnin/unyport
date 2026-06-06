@@ -192,6 +192,9 @@ document.addEventListener('alpine:init', () => {
     rebootHeatmapMaxPerDay: 0,
     rebootHeatmapDetailOpen: false,
     rebootHeatmapDetail: null,
+    rebootHeatmapHoverOpen: false,
+    rebootHeatmapHoverDetail: null,
+    _rebootHoverRule: null,
 
     hostRoleRole: '',
     hostRoleRuntime: '',
@@ -480,6 +483,15 @@ document.addEventListener('alpine:init', () => {
       return `${total} restart${total > 1 ? 's' : ''}`;
     },
 
+    get rebootHeatmapSummaryCount() {
+      return Number(this.rebootHeatmapTotal) || 0;
+    },
+
+    get rebootHeatmapSummaryText() {
+      const total = Number(this.rebootHeatmapTotal) || 0;
+      return `restart${total > 1 ? 's' : ''}`;
+    },
+
     get rebootHeatmapToday() {
       return new Date().toISOString().slice(0, 10);
     },
@@ -508,6 +520,113 @@ document.addEventListener('alpine:init', () => {
     get rebootHeatmapDetailIsTodayLabel() {
       const detail = this.rebootHeatmapDetail || {};
       return detail.date === this.rebootHeatmapToday ? 'Yes' : 'No';
+    },
+
+    rebootHeatmapCellCountLabel(cell) {
+      const count = Number(cell && cell.count) || 0;
+      return `${count} restart${count > 1 ? 's' : ''}`;
+    },
+
+    rebootHeatmapCellLevelLabel(cell) {
+      const level = Number(cell && cell.level) || 0;
+      if (level >= 3) return 'High activity';
+      if (level === 2) return 'Medium activity';
+      if (level === 1) return 'Low activity';
+      return 'No activity';
+    },
+
+    rebootHeatmapCellTodayLabel(cell) {
+      return cell && cell.date === this.rebootHeatmapToday ? 'Current day' : 'Archived day';
+    },
+
+    get rebootHeatmapHoverCountLabel() {
+      return this.rebootHeatmapCellCountLabel(this.rebootHeatmapHoverDetail);
+    },
+
+    get rebootHeatmapHoverLevelLabel() {
+      return this.rebootHeatmapCellLevelLabel(this.rebootHeatmapHoverDetail);
+    },
+
+    get rebootHeatmapHoverTodayLabel() {
+      return this.rebootHeatmapCellTodayLabel(this.rebootHeatmapHoverDetail);
+    },
+
+    _getRebootHoverRule() {
+      if (this._rebootHoverRule) return this._rebootHoverRule;
+      const styleSheets = Array.from(document.styleSheets || []);
+      for (const sheet of styleSheets) {
+        let rules;
+        try {
+          rules = sheet.cssRules || [];
+        } catch (_) {
+          continue;
+        }
+        for (const rule of rules) {
+          if (rule && rule.selectorText === '.reboot-hover-card') {
+            this._rebootHoverRule = rule;
+            return rule;
+          }
+        }
+      }
+      for (const sheet of styleSheets) {
+        try {
+          const rules = sheet.cssRules || [];
+          const index = rules.length;
+          sheet.insertRule('.reboot-hover-card {}', index);
+          this._rebootHoverRule = sheet.cssRules[index];
+          return this._rebootHoverRule;
+        } catch (_) {
+          continue;
+        }
+      }
+      return null;
+    },
+
+    _positionRebootHeatmapHover(event) {
+      const rule = this._getRebootHoverRule();
+      if (!rule || !event) return;
+      const cardWidth = 304;
+      const cardHeight = 220;
+      const gutter = 12;
+      const vw = window.innerWidth || 0;
+      const vh = window.innerHeight || 0;
+      const rect = event.currentTarget && event.currentTarget.getBoundingClientRect
+        ? event.currentTarget.getBoundingClientRect()
+        : null;
+      let left;
+      let top;
+      if (rect) {
+        left = rect.right + gutter;
+        top = rect.top + (rect.height / 2) - (cardHeight / 2);
+        if (left + cardWidth > vw - 12) left = rect.left - cardWidth - gutter;
+      } else {
+        left = (Number(event.clientX) || 0) + gutter;
+        top = (Number(event.clientY) || 0) + gutter;
+        if (left + cardWidth > vw - 12) left = Math.max(12, (Number(event.clientX) || 0) - cardWidth - gutter);
+      }
+      top = Math.max(12, Math.min(top, vh - cardHeight - 12));
+      left = Math.max(12, Math.min(left, vw - cardWidth - 12));
+      rule.style.left = `${left}px`;
+      rule.style.top = `${top}px`;
+      rule.style.right = 'auto';
+      rule.style.bottom = 'auto';
+    },
+
+    openRebootHeatmapHover(cell, event) {
+      if (!cell || cell.blank) return;
+      this.rebootHeatmapHoverDetail = cell;
+      this.rebootHeatmapHoverOpen = true;
+      this._positionRebootHeatmapHover(event);
+    },
+
+    moveRebootHeatmapHover(event) {
+      if (!this.rebootHeatmapHoverOpen) return;
+      this._positionRebootHeatmapHover(event);
+    },
+
+    closeRebootHeatmapHover() {
+      this.rebootHeatmapHoverOpen = false;
+      this.rebootHeatmapHoverDetail = null;
     },
 
     // ── Actions UI ───────────────────────────────────────────
@@ -1320,15 +1439,25 @@ document.addEventListener('alpine:init', () => {
 
     _compareKernel(latestLts) {
       if (!latestLts) return;
-      const cur = this.kernelLts;
+      const cur = this.sysKernel;
       if (!cur || cur === '—') return;
-      const parseKer = v => v.replace(/-lts$/, '').split('.').map(Number);
-      const [cM, cm, cp = 0] = parseKer(cur);
-      const [lM, lm, lp = 0] = parseKer(latestLts);
+      const parseKer = (value) => {
+        const match = String(value || '').match(/(\d+)\.(\d+)\.(\d+)/);
+        if (!match) return null;
+        return [Number(match[1]), Number(match[2]), Number(match[3])];
+      };
+      const currentParts = parseKer(cur);
+      const latestParts = parseKer(latestLts);
       this.kernelLatestVer = latestLts;
+      if (!currentParts || !latestParts) {
+        this.kernelUpdateLevel = 'error';
+        return;
+      }
+      const [cM, cm, cp] = currentParts;
+      const [lM, lm, lp] = latestParts;
       if (lM > cM) this.kernelUpdateLevel = 'major';
-      else if (lm > cm) this.kernelUpdateLevel = 'minor';
-      else if (lp > cp) this.kernelUpdateLevel = 'patch';
+      else if (lM === cM && lm > cm) this.kernelUpdateLevel = 'minor';
+      else if (lM === cM && lm === cm && lp > cp) this.kernelUpdateLevel = 'patch';
       else this.kernelUpdateLevel = 'ok';
     },
 
@@ -1636,6 +1765,8 @@ document.addEventListener('alpine:init', () => {
       this.rebootHeatmapMaxPerDay = 0;
       this.rebootHeatmapDetailOpen = false;
       this.rebootHeatmapDetail = null;
+      this.rebootHeatmapHoverOpen = false;
+      this.rebootHeatmapHoverDetail = null;
       this.sseConnected = false;
       this.netRxVal = '0 B/s';
       this.netTxVal = '0 B/s';
