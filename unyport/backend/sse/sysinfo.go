@@ -25,9 +25,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
+
+var ansiEscapePattern = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`)
 
 // ============================================================
 // BIOS / Firmware Info — /sys/devices/virtual/dmi/id/
@@ -743,6 +746,16 @@ func TailLogFile(path string, n int) ([]string, error) {
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
 	if len(lines) > n {
 		lines = lines[len(lines)-n:]
+	}
+	for i, line := range lines {
+		line = ansiEscapePattern.ReplaceAllString(line, "")
+		line = strings.Map(func(r rune) rune {
+			if r < 32 && r != '\t' {
+				return -1
+			}
+			return r
+		}, line)
+		lines[i] = strings.TrimRight(line, " ")
 	}
 	return lines, nil
 }

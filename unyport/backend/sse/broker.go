@@ -1,11 +1,13 @@
 package sse
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -19,16 +21,18 @@ const (
 
 // Broker collecte les métriques et diffuse vers N clients SSE connectés.
 type Broker struct {
-	mu       sync.RWMutex
-	ring     [ringSize]Snapshot
-	head     int
-	count    int
-	clients  map[chan Snapshot]struct{}
-	logger   *slog.Logger
-	hostRole HostRole // détecté une fois au démarrage, immuable
+	mu            sync.RWMutex
+	ring          [ringSize]Snapshot
+	head          int
+	count         int
+	clients       map[chan Snapshot]struct{}
+	logger        *slog.Logger
+	hostRole      HostRole // détecté une fois au démarrage, immuable
+	rebootLogPath string
+	startupHistoryPath string
 }
 
-func NewBroker(logger *slog.Logger) *Broker {
+func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath string) *Broker {
 	role := DetectHostRole()
 	logger.Info("host role detected",
 		"role", role.Role,
@@ -41,6 +45,8 @@ func NewBroker(logger *slog.Logger) *Broker {
 		clients:  make(map[chan Snapshot]struct{}),
 		logger:   logger,
 		hostRole: role,
+		rebootLogPath: rebootLogPath,
+		startupHistoryPath: startupHistoryPath,
 	}
 	go b.loop()
 	return b
@@ -476,9 +482,9 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		roleSlug = "domU"
 	}
 
-	// Fetch page releases publique — pas d'API token requis
+	// Fetch flux Atom public — plus stable que le HTML rendu des releases.
 	client := &http.Client{Timeout: 8 * time.Second}
-	resp, err := client.Get("https://github.com/trinity-labs/trinity-boot/releases")
+	resp, err := client.Get("https://github.com/trinity-labs/trinity-boot/releases.atom")
 	if err != nil {
 		http.Error(w, `{"error":"fetch_failed"}`, http.StatusBadGateway)
 		return
@@ -490,21 +496,18 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error":"read_failed"}`, http.StatusBadGateway)
 		return
 	}
-	html := string(body)
+	feed := string(body)
 
 	// Regex kernel : kernel-{role}-X.X.X-N-lts
 	kerPat := regexp.MustCompile(`kernel-` + regexp.QuoteMeta(roleSlug) + `-(\d+\.\d+\.\d+)-\d+-lts`)
 	// Regex alpine : alpine-{role}-X.X.X
 	alpPat := regexp.MustCompile(`alpine-` + regexp.QuoteMeta(roleSlug) + `-(\d+\.\d+\.\d+)`)
 
-	kernelVer := ""
-	if m := kerPat.FindStringSubmatch(html); m != nil {
-		kernelVer = m[1] + "-lts" // "6.18.33-lts"
+	kernelVer := highestMatchedVersion(feed, kerPat)
+	if kernelVer != "" {
+		kernelVer += "-lts"
 	}
-	alpineVer := ""
-	if m := alpPat.FindStringSubmatch(html); m != nil {
-		alpineVer = m[1] // "3.23.4"
-	}
+	alpineVer := highestMatchedVersion(feed, alpPat)
 
 	type versionsResp struct {
 		KernelLts string `json:"kernel_lts"`
@@ -519,4 +522,238 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		Alpine:    strings.TrimSpace(alpineVer),
 		Role:      roleSlug,
 	})
+}
+
+func highestMatchedVersion(input string, pattern *regexp.Regexp) string {
+	matches := pattern.FindAllStringSubmatch(input, -1)
+	best := ""
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+		if compareDotVersions(match[1], best) > 0 {
+			best = match[1]
+		}
+	}
+	return best
+}
+
+func compareDotVersions(a, b string) int {
+	if a == b {
+		return 0
+	}
+	if b == "" {
+		return 1
+	}
+
+	pa := strings.Split(a, ".")
+	pb := strings.Split(b, ".")
+	maxLen := len(pa)
+	if len(pb) > maxLen {
+		maxLen = len(pb)
+	}
+
+	for i := 0; i < maxLen; i++ {
+		av := 0
+		bv := 0
+		if i < len(pa) {
+			fmt.Sscanf(pa[i], "%d", &av)
+		}
+		if i < len(pb) {
+			fmt.Sscanf(pb[i], "%d", &bv)
+		}
+		if av > bv {
+			return 1
+		}
+		if av < bv {
+			return -1
+		}
+	}
+	return 0
+}
+
+type rebootHeatmapCell struct {
+	Date  string `json:"date"`
+	Count int    `json:"count"`
+	Level int    `json:"level"`
+	Label string `json:"label"`
+}
+
+type rebootHeatmapResp struct {
+	Year        int                 `json:"year"`
+	TotalReboots int                `json:"total_reboots"`
+	MaxPerDay   int                 `json:"max_per_day"`
+	LeadBlank   int                 `json:"lead_blank"`
+	Days        []rebootHeatmapCell `json:"days"`
+}
+
+type startupHistoryRecord struct {
+	Timestamp  string `json:"timestamp"`
+	Event      string `json:"event"`
+	Theme      string `json:"theme,omitempty"`
+	BootID     string `json:"boot_id,omitempty"`
+	RebootedAt string `json:"rebooted_at,omitempty"`
+}
+
+var startupLogPattern = regexp.MustCompile(`time=([0-9T:\-:\.]+Z).*msg="?startup"?`)
+
+func (b *Broker) RebootsHandler(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	year := now.Year()
+	loc := now.Location()
+
+	counts, err := parseStartupHistoryByDay(b.startupHistoryPath, year, loc)
+	if err != nil || len(counts) == 0 {
+		if err != nil {
+			b.logger.Warn("startup history unavailable", "path", b.startupHistoryPath, "err", err)
+		}
+		counts, err = parseStartupRebootsByDay(b.rebootLogPath, year, loc)
+		if err != nil {
+			b.logger.Warn("startup log fallback unavailable", "path", b.rebootLogPath, "err", err)
+		}
+	}
+
+	startOfYear := time.Date(year, time.January, 1, 0, 0, 0, 0, loc)
+	daysInYear := 365
+	if isLeapYear(year) {
+		daysInYear = 366
+	}
+
+	cells := make([]rebootHeatmapCell, 0, daysInYear)
+	totalReboots := 0
+	maxPerDay := 0
+
+	for i := 0; i < daysInYear; i++ {
+		day := startOfYear.AddDate(0, 0, i)
+		key := day.Format("2006-01-02")
+		count := counts[key]
+		level := rebootHeatmapLevel(count)
+		if count > maxPerDay {
+			maxPerDay = count
+		}
+		totalReboots += count
+		cells = append(cells, rebootHeatmapCell{
+			Date:  key,
+			Count: count,
+			Level: level,
+			Label: day.Format("Mon 02 Jan 2006"),
+		})
+	}
+
+	leadBlank := (int(startOfYear.Weekday()) + 6) % 7
+
+	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(rebootHeatmapResp{
+		Year:         year,
+		TotalReboots: totalReboots,
+		MaxPerDay:    maxPerDay,
+		LeadBlank:    leadBlank,
+		Days:         cells,
+	})
+}
+
+
+func parseStartupRebootsByDay(path string, year int, loc *time.Location) (map[string]int, error) {
+	out := make(map[string]int)
+	file, err := os.Open(path)
+	if err != nil {
+		return out, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		match := startupLogPattern.FindStringSubmatch(line)
+		if len(match) < 2 {
+			continue
+		}
+		ts, err := time.Parse(time.RFC3339Nano, match[1])
+		if err != nil {
+			continue
+		}
+		ts = ts.In(loc)
+		if ts.Year() != year {
+			continue
+		}
+		out[ts.Format("2006-01-02")]++
+	}
+	return out, scanner.Err()
+}
+
+func parseStartupHistoryByDay(path string, year int, loc *time.Location) (map[string]int, error) {
+	out := make(map[string]int)
+	seenBootIDs := make(map[string]struct{})
+	seenRebootTimes := make(map[string]struct{})
+	file, err := os.Open(path)
+	if err != nil {
+		return out, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		var rec startupHistoryRecord
+		if err := json.Unmarshal([]byte(line), &rec); err != nil {
+			continue
+		}
+		if rec.Event != "startup" || (rec.Timestamp == "" && rec.RebootedAt == "") {
+			continue
+		}
+		referenceTime := rec.RebootedAt
+		if referenceTime == "" {
+			referenceTime = rec.Timestamp
+		}
+		if rec.BootID != "" {
+			if _, exists := seenBootIDs[rec.BootID]; exists {
+				continue
+			}
+			seenBootIDs[rec.BootID] = struct{}{}
+		} else if rec.RebootedAt != "" {
+			if _, exists := seenRebootTimes[rec.RebootedAt]; exists {
+				continue
+			}
+			seenRebootTimes[rec.RebootedAt] = struct{}{}
+		}
+		ts, err := time.Parse(time.RFC3339Nano, referenceTime)
+		if err != nil {
+			continue
+		}
+		ts = ts.In(loc)
+		if ts.Year() != year {
+			continue
+		}
+		out[ts.Format("2006-01-02")]++
+	}
+	return out, scanner.Err()
+}
+
+func rebootHeatmapLevel(count int) int {
+	switch {
+	case count <= 0:
+		return 0
+	case count == 1:
+		return 1
+	case count == 2:
+		return 2
+	default:
+		return 3
+	}
+}
+
+func isLeapYear(year int) bool {
+	if year%400 == 0 {
+		return true
+	}
+	if year%100 == 0 {
+		return false
+	}
+	return year%4 == 0
 }

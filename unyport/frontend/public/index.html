@@ -8,6 +8,8 @@
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="/css/main.css">
 
+  <script src="/app/theme-color.js"></script>
+
   <script src="/vendor/chart.umd.min.js"></script>
   <script src="/vendor/luxon.min.js"></script>
   <script src="/vendor/chartjs-adapter-luxon.umd.min.js"></script>
@@ -20,6 +22,7 @@
   <script defer src="/app/networkmap.js"></script>
   <script defer src="/app/metrics.js"></script>
   <script defer src="/app/app.js"></script>
+  <script defer src="/app/logout.js?v=20260606b"></script>
   <script defer src="/vendor/alpinejs-csp.min.js"></script>
 </head>
 
@@ -236,7 +239,7 @@
           <i class="fa-solid fa-ellipsis-vertical sidebar-user-more"></i>
         </div>
 
-        <a class="nav-item nav-logout" title="Sign out of UnyPort" @click.prevent="doLogout()">
+      <a class="nav-item nav-logout" title="Sign out of UnyPort" data-unyport-logout>
           <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
           <span>Sign out</span>
         </a>
@@ -319,7 +322,7 @@
                 </button>
               </template>
               <div class="topbar-dropdown-sep"></div>
-              <button class="topbar-dropdown-item topbar-dropdown-danger" title="Sign out of UnyPort" @click="doLogout()">
+              <button class="topbar-dropdown-item topbar-dropdown-danger" title="Sign out of UnyPort" data-unyport-logout>
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Sign out</span>
               </button>
@@ -380,6 +383,62 @@
                 </div>
               </div>
             </div>
+
+            <section class="reboot-heatmap-band">
+              <div class="reboot-heatmap-head">
+                <div>
+                  <h2>Host restarts</h2>
+                  <p>Timeline from <code>unyport.log</code> for <span x-text="rebootHeatmapYear"></span>.</p>
+                </div>
+                <div class="reboot-heatmap-meta">
+                  <strong x-text="rebootHeatmapSummaryLabel"></strong>
+                  <span>tracked this year</span>
+                </div>
+                <div class="reboot-heatmap-legend">
+                  <span>Low</span>
+                  <i class="reboot-heatmap-swatch level-0"></i>
+                  <i class="reboot-heatmap-swatch level-1"></i>
+                  <i class="reboot-heatmap-swatch level-2"></i>
+                  <i class="reboot-heatmap-swatch level-3"></i>
+                  <span>High</span>
+                </div>
+              </div>
+
+              <p class="reboot-heatmap-error" x-show="rebootHeatmapError" x-text="rebootHeatmapError"></p>
+              <p class="reboot-heatmap-loading" x-show="rebootHeatmapLoading">Loading startup history…</p>
+
+              <div class="reboot-heatmap-grid-wrap" x-show="!rebootHeatmapLoading && !rebootHeatmapError">
+                <div class="reboot-heatmap-months" aria-hidden="true">
+                  <template x-for="month in rebootHeatmapMonths" :key="month.key">
+                    <span class="reboot-heatmap-month" :class="month.columnClass" x-text="month.label"></span>
+                  </template>
+                </div>
+                <div class="reboot-heatmap-grid">
+                  <template x-for="cell in rebootHeatmapCells" :key="cell.key">
+                    <div class="reboot-heatmap-item" :class="cell.blank ? 'is-blank' : ((cell.gridRow || 0) < 2 ? 'tooltip-down' : 'tooltip-up')">
+                      <button
+                        type="button"
+                        :class="rebootHeatmapCellClass(cell)"
+                        :aria-label="rebootHeatmapCellTitle(cell)"
+                        @click="openRebootHeatmapDetail(cell)">
+                      </button>
+                      <template x-if="!cell.blank">
+                        <div class="reboot-hover-popover" aria-hidden="true">
+                          <strong x-text="cell.date || '—'"></strong>
+                          <span x-text="(cell.count || 0) + ' restart' + ((cell.count || 0) > 1 ? 's' : '')"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <p class="reboot-heatmap-foot" x-show="!rebootHeatmapLoading && !rebootHeatmapError">
+                Peak activity:
+                <strong x-text="rebootHeatmapMaxPerDay || 0"></strong>
+                startup<span x-show="rebootHeatmapMaxPerDay > 1">s</span> in one day.
+              </p>
+            </section>
 
             <div class="section-head">
               <h2 x-text="hostPageTitle"></h2>
@@ -1433,6 +1492,43 @@
     </div>
   </div>
 
+  <div class="modal-overlay" x-show="rebootHeatmapDetailOpen" @click.self="closeRebootHeatmapDetail()" x-transition>
+    <div class="modal modal-heatmap">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <i class="fa-solid fa-clock-rotate-left modal-header-icon"></i>
+          <div>
+            <h3>Host restart details</h3>
+            <span class="modal-email" x-text="rebootHeatmapDetailLabel"></span>
+          </div>
+        </div>
+        <button class="modal-close" title="Close restart details" @click="closeRebootHeatmapDetail()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="reboot-detail-grid">
+          <div class="reboot-detail-card">
+            <span class="reboot-detail-label">Date</span>
+            <strong x-text="rebootHeatmapDetailDate"></strong>
+          </div>
+          <div class="reboot-detail-card">
+            <span class="reboot-detail-label">Restarts</span>
+            <strong x-text="rebootHeatmapDetailCountLabel"></strong>
+          </div>
+          <div class="reboot-detail-card">
+            <span class="reboot-detail-label">Intensity</span>
+            <strong x-text="rebootHeatmapDetailLevel"></strong>
+          </div>
+          <div class="reboot-detail-card">
+            <span class="reboot-detail-label">Today</span>
+            <strong x-text="rebootHeatmapDetailIsTodayLabel"></strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================================================== -->
   <!-- MOBILE MENU                                            -->
   <!-- ===================================================== -->
@@ -1447,7 +1543,7 @@
       </button>
     </div>
 
-    <div class="mobile-menu-user" title="Open your profile" @click="openProfile(); closeMobileMenu()">
+      <div class="mobile-menu-user" title="Open your profile" @click="openProfileAndCloseMobileMenu()">
       <div class="mobile-menu-avatar">
         <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
         <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
@@ -1504,7 +1600,7 @@
       <div>
         <div class="mobile-nav-section">Administration</div>
         <template x-if="isAdmin">
-          <a class="mobile-nav-item" title="Manage users" @click="openAdminUsers(); closeMobileMenu()">
+          <a class="mobile-nav-item" title="Manage users" @click="openAdminUsersAndCloseMobileMenu()">
             <span class="mobile-nav-icon"><i class="fa-solid fa-users"></i></span>
             <span>Users</span>
           </a>
@@ -1522,7 +1618,7 @@
     </nav>
 
     <div class="mobile-menu-footer">
-      <a class="mobile-nav-item mobile-nav-logout" title="Sign out of UnyPort" @click="doLogout()">
+      <a class="mobile-nav-item mobile-nav-logout" title="Sign out of UnyPort" data-unyport-logout>
         <span class="mobile-nav-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
         <span>Sign out</span>
       </a>

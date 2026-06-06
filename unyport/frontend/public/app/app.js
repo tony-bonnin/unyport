@@ -183,6 +183,15 @@ document.addEventListener('alpine:init', () => {
     securityServices: [],
     securityProcesses: [],
     securityListeners: [],
+    rebootHeatmapYear: new Date().getUTCFullYear(),
+    rebootHeatmapLeadBlank: 0,
+    rebootHeatmapDays: [],
+    rebootHeatmapLoading: false,
+    rebootHeatmapError: '',
+    rebootHeatmapTotal: 0,
+    rebootHeatmapMaxPerDay: 0,
+    rebootHeatmapDetailOpen: false,
+    rebootHeatmapDetail: null,
 
     hostRoleRole: '',
     hostRoleRuntime: '',
@@ -412,6 +421,95 @@ document.addEventListener('alpine:init', () => {
       return '';
     },
 
+    get rebootHeatmapCells() {
+      const blanks = Array.from({ length: this.rebootHeatmapLeadBlank || 0 }, (_, idx) => ({
+        key: `blank-${idx}`,
+        blank: true,
+        gridRow: idx % 7,
+      }));
+      let sourceDays = Array.isArray(this.rebootHeatmapDays) ? this.rebootHeatmapDays : [];
+      if (sourceDays.length < 300) {
+        const year = Number(this.rebootHeatmapYear) || new Date().getUTCFullYear();
+        const daysInYear = new Date(Date.UTC(year, 1, 29)).getUTCMonth() === 1 ? 366 : 365;
+        const countsByDate = new Map(sourceDays.map((day) => [day.date, day]));
+        sourceDays = [];
+        for (let i = 0; i < daysInYear; i += 1) {
+          const day = new Date(Date.UTC(year, 0, 1 + i));
+          const date = day.toISOString().slice(0, 10);
+          const existing = countsByDate.get(date);
+          sourceDays.push(existing || {
+            date,
+            count: 0,
+            level: 0,
+            label: day.toLocaleDateString('en-GB', {
+              weekday: 'short',
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              timeZone: 'UTC',
+            }),
+          });
+        }
+      }
+      const days = sourceDays.map((day, idx) => ({
+        ...day,
+        key: day.date,
+        blank: false,
+        gridRow: ((this.rebootHeatmapLeadBlank || 0) + idx) % 7,
+      }));
+      return blanks.concat(days);
+    },
+
+    get rebootHeatmapMonths() {
+      const year = Number(this.rebootHeatmapYear) || new Date().getUTCFullYear();
+      const lead = Number(this.rebootHeatmapLeadBlank) || 0;
+      return Array.from({ length: 12 }, (_, monthIndex) => {
+        const firstDay = new Date(Date.UTC(year, monthIndex, 1));
+        const dayOfYear = Math.floor((firstDay - new Date(Date.UTC(year, 0, 1))) / 86400000);
+        const weekColumn = Math.floor((lead + dayOfYear) / 7) + 1;
+        return {
+          key: `month-${monthIndex}`,
+          label: firstDay.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }),
+          columnClass: `col-${weekColumn}`,
+        };
+      });
+    },
+
+    get rebootHeatmapSummaryLabel() {
+      const total = Number(this.rebootHeatmapTotal) || 0;
+      return `${total} restart${total > 1 ? 's' : ''}`;
+    },
+
+    get rebootHeatmapToday() {
+      return new Date().toISOString().slice(0, 10);
+    },
+
+    get rebootHeatmapDetailCountLabel() {
+      const detail = this.rebootHeatmapDetail || {};
+      const count = Number(detail.count) || 0;
+      return `${count} restart${count > 1 ? 's' : ''}`;
+    },
+
+    get rebootHeatmapDetailLabel() {
+      const detail = this.rebootHeatmapDetail || {};
+      return detail.label || detail.date || '—';
+    },
+
+    get rebootHeatmapDetailDate() {
+      const detail = this.rebootHeatmapDetail || {};
+      return detail.date || '—';
+    },
+
+    get rebootHeatmapDetailLevel() {
+      const detail = this.rebootHeatmapDetail || {};
+      return Number(detail.level) || 0;
+    },
+
+    get rebootHeatmapDetailIsTodayLabel() {
+      const detail = this.rebootHeatmapDetail || {};
+      return detail.date === this.rebootHeatmapToday ? 'Yes' : 'No';
+    },
+
     // ── Actions UI ───────────────────────────────────────────
     toggleDropdown() { this.dropdownOpen = !this.dropdownOpen; },
     closeDropdown() { this.dropdownOpen = false; },
@@ -421,6 +519,14 @@ document.addEventListener('alpine:init', () => {
     openProfileMenu() { this.closeDropdown(); this.openProfile(); },
     toggleThemeMenu() { this.closeDropdown(); this.toggleTheme(); },
     openAdminUsersMenu() { this.closeDropdown(); this.openAdminUsers(); },
+    openProfileAndCloseMobileMenu() {
+      this.closeMobileMenu();
+      this.openProfile();
+    },
+    openAdminUsersAndCloseMobileMenu() {
+      this.closeMobileMenu();
+      this.openAdminUsers();
+    },
 
     // ── Branding ─────────────────────────────────────────────
     async _loadBranding() {
@@ -694,6 +800,10 @@ document.addEventListener('alpine:init', () => {
     // ── Init ─────────────────────────────────────────────────
     async init() {
       document.documentElement.setAttribute('data-theme', this.theme);
+      if (window.__unyportSyncThemeColor) {
+        window.__unyportSyncThemeColor(this.theme, this.hostRoleRole || 'Dom0');
+      }
+      this._updateThemeMetaColor(this.hostRoleRole || 'Dom0');
 
       // Optimisation: Parallélisation des appels indépendants
       await Promise.all([fetchCSRF(), this._loadBranding()]);
@@ -757,18 +867,57 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    async doLogout() {
+    async doLogout(event) {
+      if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
+      }
+      this.dropdownOpen = false;
+      this.mobileMenuOpen = false;
       this._stopSSE();
       if (typeof destroyCharts === 'function') destroyCharts();
-      await logout();
-      this._resetState();
-      this._showLogin();
+      try {
+        await logout();
+      } finally {
+        this._resetState();
+        this._showLogin();
+        this._updateThemeMetaColor('Dom0');
+        setTimeout(() => {
+          if (window.location.pathname !== '/') {
+            history.replaceState({}, '', '/');
+          }
+          if (this.page !== 'login') {
+            this._showLogin();
+            this._updateThemeMetaColor('Dom0');
+          }
+          window.location.replace('/');
+        }, 120);
+      }
     },
 
     toggleTheme() {
       this.theme = this.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', this.theme);
       localStorage.setItem('theme', this.theme);
+      this._updateThemeMetaColor(this.hostRoleRole || 'Dom0');
+      if (window.__unyportSyncThemeColor) {
+        window.__unyportSyncThemeColor(this.theme, this.hostRoleRole || 'Dom0');
+      } else {
+        var evt;
+        if (typeof window.CustomEvent === 'function') {
+          evt = new CustomEvent('themechange');
+        } else if (document.createEvent) {
+          evt = document.createEvent('Event');
+          evt.initEvent('themechange', false, false);
+        } else {
+          evt = null;
+        }
+        if (evt && window.dispatchEvent) {
+          window.dispatchEvent(evt);
+        } else if (evt && window.fireEvent) {
+          window.fireEvent('on' + evt.type);
+        }
+      }
+
     },
 
     // ── Profil ───────────────────────────────────────────────
@@ -961,7 +1110,9 @@ document.addEventListener('alpine:init', () => {
     // ── Dashboard ────────────────────────────────────────────
     async _enterDashboard() {
       this.page = 'app';
-      await Promise.all([this._loadApps(), this._loadSysInfo()]);
+      document.documentElement.removeAttribute('data-auth-page');
+      this._lockShellScroll(false);
+      await Promise.all([this._loadApps(), this._loadSysInfo(), this.loadRebootHistory()]);
       this._initRouter();
 
       if (window.FontAwesome?.dom) window.FontAwesome.dom.i2svg();
@@ -1064,6 +1215,51 @@ document.addEventListener('alpine:init', () => {
         this.logFiles = Array.isArray(r) ? r : [];
         if (this.logFiles.length > 0 && !this.logSelectedFile) this.logSelectedFile = this.logFiles[0].name;
       } catch { this.logFiles = []; }
+    },
+
+    async loadRebootHistory() {
+      if (this.rebootHeatmapLoading) return;
+      this.rebootHeatmapLoading = true;
+      this.rebootHeatmapError = '';
+      try {
+        const r = await apiFetch(`/api/reboots?_=${Date.now()}`);
+        this.rebootHeatmapYear = Number(r?.year) || new Date().getUTCFullYear();
+        this.rebootHeatmapLeadBlank = Number(r?.lead_blank) || 0;
+        this.rebootHeatmapDays = Array.isArray(r?.days) ? r.days : [];
+        this.rebootHeatmapTotal = Number(r?.total_reboots) || 0;
+        this.rebootHeatmapMaxPerDay = Number(r?.max_per_day) || 0;
+      } catch (e) {
+        this.rebootHeatmapDays = [];
+        this.rebootHeatmapTotal = 0;
+        this.rebootHeatmapMaxPerDay = 0;
+        this.rebootHeatmapLeadBlank = 0;
+        this.rebootHeatmapError = e?.message || 'Startup history unavailable.';
+      } finally {
+        this.rebootHeatmapLoading = false;
+      }
+    },
+
+    rebootHeatmapCellClass(cell) {
+      if (!cell || cell.blank) return 'reboot-heatmap-cell is-blank';
+      const classes = ['reboot-heatmap-cell', `level-${Number(cell.level) || 0}`];
+      if (cell.date === this.rebootHeatmapToday) classes.push('is-today');
+      return classes.join(' ');
+    },
+
+    rebootHeatmapCellTitle(cell) {
+      if (!cell || cell.blank) return '';
+      return cell.label || `${cell.date}: ${cell.count || 0} restart${(cell.count || 0) > 1 ? 's' : ''}`;
+    },
+
+    openRebootHeatmapDetail(cell) {
+      if (!cell || cell.blank) return;
+      this.rebootHeatmapDetail = cell;
+      this.rebootHeatmapDetailOpen = true;
+    },
+
+    closeRebootHeatmapDetail() {
+      this.rebootHeatmapDetailOpen = false;
+      this.rebootHeatmapDetail = null;
     },
 
     async loadSecurity() {
@@ -1276,8 +1472,44 @@ document.addEventListener('alpine:init', () => {
     },
 
     _applyRoleColor(role) {
-      const map = { 'Dom0': 'dom0', 'DomU': 'domu', 'Container': 'container', 'Alpine': 'alpine' };
-      document.documentElement.setAttribute('data-role', map[role] || 'alpine');
+      const roleKey = (String(role || '').trim().toLowerCase()) || 'alpine';
+      const map = { dom0: 'dom0', domu: 'domu', container: 'container', alpine: 'alpine' };
+      document.documentElement.setAttribute('data-role', map[roleKey] || 'alpine');
+      this._updateThemeMetaColor(role || 'Dom0');
+      if (window && window.__unyportSyncThemeColor) {
+        window.__unyportSyncThemeColor(this.theme, role || 'Dom0');
+      }
+    },
+
+    _themeColorByRole(theme, role) {
+      const key = String(role || '').trim().toLowerCase();
+      const light = {
+        dom0: '#3e3aab',
+        domu: '#a0284a',
+        container: '#b05a1a',
+        alpine: '#28587c',
+      };
+      const dark = {
+        dom0: '#6864d4',
+        domu: '#d45c82',
+        container: '#de8d50',
+        alpine: '#4d8cb0',
+      };
+      const palette = (theme === 'dark') ? dark : light;
+      return palette[key] || palette.dom0;
+    },
+
+    _updateThemeMetaColor(role) {
+      const currentTheme = (this.theme || document.documentElement.getAttribute('data-theme') || 'light');
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) {
+        meta.setAttribute('content', this._themeColorByRole(currentTheme, role || this.hostRoleRole || 'Dom0'));
+      }
+    },
+
+    _setLoginThemeMetaColor() {
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', '#3e3aab');
     },
 
     _updateCSS() {
@@ -1395,6 +1627,15 @@ document.addEventListener('alpine:init', () => {
       this.securitySummary = { ok: 0, warn: 0, critical: 0, unknown: 0 };
       this.securityChecks = []; this.securityServices = []; this.securityProcesses = []; this.securityListeners = [];
       this.securityError = ''; this.securityLoading = false;
+      this.rebootHeatmapYear = new Date().getUTCFullYear();
+      this.rebootHeatmapLeadBlank = 0;
+      this.rebootHeatmapDays = [];
+      this.rebootHeatmapLoading = false;
+      this.rebootHeatmapError = '';
+      this.rebootHeatmapTotal = 0;
+      this.rebootHeatmapMaxPerDay = 0;
+      this.rebootHeatmapDetailOpen = false;
+      this.rebootHeatmapDetail = null;
       this.sseConnected = false;
       this.netRxVal = '0 B/s';
       this.netTxVal = '0 B/s';
@@ -1423,10 +1664,26 @@ document.addEventListener('alpine:init', () => {
     },
 
     _showLogin() {
+      document.documentElement.setAttribute('data-auth-page', 'login');
       this._stopSSE();
+      this._lockShellScroll(true);
+      this._setLoginThemeMetaColor();
       this.page = 'login';
+      this.mobileMenuOpen = false;
       if (window.location.pathname !== '/') {
         history.replaceState({}, '', '/');
+      }
+    },
+    _lockShellScroll(locked) {
+      const shell = document.getElementById('app-shell');
+      const mainScroll = document.querySelector('.main-scroll');
+      if (mainScroll) {
+        if (locked) mainScroll.scrollTop = 0;
+        mainScroll.style.overflowY = locked ? 'hidden' : 'auto';
+        mainScroll.style.touchAction = locked ? 'none' : '';
+      }
+      if (shell) {
+        shell.style.pointerEvents = locked ? 'none' : '';
       }
     },
   }));

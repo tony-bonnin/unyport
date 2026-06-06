@@ -1398,3 +1398,276 @@ time=2026-06-05T20:50:48.086Z level=INFO msg="proxy registered" app=TTYd target=
 time=2026-06-05T20:50:48.086Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
 time=2026-06-05T20:50:48.086Z level=INFO msg=listening addr=:8800
 time=2026-06-05T20:50:48.086Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T10:58:31.923Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T11:43:29.141Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T11:43:29.142Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T11:43:29.164Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T11:43:29.164Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T11:43:29.164Z level=INFO msg=listening addr=:8800
+time=2026-06-06T11:43:29.164Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T11:51:41.214Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T11:51:41.215Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T11:51:41.233Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T11:51:41.234Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T11:51:41.234Z level=INFO msg=listening addr=:8800
+time=2026-06-06T11:51:41.234Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T11:54:55.282Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T11:54:55.282Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T11:54:55.299Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T11:54:55.299Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T11:54:55.299Z level=INFO msg=listening addr=:8800
+time=2026-06-06T11:54:55.299Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T11:56:56.453Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T11:56:56.454Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T11:56:56.470Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T11:56:56.470Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T11:56:56.470Z level=INFO msg=listening addr=:8800
+time=2026-06-06T11:56:56.470Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:00:00.150Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:00:00.151Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:00:00.168Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:00:00.168Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:00:00.168Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:00:00.168Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:09:59.337Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:09:59.338Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:09:59.362Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:09:59.362Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:09:59.362Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:09:59.362Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:17:10.694Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:17:10.694Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:17:10.729Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:17:10.729Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:17:10.729Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:17:10.729Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:20:48.855Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:20:48.855Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:20:48.872Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:20:48.872Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:20:48.872Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:20:48.872Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:30:48.763Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:30:48.763Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:30:48.781Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:30:48.781Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:30:48.781Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:30:48.782Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:37:27.741Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:37:27.742Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:37:27.760Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:37:27.760Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:37:27.760Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:37:27.760Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:40:48.884Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:40:48.885Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:40:48.914Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:40:48.914Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:40:48.914Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:40:48.914Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:45:21.263Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:45:21.264Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:45:21.281Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:45:21.281Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:45:21.281Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:45:21.281Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T12:47:43.227Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T12:47:51.361Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T12:48:13.494Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T12:57:32.431Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T12:57:32.431Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T12:57:32.448Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T12:57:32.448Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T12:57:32.448Z level=INFO msg=listening addr=:8800
+time=2026-06-06T12:57:32.448Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:05:33.475Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:05:33.475Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:05:33.493Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:05:33.493Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:05:33.493Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:05:33.493Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:07:15.973Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:07:15.974Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:07:15.991Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:07:15.991Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:07:15.991Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:07:15.991Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:07:50.402Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T13:15:17.766Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:15:17.767Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:15:17.802Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:15:17.802Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:15:17.802Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:15:17.802Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:21:18.453Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:21:18.453Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:21:18.470Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:21:18.470Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:21:18.470Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:21:18.470Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:32:46.310Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:32:46.311Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:32:46.329Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:32:46.329Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:32:46.329Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:32:46.329Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:49:00.430Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T13:53:55.270Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:53:55.271Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:53:55.289Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:53:55.289Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:53:55.289Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:53:55.289Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T13:57:49.618Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T13:57:49.618Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T13:57:49.638Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T13:57:49.638Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T13:57:49.638Z level=INFO msg=listening addr=:8800
+time=2026-06-06T13:57:49.638Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:01:01.071Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:01:01.071Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:01:01.088Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:01:01.088Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:01:01.088Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:01:01.088Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:07:37.526Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:07:37.527Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:07:37.556Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:07:37.556Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:07:37.556Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:07:37.556Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:20:12.060Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:20:12.061Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:20:12.079Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:20:12.079Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:20:12.079Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:20:12.079Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:27:40.286Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:27:40.287Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:27:40.304Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:27:40.304Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:27:40.304Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:27:40.304Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:31:32.919Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:31:32.920Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:31:32.938Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:31:32.938Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:31:32.938Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:31:32.938Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:34:40.085Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:34:40.086Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:34:40.107Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:34:40.107Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:34:40.107Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:34:40.107Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:35:26.157Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:35:26.158Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:35:26.177Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:35:26.177Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:35:26.177Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:35:26.177Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:36:58.993Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:36:58.993Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:36:59.010Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:36:59.010Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:36:59.010Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:36:59.010Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:41:23.748Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:41:23.749Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:41:23.765Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:41:23.765Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:41:23.765Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:41:23.765Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:45:21.213Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:45:21.214Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:45:21.230Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:45:21.231Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:45:21.231Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:45:21.231Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:48:23.910Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:48:23.911Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:48:23.928Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:48:23.928Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:48:23.928Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:48:23.928Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T14:54:16.996Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T14:54:46.164Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T14:54:46.165Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T14:54:46.182Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T14:54:46.182Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T14:54:46.182Z level=INFO msg=listening addr=:8800
+time=2026-06-06T14:54:46.182Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:03:53.949Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:03:53.951Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:03:53.974Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:03:53.974Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:03:53.974Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:03:53.974Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:09:00.866Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:09:00.866Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:09:00.885Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:09:00.885Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:09:00.885Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:09:00.885Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:11:18.247Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:11:18.248Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:11:18.266Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:11:18.266Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:11:18.266Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:11:18.266Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:14:05.902Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:14:05.903Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:14:05.920Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:14:05.920Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:14:05.920Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:14:05.920Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:16:59.986Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:16:59.986Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:17:00.004Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:17:00.004Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:17:00.004Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:17:00.004Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:21:10.231Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:21:10.232Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:21:10.248Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:21:10.248Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:21:10.248Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:21:10.248Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:23:24.386Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:23:24.386Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:23:24.403Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:23:24.403Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:23:24.403Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:23:24.403Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:28:52.238Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T15:28:52.239Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T15:28:52.256Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T15:28:52.256Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T15:28:52.256Z level=INFO msg=listening addr=:8800
+time=2026-06-06T15:28:52.256Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T15:55:39.397Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T16:54:38.325Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T16:54:38.326Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T16:54:38.343Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T16:54:38.343Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T16:54:38.343Z level=INFO msg=listening addr=:8800
+time=2026-06-06T16:54:38.343Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T17:03:20.356Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-06T17:31:05.992Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T17:31:05.993Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T17:31:06.010Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T17:31:06.010Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T17:31:06.010Z level=INFO msg=listening addr=:8800
+time=2026-06-06T17:31:06.010Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T17:45:06.523Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T17:45:06.526Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T17:45:06.545Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T17:45:06.545Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T17:45:06.545Z level=INFO msg=listening addr=:8800
+time=2026-06-06T17:45:06.545Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-06T17:45:20.768Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-06T17:45:20.769Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-06T17:45:20.785Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-06T17:45:20.786Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-06T17:45:20.786Z level=INFO msg=listening addr=:8800
+time=2026-06-06T17:45:20.786Z level=INFO msg="unyport listening" addr=:8800

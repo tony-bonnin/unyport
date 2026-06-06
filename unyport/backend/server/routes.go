@@ -134,6 +134,7 @@ func setupRoutes(
 
 	// ---- /api/versions : versions latest TRINITY (protégé — tous rôles) ----
 	mux.Handle("/api/versions", authMW(http.HandlerFunc(broker.VersionsHandler)))
+	mux.Handle("/api/reboots", authMW(http.HandlerFunc(broker.RebootsHandler)))
 
 	// ---- API sysinfo étendue — portage ACF Lua (protégé — tous rôles) ----
 	mux.Handle("/api/bios", authMW(http.HandlerFunc(broker.BIOSHandler)))

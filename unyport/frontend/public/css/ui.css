@@ -259,28 +259,26 @@
 }
 
 .default-credential-warning {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 1rem 1.66rem;
-  border-radius: var(--r-sm);
-  background: #fef2f2;
-  color: #e70404;
-  font-size: 12.5px;
-  font-weight: 650;
-  margin: auto;
-  align-self: center;
+    display: inline-flex;
+    align-items: center;
+    padding: 1rem 1.66rem;
+    border-radius: var(--r-sm);
+    background: #fef2f2;
+    color: #e70404;
+    font-size: 0.75rem;
+    font-weight: 650;
+    margin: auto;
+    gap: 1rem;
+    align-self: center;
 }
 
 .default-credential-warning i {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1em;
-  height: 1em;
-  color: #e70404;
-  animation: warning-pulse 1.8s ease-in-out infinite;
-  border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #e70404;
+    animation: warning-pulse 1.8s ease-in-out infinite;
+    font-size: 1rem;
 }
 
 @keyframes warning-pulse {

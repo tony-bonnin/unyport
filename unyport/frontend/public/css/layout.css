@@ -428,6 +428,16 @@
   overflow-x: hidden;
 }
 
+[data-auth-page="login"] .main-scroll {
+  overflow: hidden;
+  touch-action: none;
+}
+
+[data-auth-page="login"] #app-shell {
+  display: none !important;
+  pointer-events: none;
+}
+
 .main-inner {
   width: min(var(--content-max), calc(100% - 64px));
   margin: 0 auto;

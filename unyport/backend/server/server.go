@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -146,7 +147,11 @@ func New(cfg config.Config, settings *config.Settings, logger *slog.Logger) *Ser
 	// ---- Services ----
 	authHandler := auth.NewHandler(users, jwt, mailer, logger)
 	oauthSvc := auth.NewOAuthService(cfg.Auth, users, jwt, mailer, settings.Security2.HTTPS)
-	broker := sse.NewBroker(logger)
+	broker := sse.NewBroker(
+		logger,
+		filepath.Join(settings.Paths.LogDir, "unyport.log"),
+		filepath.Join(settings.Paths.LogDir, "startup-history.jsonl"),
+	)
 	authMW := middleware.Auth(jwt, users, logger)
 
 	// ---- Rate limiter login ----

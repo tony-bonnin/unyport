@@ -56,6 +56,19 @@
 
 @media (max-width: 900px) {
   .settings-grid { grid-template-columns: 1fr; }
+  .default-credential-warning {
+    gap: 2rem;
+    font-size: 0.66rem;
+  }
+
+  .message-container {
+      margin: 2rem auto 2.66rem;
+  }
+
+  .topbar-credential-dot {
+      right: -8px;
+  }
+
 }
 
 .settings-card {
