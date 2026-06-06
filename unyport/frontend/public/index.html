@@ -503,13 +503,13 @@
                 </div>
 
                 <dl class="hyp-dl">
-                  <div class="hyp-row"><dt>OS</dt><dd>
-                    <span x-text="alpineVerDisplay"></span>
+                  <div class="hyp-row has-ver-badge"><dt>OS</dt><dd>
                     <span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span>
+                    <span x-text="alpineVerDisplay"></span>
                   </dd></div>
-                  <div class="hyp-row"><dt>Kernel</dt><dd>
-                    <span x-text="kernelLts || kernelShort || sysKernel || '—'"></span>
+                  <div class="hyp-row has-ver-badge"><dt>Kernel</dt><dd>
                     <span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span>
+                    <span x-text="kernelLts || kernelShort || sysKernel || '—'"></span>
                   </dd></div>
                   <div class="hyp-row"><dt>Xen role</dt><dd x-text="xenLabel || '—'"></dd></div>
                   <div class="hyp-row"><dt>IP address</dt><dd x-text="netIpDisplay"></dd></div>
@@ -543,9 +543,9 @@
                 </div>
                 <div class="res-primary" x-text="uptime"></div>
                 <dl class="res-kv">
-                  <dt>OS</dt><dd><span x-text="alpineVerDisplay"></span><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span></dd>
-                  <dt>Kernel</dt><dd><span x-text="kernelLts || sysKernel || '—'"></span><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span></dd>
-                  <dt>Date</dt><dd x-text="sysDate || '—'"></dd>
+                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
+                  <div class="res-kv-row"><dt>Date</dt><dd x-text="sysDate || '—'"></dd></div>
                 </dl>
               </div>
               <div class="res-card">
@@ -670,8 +670,8 @@
                   <h3>Operating system</h3>
                 </div>
                 <dl class="res-kv">
-                  <dt>Distribution</dt><dd><span x-text="alpineVerDisplay"></span><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span></dd>
-                  <dt>Kernel</dt><dd><span x-text="kernelLts || sysKernel || '—'"></span><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span></dd>
+                  <div class="res-kv-row has-ver-badge"><dt>Distribution</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
                 </dl>
               </div>
               <div class="hyp-info-card">
@@ -1042,8 +1042,8 @@
                 <div class="res-primary">Semi-persistent</div>
                 <dl class="res-kv">
                   <dt>Mode</dt><dd>Data Disk (LBU)</dd>
-                  <dt>OS</dt><dd><span x-text="alpineVerDisplay"></span><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span></dd>
-                  <dt>Kernel</dt><dd><span x-text="kernelLts || sysKernel || '—'"></span><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span></dd>
+                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
                   <dt>Uptime</dt><dd x-text="uptime"></dd>
                 </dl>
               </div>

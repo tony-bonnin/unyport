@@ -219,7 +219,7 @@
   height: 15px;
   padding: 0;
   justify-content: center;
-  border: 2px solid var(--surface);
+  border: none;
   border-radius: 999px;
   font-size: 7.5px;
   line-height: 11px;
@@ -348,17 +348,17 @@
 }
 
 .modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  box-shadow: 0 24px 48px rgba(0,0,0,.18);
-  width: min(520px, calc(100vw - 32px));
-  max-height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, .18);
+    width: min(520px, calc(100vw - 32px));
+    max-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 640px;
 }
-
 .modal-admin {
   width: min(680px, calc(100vw - 32px));
 }

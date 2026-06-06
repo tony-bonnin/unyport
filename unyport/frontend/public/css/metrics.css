@@ -970,7 +970,7 @@
 .svc-runlevels { display: flex; gap: 4px; flex-wrap: wrap; }
 .svc-rl-tag {
   display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600;
-  background: var(--brand-50, #eeedfb); color: var(--brand); border: 1px solid var(--brand-100, #d0cdfa);
+  background: var(--brand-50, #eeedfb); color: var(--brand); border: none;
 }
 .svc-rl-empty { color: var(--text-dim); font-size: 11px; }
 .text-crit { color: #dc2626; }
@@ -1024,7 +1024,7 @@
 
 [data-theme="dark"] .mod-chip, [data-theme="dark"] .apk-chip { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.08); }
 [data-theme="dark"] .mod-grid, [data-theme="dark"] .apk-grid, [data-theme="dark"] .log-viewer { background: rgba(255,255,255,.02); border-color: rgba(255,255,255,.08); }
-[data-theme="dark"] .svc-rl-tag { background: rgba(62,58,171,.25); border-color: rgba(62,58,171,.4); }
+[data-theme="dark"] .svc-rl-tag { background: rgba(62,58,171,.25); }
 [data-theme="dark"] .svc-state-started  { background: #052e16; color: #4ade80; }
 [data-theme="dark"] .svc-state-stopped  { background: #1e293b; color: #94a3b8; }
 [data-theme="dark"] .svc-state-crashed  { background: #450a0a; color: #f87171; }
