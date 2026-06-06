@@ -8,7 +8,7 @@
 
 <div align="center">
 
-<img width="75%" alt="banner-unyport" src="git_assets/img/banner.png" />
+<img width="75%" alt="banner-unyport" src="git_assets/img/unyport-git-banner.png" />
 
 </div>
 

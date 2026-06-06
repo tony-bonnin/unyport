@@ -1367,3 +1367,34 @@ time=2026-05-31T20:44:31.138Z level=INFO msg="middleware chain ready" chain=Secu
 time=2026-05-31T20:44:31.138Z level=INFO msg=listening addr=:8800
 time=2026-05-31T20:44:31.139Z level=INFO msg="unyport listening" addr=:8800
 time=2026-05-31T20:44:59.806Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.19.0.1
+time=2026-06-04T05:35:08.164Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-04T05:35:08.166Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-04T05:35:08.187Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-04T05:35:08.187Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-04T05:35:08.187Z level=INFO msg=listening addr=:8800
+time=2026-06-04T05:35:08.187Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-04T05:50:39.602Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-04T05:50:39.603Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-04T05:50:39.626Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-04T05:50:39.626Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-04T05:50:39.626Z level=INFO msg=listening addr=:8800
+time=2026-06-04T05:50:39.627Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-04T17:15:35.429Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-04T17:15:35.431Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-04T17:15:35.464Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-04T17:15:35.464Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-04T17:15:35.464Z level=INFO msg=listening addr=:8800
+time=2026-06-04T17:15:35.464Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-05T18:46:31.143Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-05T18:46:31.144Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-05T18:46:31.176Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-05T18:46:31.176Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-05T18:46:31.176Z level=INFO msg=listening addr=:8800
+time=2026-06-05T18:46:31.176Z level=INFO msg="unyport listening" addr=:8800
+time=2026-06-05T20:33:14.243Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-05T20:50:48.065Z level=INFO msg=startup platform=alpine-xen theme=lights
+time=2026-06-05T20:50:48.066Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-05T20:50:48.086Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-05T20:50:48.086Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-05T20:50:48.086Z level=INFO msg=listening addr=:8800
+time=2026-06-05T20:50:48.086Z level=INFO msg="unyport listening" addr=:8800

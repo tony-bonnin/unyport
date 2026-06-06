@@ -255,33 +255,32 @@
 
 /* ── Header ── */
 .mobile-menu-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-  flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.33rem 0.5rem 1.33rem 1.66rem;
+    border-bottom: 1px solid rgba(255, 255, 255, .08);
+    flex-shrink: 0;
+    background: var(--brand);
 }
-
 .mobile-menu-logo {
-  height: 28px;
+  height: 36px;
   width: auto;
   object-fit: contain;
 }
-
 .mobile-menu-close {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-sm);
-  border: none;
-  background: rgba(255,255,255,.08);
-  color: var(--side-text);
-  font-size: 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .1s;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r-sm);
+    border: none;
+    background: rgba(255, 255, 255, .08);
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .1s;
 }
 .mobile-menu-close:hover { background: rgba(255,255,255,.15); }
 
@@ -366,11 +365,11 @@
 }
 .mobile-nav-item:hover { background: var(--side-hover); }
 .mobile-nav-item.active {
-  color: #fff;
-  background: rgba(255,255,255,.1);
-  font-weight: 650;
+    color: var(--brand);
+    background: rgba(255, 255, 255, .1);
+    font-weight: 650;
+    background: var(--side-hover);
 }
-
 .mobile-nav-icon {
   width: 32px;
   height: 32px;
@@ -443,4 +442,34 @@
 
 .mobile-menu {
   transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+
+  .hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: var(--brand);
+  }
+
+  .topbar-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .topbar-center {
+    display: none;
+  }
+
+  #topbar {
+    padding: 0 12px;
+  }
 }

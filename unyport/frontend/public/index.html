@@ -252,7 +252,7 @@
 
         <div class="topbar-left">
           <button class="hamburger" @click="openMobileMenu()" type="button" aria-label="Open menu" title="Open menu">
-            <span></span><span></span><span></span>
+            <i class="fa-solid fa-bars"></i>
           </button>
           <span class="topbar-page-title" x-text="getPageTitle()"></span>
         </div>
@@ -1436,9 +1436,9 @@
   <!-- ===================================================== -->
   <!-- MOBILE MENU                                            -->
   <!-- ===================================================== -->
-  <div class="mobile-menu-overlay" :class="mobileMenuOpen ? 'is-open' : ''" @click="closeMobileMenu()"></div>
+  <div class="mobile-menu-overlay" x-show="mobileMenuOpen" :class="mobileMenuOpen ? 'is-open' : ''" @click="closeMobileMenu()" x-transition.opacity></div>
 
-  <div class="mobile-menu" :class="mobileMenuOpen ? 'is-open' : ''" aria-hidden="true">
+  <div class="mobile-menu" x-show="mobileMenuOpen" :class="mobileMenuOpen ? 'is-open' : ''" :aria-hidden="mobileMenuOpen ? 'false' : 'true'" x-transition:enter="mobile-menu-enter" x-transition:enter-start="mobile-menu-enter-start" x-transition:enter-end="mobile-menu-enter-end" x-transition:leave="mobile-menu-leave" x-transition:leave-start="mobile-menu-leave-start" x-transition:leave-end="mobile-menu-leave-end">
 
     <div class="mobile-menu-header">
       <img src="/media/img/logos/logo-unyport-white-full.png" alt="UnyPort" class="mobile-menu-logo">
