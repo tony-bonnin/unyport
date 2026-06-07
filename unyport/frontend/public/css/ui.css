@@ -142,6 +142,32 @@
 
 .sidebar-user:hover { background: var(--side-hover); }
 
+.sidebar-version {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.33rem;
+  padding: 1rem 0 0;
+  color: var(--side-text-dim);
+  flex-direction: row;
+  font-family: monospace;
+}
+
+.sidebar-version:hover {
+    text-decoration: underline;
+}
+
+.sidebar-version-label {
+  font-size: 0.66rem;
+  color: inherit;
+}
+
+.sidebar-version-value {
+  font-size: 0.66rem;
+  font-weight: normal;
+  color: inherit;
+}
+
 .sidebar-user-avatar {
   position: relative;
   width: 30px;

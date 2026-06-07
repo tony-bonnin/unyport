@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unyport/config"
 )
 
 const (
@@ -309,12 +310,13 @@ func writeSSE(w http.ResponseWriter, f http.Flusher, snap Snapshot) {
 // Les champs mem_*_mb sont cohérents avec les clés du Snapshot SSE.
 type SystemInfo struct {
 	// OS / Kernel
-	Hostname  string `json:"hostname"`
-	OSRelease string `json:"os_release"`
-	OSVersion string `json:"os_version"`
-	Kernel    string `json:"kernel"`
-	Date      string `json:"date"`
-	Uptime    string `json:"uptime"`
+	Hostname       string `json:"hostname"`
+	OSRelease      string `json:"os_release"`
+	OSVersion      string `json:"os_version"`
+	Kernel         string `json:"kernel"`
+	Date           string `json:"date"`
+	Uptime         string `json:"uptime"`
+	UnyportVersion string `json:"unyport_version"`
 
 	// CPU
 	CPUModel  string `json:"cpu_model"`
@@ -422,6 +424,7 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 		Kernel:         strings.TrimSpace(kernel),
 		Date:           time.Now().Format(time.RFC1123),
 		Uptime:         strings.TrimSpace(uptime),
+		UnyportVersion: config.Version,
 		CPUModel:       model,
 		CPUVendor:      vendor,
 		CPUCores:       cores,

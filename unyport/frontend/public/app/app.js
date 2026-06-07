@@ -138,6 +138,7 @@ document.addEventListener('alpine:init', () => {
     sysHostname: '—',
     sysOsRelease: 'Alpine Linux',
     sysOsVersion: '',
+    sysUnyportVersion: '',
     sysKernel: '—',
     sysDate: '—',
     sysCpuModel: '—',
@@ -1279,6 +1280,7 @@ document.addEventListener('alpine:init', () => {
 
         if (info.hostname) this.sysHostname = info.hostname;
         if (info.os_version) { this.sysOsVersion = info.os_version; this._checkVersions(info.os_version); }
+        if (info.unyport_version) this.sysUnyportVersion = info.unyport_version;
         this._startUptimeTicker(info.uptime);
         this._updateLBU(info);
         if (info.disks) this.sysDisks = info.disks;

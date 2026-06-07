@@ -210,7 +210,6 @@
       </nav>
 
       <div class="sidebar-footer">
-
         <div x-show="showLbu">
           <div class="lbu-status dirty" x-show="showLbuDirty">
             <div class="lbu-dot"></div>
@@ -244,6 +243,11 @@
       <a class="nav-item nav-logout" title="Sign out of UnyPort" data-unyport-logout>
           <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
           <span>Sign out</span>
+        </a>
+
+        <a class="sidebar-version" x-show="sysUnyportVersion" href="https://github.com/tony-bonnin/unyport/releases" target="_blank" rel="noopener noreferrer" title="Open UnyPort releases">
+          <span class="sidebar-version-label">UnyPort</span>
+          <strong class="sidebar-version-value" x-text="'v' + sysUnyportVersion"></strong>
         </a>
 
       </div>

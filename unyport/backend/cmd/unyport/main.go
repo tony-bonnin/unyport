@@ -34,7 +34,7 @@ func main() {
 	}
 
 	logger = initLogger(settings.Paths.LogDir)
-	logger.Info("startup", "platform", "alpine-xen", "theme", settings.Theme)
+	logger.Info("startup", "platform", "alpine-xen", "theme", settings.Theme, "version", config.Version)
 	recordStartupEvent(filepath.Join(settings.Paths.LogDir, "startup-history.jsonl"), settings.Theme, logger)
 
 	srv := server.New(cfg, settings, logger)
@@ -51,7 +51,7 @@ func main() {
 		}
 	}()
 
-	logger.Info("unyport listening", "addr", srv.Addr())
+	logger.Info("unyport listening", "addr", srv.Addr(), "version", config.Version)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
