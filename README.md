@@ -8,7 +8,7 @@
 
 <div align="center">
 
-<img width="75%" alt="banner-unyport" src="git_assets/img/unyport-git-banner.png" />
+<img width="100%" alt="banner-unyport" src="git_assets/img/unyport-git-banner.png" />
 
 </div>
 
@@ -28,7 +28,7 @@ Paid services are limited to **support/integration/operations by TRINITY**.
 
 <div align="center">
 
-<img width="75%" alt="Login Screenshot" src="git_assets/img/login.png" />
+<img width="100%" alt="Login Screenshot" src="git_assets/img/login.png" />
 
 </div>
 
@@ -161,11 +161,11 @@ Password : aUniC0rnForUnyPort!
 
 <div align="center">
 
-<img width="75%" alt="Dashboard Screenshot" src="git_assets/img/dashboard.png" />
+<img width="100%" alt="Dashboard Screenshot" src="git_assets/img/dashboard.png" />
 
 <br><br>
 
-<img width="75%" alt="Dashboard Screenshot" src="git_assets/img/map.png" />
+<img width="100%" alt="Dashboard Screenshot" src="git_assets/img/map.png" />
 
 </div>
 
