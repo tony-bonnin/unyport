@@ -127,6 +127,17 @@ This repository ships a Docker-based UnyPort setup plus the full source tree.
 - A free TCP port `8800`
 - Optional: Nginx or another reverse proxy for HTTPS
 
+**Runtime layout**
+
+UnyPort is a single Go binary.
+At runtime, it expects a `settings/` directory next to the binary, containing:
+
+- `settings/settings.yaml`
+- `settings/config.yaml`
+- `settings/users.json`
+
+In this source repository, those files are currently stored under [`unyport/backend/settings/`](./unyport/backend/settings/).
+
 **1. Open this repository**
 
 ```sh
@@ -167,11 +178,15 @@ docker compose logs -f unyport
 - direct access: `http://YOUR-HOST:8800`
 - behind Nginx: proxy to `http://127.0.0.1:8800` or to the host bind address you configured
 
-If you terminate TLS at Nginx, also set `security_extra.https: true` in [unyport/backend/settings/settings.yaml](./unyport/backend/settings/settings.yaml) so auth and CSRF cookies are emitted with the correct security flags.
+If you terminate TLS at Nginx, also set `security_extra.https: true` in `settings/settings.yaml` so auth and CSRF cookies are emitted with the correct security flags.
+
+In this repository source layout, the file lives at [unyport/backend/settings/settings.yaml](./unyport/backend/settings/settings.yaml).
 
 **Bundled local credentials**
 
-This repository currently ships with a pre-seeded local user in [unyport/backend/settings/users.json](./unyport/backend/settings/users.json):
+This repository currently ships with a pre-seeded local user in `settings/users.json`.
+
+In this repository source layout, the file lives at [unyport/backend/settings/users.json](./unyport/backend/settings/users.json):
 
 ```text
 Email    : demo@unyport.app
@@ -191,9 +206,11 @@ Important:
 If you want a clean first-run admin account instead of the bundled demo user:
 
 1. Stop the stack.
-2. Remove `unyport/backend/settings/users.json`.
+2. Remove `settings/users.json`.
 3. Add `UNYPORT_ADMIN_PASSWORD` to the `unyport` service environment in [docker-compose.yml](./docker-compose.yml).
 4. Start the stack again.
+
+In this repository source layout, that runtime file corresponds to `unyport/backend/settings/users.json`.
 
 Example:
 
@@ -213,8 +230,9 @@ Role     : admin
 
 **Notes**
 
-- OAuth client IDs and secrets in [unyport/backend/settings/config.yaml](./unyport/backend/settings/config.yaml) are placeholders and must be replaced before use.
-- The default app proxy points to `ttyd`. If no `ttyd` service exists on the same network, `/proxy/ttyd/` will stay unavailable until you adapt the backend app config.
+- OAuth client IDs and secrets in `settings/config.yaml` are placeholders and must be replaced before use.
+- In this repository source layout, that file lives at [unyport/backend/settings/config.yaml](./unyport/backend/settings/config.yaml).
+- The default app proxy points to `ttyd`. If no `ttyd` service exists on the same network, `/proxy/ttyd/` will stay unavailable until you adapt the UnyPort app config.
 
 ---
 
