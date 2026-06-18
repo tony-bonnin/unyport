@@ -296,6 +296,7 @@
     margin: auto;
     gap: 1rem;
     align-self: center;
+    border: 1px solid #ffdfdf;
 }
 
 .default-credential-warning i {

@@ -33,7 +33,7 @@ Paid services are limited to **support/integration/operations by TRINITY**.
 </div>
 
 
-→ **[dashboard.trinity-net.com](https://dashboard.trinity-net.com)**
+→ **[demo.unyport.app](https://demo.unyport.app)**
 
 Legacy URL note: the previous address **dashboard.trinity-net.com** is still active.
 
@@ -116,23 +116,105 @@ That project is archived on Codeberg: [codeberg.org/trinity-labs/official](https
 
 <br>
 
-⬛ **Quick Start**
+⬛ **Installation**
+
+This repository ships a Docker-based UnyPort setup plus the full source tree.
+
+**Prerequisites**
+
+- Docker Engine
+- Docker Compose plugin (`docker compose`)
+- A free TCP port `8800`
+- Optional: Nginx or another reverse proxy for HTTPS
+
+**1. Open this repository**
 
 ```sh
-# Clone
-git clone https://codeberg.org/trinity-labs/unyport.git
-cd unyport
-
-# Run with Docker
-docker compose up -d
-
-# Or build natively on Alpine Linux
-cd unyport
-go build -o unyport .
-./unyport
+cd docker_unyport
 ```
 
-Access : `https://your-host:PORT`
+**2. Review the exposed port**
+
+The bundled [docker-compose.yml](./docker-compose.yml) now exposes UnyPort on all interfaces by default:
+
+```yaml
+ports:
+  - "8800:8800"
+```
+
+You can keep this default, or restrict the bind manually:
+
+- use `8800:8800` to listen on all interfaces
+- use `127.0.0.1:8800:8800` if UnyPort sits only behind local Nginx
+- use `YOUR-HOST-IP:8800:8800` if you want to bind a specific interface
+
+Example:
+
+```yaml
+ports:
+  - "127.0.0.1:8800:8800"
+```
+
+**3. Start the stack**
+
+```sh
+docker compose up -d
+docker compose logs -f unyport
+```
+
+**4. Open UnyPort**
+
+- direct access: `http://YOUR-HOST:8800`
+- behind Nginx: proxy to `http://127.0.0.1:8800` or to the host bind address you configured
+
+If you terminate TLS at Nginx, also set `security_extra.https: true` in [unyport/backend/settings/settings.yaml](./unyport/backend/settings/settings.yaml) so auth and CSRF cookies are emitted with the correct security flags.
+
+**Bundled local credentials**
+
+This repository currently ships with a pre-seeded local user in [unyport/backend/settings/users.json](./unyport/backend/settings/users.json):
+
+```text
+Email    : demo@unyport.app
+Password : aUniC0rnForUnyPort!
+Role     : viewer
+```
+
+Important:
+
+- this account is for local evaluation only
+- it is currently a `viewer`, not an `admin`
+- change the password before exposing the instance
+- do not keep these credentials on any Internet-facing deployment
+
+**Fresh admin bootstrap (optional)**
+
+If you want a clean first-run admin account instead of the bundled demo user:
+
+1. Stop the stack.
+2. Remove `unyport/backend/settings/users.json`.
+3. Add `UNYPORT_ADMIN_PASSWORD` to the `unyport` service environment in [docker-compose.yml](./docker-compose.yml).
+4. Start the stack again.
+
+Example:
+
+```yaml
+environment:
+  UNYPORT_ASSETS: /app/unyport/frontend/public
+  UNYPORT_ADMIN_PASSWORD: "ChangeThisToALongRandomPassword"
+```
+
+The first boot will then seed:
+
+```text
+Email    : demo@unyport.app
+Password : <your UNYPORT_ADMIN_PASSWORD value>
+Role     : admin
+```
+
+**Notes**
+
+- OAuth client IDs and secrets in [unyport/backend/settings/config.yaml](./unyport/backend/settings/config.yaml) are placeholders and must be replaced before use.
+- The default app proxy points to `ttyd`. If no `ttyd` service exists on the same network, `/proxy/ttyd/` will stay unavailable until you adapt the backend app config.
 
 ---
 
@@ -148,7 +230,7 @@ Memory  :  103M / 210M
 Uptime  :  6d 12m
 ```
 
-**Demo credentials**
+**Public demo credentials**
 
 ```text
 Email    : demo@unyport.app

@@ -1762,3 +1762,11 @@ time=2026-06-07T09:40:38.234Z level=INFO msg="proxy registered" app=TTYd target=
 time=2026-06-07T09:40:38.235Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
 time=2026-06-07T09:40:38.235Z level=INFO msg=listening addr=:8800
 time=2026-06-07T09:40:38.235Z level=INFO msg="unyport listening" addr=:8800 version=0.1.0
+time=2026-06-08T13:29:22.180Z level=INFO msg="login ok" email=demo@unyport.app role=viewer ip=172.20.0.1
+time=2026-06-08T13:29:38.502Z level=ERROR msg="proxy error" app=TTYd err="dial tcp: lookup ttyd on 127.0.0.11:53: no such host"
+time=2026-06-10T01:07:00.505Z level=INFO msg=startup platform=alpine-xen theme=lights version=0.1.0
+time=2026-06-10T01:07:00.513Z level=INFO msg="host role detected" role=Container runtime=docker label="Container · Docker" verified=true
+time=2026-06-10T01:07:00.537Z level=INFO msg="proxy registered" app=TTYd target=http://ttyd:7681 mount=/proxy/ttyd/
+time=2026-06-10T01:07:00.537Z level=INFO msg="middleware chain ready" chain=Secure→CSRFBypass→CSRFProtect→mux jwt_ttl=1h0m0s rate_limit_login=5 trusted_origins="[localhost:8800 127.0.0.1:8800 [::1]:8800 172.20.0.2:8800]" https=false http3=false
+time=2026-06-10T01:07:00.537Z level=INFO msg=listening addr=:8800
+time=2026-06-10T01:07:00.537Z level=INFO msg="unyport listening" addr=:8800 version=0.1.0

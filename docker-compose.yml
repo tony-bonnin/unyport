@@ -40,7 +40,7 @@ services:
       - go-cache:/root/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     ports:
-      - "192.168.3.5:8800:8800"
+      - "8800:8800"
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
