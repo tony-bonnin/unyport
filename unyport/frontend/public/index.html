@@ -5,6 +5,39 @@
   <title>UnyPort | TRINITY Labs · Xen Alpine Linux - v0.1-beta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#3e3aab">
+  <meta name="description" content="UnyPort is an Alpine Linux and Xen control plane for host supervision, live metrics, internal app access and daily operations.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="googlebot" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://unyport.app/">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:site_name" content="UnyPort">
+  <meta property="og:title" content="UnyPort | Alpine Linux and Xen control plane">
+  <meta property="og:description" content="Operator-facing Alpine Linux and Xen control plane for metrics, app proxying, daily supervision and host operations.">
+  <meta property="og:url" content="https://unyport.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://unyport.app/media/img/backgrounds/background-login-unyport.png">
+  <meta property="og:image:alt" content="UnyPort login and control plane">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="UnyPort | Alpine Linux and Xen control plane">
+  <meta name="twitter:description" content="Operator-facing Alpine Linux and Xen control plane for metrics, app proxying, daily supervision and host operations.">
+  <meta name="twitter:image" content="https://unyport.app/media/img/backgrounds/background-login-unyport.png">
+  <meta name="twitter:image:alt" content="UnyPort login and control plane">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "UnyPort",
+      "applicationCategory": "SystemAdministrationApplication",
+      "operatingSystem": "Linux",
+      "url": "https://unyport.app/",
+      "image": "https://unyport.app/media/img/backgrounds/background-login-unyport.png",
+      "description": "Operator-facing Alpine Linux and Xen control plane for metrics, app proxying, daily supervision and host operations.",
+      "creator": {
+        "@type": "Organization",
+        "name": "TRINITY Labs"
+      }
+    }
+  </script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="/css/main.css">
 
@@ -60,6 +93,7 @@
         <span class="badge">Xen Hypervisor</span>
         <span class="badge">Alpine Linux</span>
         <span class="badge">TRINITY Edge Networks</span>
+        <a class="badge" href="https://adocs.trinity-net.com/admin/unyport/" target="_blank" rel="noopener noreferrer" title="Open UnyPort admin documentation">Admin Docs</a>
       </div>
     </div>
 
@@ -204,6 +238,11 @@
           <a href="/settings" class="nav-item" title="Open application settings" :class="currentPage === 'settings'   ? 'active' : ''" @click.prevent="navigate('/settings')">
             <span class="nav-icon"><i class="fa-solid fa-gear"></i></span>
             <span>Settings</span>
+          </a>
+
+          <a href="https://adocs.trinity-net.com/admin/unyport/" target="_blank" rel="noopener noreferrer" class="nav-item" title="Open UnyPort admin documentation">
+            <span class="nav-icon"><i class="fa-solid fa-book"></i></span>
+            <span>Documentation</span>
           </a>
         </div>
 

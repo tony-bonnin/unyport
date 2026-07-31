@@ -100,6 +100,7 @@ func setupRoutes(
 		}
 		mux.Handle("/favicon.ico", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/robots.txt", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
+		mux.Handle("/sitemap.xml", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/manifest.json", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/", spaFallbackDir(assetsDir))
 	} else {
@@ -122,6 +123,7 @@ func setupRoutes(
 		}
 		mux.Handle("/favicon.ico", mimeFixFS(http.FileServerFS(pub)))
 		mux.Handle("/robots.txt", mimeFixFS(http.FileServerFS(pub)))
+		mux.Handle("/sitemap.xml", mimeFixFS(http.FileServerFS(pub)))
 		mux.Handle("/manifest.json", mimeFixFS(http.FileServerFS(pub)))
 		mux.Handle("/", spaFallback(pub, "index.html"))
 	}
