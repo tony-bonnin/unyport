@@ -111,7 +111,8 @@
 .logo-preview-img {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;
+  -o-object-fit: contain;
+     object-fit: contain;
   display: block;
 }
 
@@ -123,7 +124,8 @@
 .sidebar-brand-img {
   max-height: 32px;
   width: auto;
-  object-fit: contain;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
 
 /* ============================================================
@@ -234,7 +236,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,.45);
-  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+          backdrop-filter: blur(2px);
   z-index: 500;
   display: none;
 }
@@ -279,7 +282,8 @@
 .mobile-menu-logo {
   height: 36px;
   width: auto;
-  object-fit: contain;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
 .mobile-menu-close {
     width: 32px;

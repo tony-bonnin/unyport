@@ -1,4 +1,3 @@
-/* ============================================================
    components.css — TRINITY · Stats strip, main grid,
                     section heading, resources grid, charts,
                     responsive breakpoints (desktop)
@@ -692,7 +691,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 
 @media (max-width: 900px) {
   body { overflow: auto; }
-  #app { height: auto; min-height: 100vh; }
+  #app { height: auto; min-height: 100vh; min-height: -webkit-fill-available; }
   .main-inner { width: calc(100% - 32px); gap: 20px; }
   .stats-strip { grid-template-columns: 1fr; }
   .stat-block + .stat-block::before { display: none; }
@@ -928,7 +927,8 @@ label.remember-me span {
 .reboot-heatmap-cell {
   padding: 0;
   position: relative;
-  appearance: none;
+  -moz-appearance: none;
+       appearance: none;
   -webkit-appearance: none;
 }
 
@@ -1154,7 +1154,8 @@ label.remember-me span {
   color: #fff;
   box-shadow: 0 22px 48px rgba(15, 23, 42, 0.32);
   border-color: var(--line);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+          backdrop-filter: blur(10px);
 }
 
 [data-theme="dark"] .reboot-hover-card strong {
@@ -1201,4 +1202,3 @@ label.remember-me span {
     font-size: 0.68rem;
   }
 }
-/* ============================================================

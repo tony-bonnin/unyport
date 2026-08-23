@@ -14,7 +14,7 @@
 [data-theme="dark"] .nm-card-sub{color:#7a8099;}
 
 /* ── Grille CSS : 6 colonnes max, 130px + 28px gap = 158px/step ── */
-.nm-grid{display:grid;column-gap:28px;margin:0 auto;}
+.nm-grid{display:grid;-webkit-column-gap:28px;-moz-column-gap:28px;column-gap:28px;margin:0 auto;}
 .nm-grid-1{grid-template-columns:repeat(1,130px);width:130px;}
 .nm-grid-2{grid-template-columns:repeat(2,130px);width:288px;}
 .nm-grid-3{grid-template-columns:repeat(3,130px);width:446px;}
@@ -149,7 +149,8 @@
   justify-content:center;
   padding:1rem;
   background:rgba(15,15,25,.5);
-  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+          backdrop-filter:blur(3px);
   z-index:1750;
 }
 .nm-modal-overlay.is-visible{display:flex;}

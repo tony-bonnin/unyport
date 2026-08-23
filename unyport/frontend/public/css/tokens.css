@@ -286,6 +286,9 @@
   border-color: var(--border-strong);
   color: var(--text);
 }
+[data-theme="dark"] input::-webkit-input-placeholder { color: var(--text-dim); }
+[data-theme="dark"] input::-moz-placeholder { color: var(--text-dim); }
+[data-theme="dark"] input::-ms-input-placeholder { color: var(--text-dim); }
 [data-theme="dark"] input::placeholder { color: var(--text-dim); }
 
 /* Transition dark/light douce */

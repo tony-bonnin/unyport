@@ -694,6 +694,7 @@
 .htop-procs thead tr {
   background: var(--brand);
   color: #fff;
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -757,6 +758,7 @@
 .top-procs-table thead tr {
   background: var(--brand);
   color: #fff;
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 1;
