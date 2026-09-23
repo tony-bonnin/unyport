@@ -861,8 +861,9 @@ document.addEventListener('alpine:init', () => {
     get themeIsLight() { return this.theme === 'light'; },
 
     get isAdmin() { return this.userRole === 'admin'; },
-    get isOperator() { return this.userRole === 'admin' || this.userRole === 'operator' || this.userRole === 'viewer'; },
+    get isOperator() { return this.userRole === 'admin' || this.userRole === 'operator'; },
     get isViewer() { return this.userRole === 'viewer'; },
+    get canViewInfrastructure() { return this.isAdmin || this.isOperator || this.isViewer; },
     get canEditBranding() { return this.isAdmin; },
 
     get brandingLogoEffective() { return this.brandingLogoPreview || this.brandingLogoSrc || ''; },

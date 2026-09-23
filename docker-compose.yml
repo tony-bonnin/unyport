@@ -34,7 +34,7 @@ services:
         CGO_ENABLED=0 go build -o ./tmp/main ./cmd/unyport &&
         echo ">>> DEV done." && ls -lh ./tmp/main &&
         ./tmp/main
-    restart: unless-stopped
+    restart: always
     volumes:
       - ./unyport:/app/unyport
       - go-cache:/root/go/pkg/mod

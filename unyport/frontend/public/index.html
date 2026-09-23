@@ -180,7 +180,7 @@
           <span>Dashboard</span>
         </a>
 
-        <template x-if="isOperator">
+        <template x-if="canViewInfrastructure">
           <div>
             <div class="nav-section-title">Infrastructure</div>
 
@@ -334,6 +334,7 @@
               </div>
               <div class="topbar-user-meta">
                 <span class="topbar-user-name" x-text="userName"></span>
+                <span class="topbar-role-badge role-badge" :class="roleBadgeClass" :title="'Current role: ' + roleBadgeLabel" x-text="roleBadgeLabel"></span>
               </div>
               <span class="credential-dot topbar-credential-dot" x-show="userDefaultCredentials" title="Default credentials in use"></span>
               <i class="fa-solid fa-chevron-down topbar-chevron" :class="dropdownOpen ? 'open' : ''"></i>
@@ -398,7 +399,7 @@
               <p>Current state of your infrastructure.</p>
             </div>
 
-            <div class="stats-strip">
+            <div class="stats-strip stats-strip-wide">
               <div class="stat-block">
                 <div class="stat-icon stat-blue"><i :class="statHostIcon"></i></div>
                 <div class="stat-body">
@@ -1025,26 +1026,29 @@
             </div>
 
             <div class="section-head"><h2>Volumes</h2><p>Mounted filesystems with usage breakdown.</p></div>
-            <div class="resources-grid" x-show="sysDisks.length > 0">
+            <div class="storage-volume-list" x-show="sysDisks.length > 0">
               <template x-for="d in sysDisks" :key="d.mount">
-                <div class="res-card">
-                  <div class="res-card-head">
-                    <div class="res-icon" :class="d.pal">
+                <div class="storage-volume-row">
+                  <div class="storage-volume-main">
+                    <div class="storage-volume-icon" :class="d.bar_cls">
                       <i class="fa-solid fa-hard-drive"></i>
                     </div>
-                    <h3 x-text="d.device"></h3>
+                    <div class="storage-volume-title">
+                      <strong x-text="d.device"></strong>
+                      <span x-text="d.mount"></span>
+                    </div>
                   </div>
-                  <div class="res-primary" x-text="_fmtMB(d.used_mb) + ' / ' + _fmtMB(d.total_mb)"></div>
-                  <div class="res-bar-wrap">
-                    <div class="res-bar disk-bar" :class="d.bar_cls"></div>
+                  <div class="storage-volume-meter">
+                    <div class="storage-volume-bar">
+                      <div class="storage-volume-fill" :class="d.bar_cls"></div>
+                    </div>
+                    <span><strong x-text="_fmtMB(d.used_mb)"></strong> / <span x-text="_fmtMB(d.total_mb)"></span></span>
                   </div>
-                  <dl class="res-kv">
-                    <dt>Used</dt><dd><span x-text="_fmtMB(d.used_mb)"></span> (<span x-text="d.used_pct"></span>%)</dd>
-                    <dt>Free</dt><dd x-text="_fmtMB(d.free_mb)"></dd>
-                    <dt>Total</dt><dd x-text="_fmtMB(d.total_mb)"></dd>
-                    <dt>Mount</dt><dd x-text="d.mount"></dd>
-                    <dt>FS</dt><dd x-text="d.fstype"></dd>
-                  </dl>
+                  <div class="storage-volume-meta">
+                    <span><b x-text="d.used_pct + '%'"></b> used</span>
+                    <span><b x-text="_fmtMB(d.free_mb)"></b> free</span>
+                    <span x-text="d.fstype"></span>
+                  </div>
                 </div>
               </template>
             </div>

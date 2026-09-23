@@ -1,4 +1,4 @@
-   components.css — TRINITY · Stats strip, main grid,
+/* components.css — TRINITY · Stats strip, main grid,
                     section heading, resources grid, charts,
                     responsive breakpoints (desktop)
    ============================================================ */
@@ -10,6 +10,10 @@
   grid-template-columns: repeat(4, 1fr);
   overflow: hidden;
   box-shadow: rgba(62, 58, 171, 0.12) 0px 8px 32px;
+}
+
+.stats-strip-wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .stat-block {
@@ -70,6 +74,11 @@
 .stat-indigo {
     background: #eceeff;
     color: var(--role-dom0, #3e3aab);
+}
+
+.topbar-role-badge {
+  align-self: flex-start;
+  margin-top: 2px;
 }
 
 /* ── Icônes custom Alpine Linux et Xen Project ───────────── */
@@ -563,6 +572,134 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
   gap: 0;
 }
 
+/* ============================================================
+   STORAGE VOLUMES
+   ============================================================ */
+.storage-volume-list {
+  display: grid;
+  gap: 10px;
+}
+
+.storage-volume-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.1fr) minmax(220px, 1fr) minmax(210px, .8fr);
+  align-items: center;
+  gap: 18px;
+  min-height: 74px;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+}
+
+.storage-volume-main {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.storage-volume-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: rgba(148, 163, 184, .12);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, .2);
+}
+
+.storage-volume-icon.warn {
+  background: rgba(217, 119, 6, .12);
+  border-color: rgba(217, 119, 6, .24);
+  color: #d97706;
+}
+
+.storage-volume-icon.crit {
+  background: rgba(220, 38, 38, .12);
+  border-color: rgba(220, 38, 38, .24);
+  color: #ef4444;
+}
+
+.storage-volume-title {
+  min-width: 0;
+}
+
+.storage-volume-title strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storage-volume-title span {
+  display: block;
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.storage-volume-meter {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.storage-volume-meter > span {
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.storage-volume-meter strong {
+  color: var(--text);
+}
+
+.storage-volume-bar {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-sunk);
+}
+
+.storage-volume-fill {
+  width: var(--disk-w, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: #16a34a;
+  transition: width .4s ease, background .4s ease;
+}
+
+.storage-volume-fill.warn { background: #d97706; }
+.storage-volume-fill.crit { background: #dc2626; }
+
+.storage-volume-meta {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  gap: 12px;
+  color: var(--text-dim);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.storage-volume-meta b {
+  color: var(--text-soft);
+  font-weight: 750;
+}
+
 .has-ver-badge dd {
     justify-content: space-between;
 }
@@ -676,29 +813,23 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 @media (max-width: 1100px) {
   .main-grid { grid-template-columns: 1fr; }
   .action-grid { grid-template-columns: repeat(4, 1fr); }
-  .stats-strip { grid-template-columns: repeat(2, 1fr); }
-  .stat-block + .stat-block::before { display: none; }
-  .stat-block:nth-child(odd)::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 22%;
-    bottom: 22%;
-    width: 1px;
-    background: var(--border);
-  }
+  .storage-volume-row { grid-template-columns: 1fr; gap: 12px; }
+  .storage-volume-meta { justify-content: flex-start; flex-wrap: wrap; }
 }
 
 @media (max-width: 900px) {
   body { overflow: auto; }
   #app { height: auto; min-height: 100vh; min-height: -webkit-fill-available; }
   .main-inner { width: calc(100% - 32px); gap: 20px; }
-  .stats-strip { grid-template-columns: 1fr; }
-  .stat-block + .stat-block::before { display: none; }
   .action-grid { grid-template-columns: 1fr 1fr; }
   .resources-grid { grid-template-columns: 1fr; }
   .charts-grid { grid-template-columns: 1fr; }
   .chart-sm { grid-column: auto; }
+}
+
+@media (max-width: 640px) {
+  .stats-strip { grid-template-columns: 1fr; }
+  .stat-block + .stat-block::before { display: none; }
 }
 
 @media (max-width: 700px) {
