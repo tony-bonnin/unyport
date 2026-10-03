@@ -17,6 +17,7 @@ import (
 	"unyport/middleware"
 	"unyport/proxy"
 	"unyport/sse"
+	"unyport/xenctl"
 )
 
 // mimeTypes — table explicite pour les environnements sans /etc/mime.types
@@ -147,6 +148,13 @@ func setupRoutes(
 	mux.Handle("/api/security", authMW(http.HandlerFunc(broker.SecurityHandler)))
 	mux.Handle("/api/logs", authMW(http.HandlerFunc(broker.LogsListHandler)))
 	mux.Handle("/api/logs/tail", authMW(http.HandlerFunc(broker.LogsTailHandler)))
+
+	// ---- API Xen native xl — lecture tous rôles, actions operator/admin ----
+	xenHandler := xenctl.NewHandler(xenctl.NewClient(), logger)
+	mux.Handle("/api/xen/info", authMW(http.HandlerFunc(xenHandler.Info)))
+	mux.Handle("/api/xen/domains", authMW(http.HandlerFunc(xenHandler.Domains)))
+	mux.Handle("/api/xen/domains/create", adminMW(http.HandlerFunc(xenHandler.Create)))
+	mux.Handle("/api/xen/domains/", writeMW(http.HandlerFunc(xenHandler.DomainAction)))
 
 	// ---- /api/apps : liste des apps proxifiées (protégé — tous rôles) ----
 	mux.Handle("/api/apps", authMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

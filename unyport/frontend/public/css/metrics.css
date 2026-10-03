@@ -380,6 +380,14 @@
   color: var(--text-soft);
 }
 
+.xen-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .proc-pid {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11.5px;

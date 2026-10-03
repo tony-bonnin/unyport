@@ -86,6 +86,8 @@ document.addEventListener('alpine:init', () => {
 
     xenDomains: [],
     xenInfo: {},
+    xenActionBusy: '',
+    xenActionError: '',
 
     brandingLogoSrc: '',
     brandingHasLogo: false,
@@ -864,6 +866,7 @@ document.addEventListener('alpine:init', () => {
     get isOperator() { return this.userRole === 'admin' || this.userRole === 'operator'; },
     get isViewer() { return this.userRole === 'viewer'; },
     get canViewInfrastructure() { return this.isAdmin || this.isOperator || this.isViewer; },
+    get canRunXenActions() { return this.isXenDom0 && this.isOperator; },
     get canEditBranding() { return this.isAdmin; },
 
     get brandingLogoEffective() { return this.brandingLogoPreview || this.brandingLogoSrc || ''; },
@@ -912,6 +915,34 @@ document.addEventListener('alpine:init', () => {
     pct1(value) {
       const n = Number(value) || 0;
       return n.toFixed(1) + '%';
+    },
+    xenActionKey(dom, action) {
+      return `${dom?.name || ''}:${action}`;
+    },
+    canActOnXenDomain(dom) {
+      const name = String(dom?.name || '');
+      return this.canRunXenActions && name !== '' && name !== 'Domain-0' && String(dom?.domid) !== '0';
+    },
+    async runXenAction(dom, action) {
+      if (!this.canActOnXenDomain(dom)) return;
+      if (action === 'destroy' && !this.isAdmin) return;
+      const name = dom.name;
+      const label = action === 'destroy' ? 'force destroy' : action;
+      if (!confirm(`${label} ${name}?`)) return;
+      const key = this.xenActionKey(dom, action);
+      this.xenActionBusy = key;
+      this.xenActionError = '';
+      try {
+        await apiFetch(`/api/xen/domains/${encodeURIComponent(name)}/actions`, {
+          method: 'POST',
+          body: JSON.stringify({ action }),
+        });
+      } catch (e) {
+        this.xenActionError = e?.message || 'Xen action failed.';
+        alert(this.xenActionError);
+      } finally {
+        this.xenActionBusy = '';
+      }
     },
     get userAvatarDisplay() { return this.userAvatar || this.userInitial || '?'; },
     get hasPhoto() { return this.userPhotoUrl !== '' && this.userPhotoUrl !== null; },
