@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101119">
+  <title>UnyPort Offline</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101119;
+      color: #f5f7fb;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(62, 58, 171, 0.28), transparent 34rem),
+        #101119;
+    }
+
+    main {
+      width: min(100%, 28rem);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      background: rgba(29, 33, 48, 0.86);
+    }
+
+    h1 {
+      margin: 0 0 0.65rem;
+      font-size: 1.2rem;
+    }
+
+    p {
+      margin: 0;
+      color: rgba(245, 247, 251, 0.72);
+      line-height: 1.5;
+    }
+
+    a {
+      display: inline-flex;
+      margin-top: 1rem;
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>UnyPort is offline</h1>
+    <p>The control plane needs the host connection for live data and actions. Reconnect to continue.</p>
+    <a href="/">Retry</a>
+  </main>
+</body>
+</html>

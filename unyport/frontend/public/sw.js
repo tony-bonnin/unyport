@@ -1,4 +1,5 @@
-const CACHE_NAME = "unyport-shell-v1";
+const CACHE_NAME = "unyport-shell-v2";
+const OFFLINE_URL = "/offline.html";
 const CACHEABLE_PREFIXES = [
   "/app/",
   "/css/",
@@ -9,11 +10,17 @@ const CACHEABLE_PREFIXES = [
 const CACHEABLE_PATHS = new Set([
   "/",
   "/favicon.ico",
-  "/manifest.json"
+  "/manifest.json",
+  OFFLINE_URL
 ]);
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(["/", OFFLINE_URL, "/manifest.json", "/favicon.ico", "/media/img/icons/unyport-icon.svg"]))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -32,21 +39,26 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/sse/")) return;
 
+  const isNavigation = event.request.mode === "navigate";
+
   const cacheable =
     CACHEABLE_PATHS.has(url.pathname) ||
     CACHEABLE_PREFIXES.some((prefix) => url.pathname.startsWith(prefix));
 
-  if (!cacheable) return;
+  if (!cacheable && !isNavigation) return;
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        if (response.ok) {
+        if (response.ok && cacheable) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => {
+        if (isNavigation) return caches.match(OFFLINE_URL);
+        return caches.match(event.request);
+      })
   );
 });

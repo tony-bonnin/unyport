@@ -2,8 +2,10 @@
   "name": "UnyPort",
   "short_name": "UnyPort",
   "description": "Alpine Linux and Xen control plane for host supervision, live metrics and native operations.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
+  "display_override": ["window-controls-overlay", "standalone"],
   "display": "standalone",
   "background_color": "#101119",
   "theme_color": "#3e3aab",
@@ -23,6 +25,8 @@
     }
   ],
   "categories": ["utilities", "productivity", "developer"],
+  "lang": "en",
+  "dir": "ltr",
   "shortcuts": [
     {
       "name": "Dashboard",
