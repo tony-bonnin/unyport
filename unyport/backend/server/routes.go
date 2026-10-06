@@ -47,6 +47,11 @@ func init() {
 // Immunise contre les Alpine sans /etc/mime.types (embed prod).
 func mimeFixFS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/manifest.json" {
+			w.Header().Set("Content-Type", "application/manifest+json; charset=utf-8")
+			h.ServeHTTP(w, r)
+			return
+		}
 		ext := strings.ToLower(filepath.Ext(r.URL.Path))
 		if ct, ok := mimeTypes[ext]; ok {
 			w.Header().Set("Content-Type", ct)
