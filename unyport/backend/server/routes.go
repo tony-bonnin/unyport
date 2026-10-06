@@ -171,6 +171,7 @@ func setupRoutes(
 
 	// Branding — GET public, PATCH/DELETE admin
 	mux.HandleFunc("/api/branding", brandingHandler.GetBranding)
+	mux.HandleFunc("/api/oauth/providers", oauthSvc.ProvidersHandler)
 	mux.HandleFunc("/api/oauth/login", oauthSvc.LoginHandler)
 	mux.HandleFunc("/api/oauth/callback", oauthSvc.CallbackHandler)
 

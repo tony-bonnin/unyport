@@ -13,20 +13,37 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/gitlab"
+	"unyport/config"
 )
 
 type OAuthService struct {
-	providers map[string]*oauth2.Config
-	users     *UserStore
-	jwt       *JWTService
-	mailer    *Mailer
-	secure    bool
+	providers      map[string]*oauth2.Config
+	users          *UserStore
+	jwt            *JWTService
+	mailer         *Mailer
+	secure         bool
+	enabled        bool
+	allowedDomains map[string]struct{}
+	autoCreate     bool
 }
 
-func NewOAuthService(cfg map[string]map[string]string, users *UserStore, jwt *JWTService, mailer *Mailer, secure bool) *OAuthService {
+func NewOAuthService(cfg map[string]map[string]string, settings *config.Settings, users *UserStore, jwt *JWTService, mailer *Mailer, secure bool) *OAuthService {
 	providers := make(map[string]*oauth2.Config)
+	enabled := settings != nil && settings.OAuth.Enabled
+	allowedDomains := make(map[string]struct{})
+	autoCreate := false
+	if settings != nil {
+		autoCreate = settings.OAuth.AutoCreate
+		for _, domain := range settings.OAuth.AllowedDomains {
+			domain = strings.ToLower(strings.TrimSpace(strings.TrimPrefix(domain, "@")))
+			if domain != "" {
+				allowedDomains[domain] = struct{}{}
+			}
+		}
+	}
 
-	if gh, ok := cfg["github"]; ok && oauthProviderConfigured(gh) {
+	if enabled {
+		if gh, ok := cfg["github"]; ok && oauthProviderConfigured(gh) {
 		providers["github"] = &oauth2.Config{
 			ClientID:     gh["client_id"],
 			ClientSecret: gh["client_secret"],
@@ -35,7 +52,7 @@ func NewOAuthService(cfg map[string]map[string]string, users *UserStore, jwt *JW
 			Endpoint:     github.Endpoint,
 		}
 	}
-	if gl, ok := cfg["gitlab"]; ok && oauthProviderConfigured(gl) {
+		if gl, ok := cfg["gitlab"]; ok && oauthProviderConfigured(gl) {
 		providers["gitlab"] = &oauth2.Config{
 			ClientID:     gl["client_id"],
 			ClientSecret: gl["client_secret"],
@@ -44,7 +61,20 @@ func NewOAuthService(cfg map[string]map[string]string, users *UserStore, jwt *JW
 			Endpoint:     gitlab.Endpoint,
 		}
 	}
-	return &OAuthService{providers: providers, users: users, jwt: jwt, mailer: mailer, secure: secure}
+	}
+	return &OAuthService{providers: providers, users: users, jwt: jwt, mailer: mailer, secure: secure, enabled: enabled, allowedDomains: allowedDomains, autoCreate: autoCreate}
+}
+
+func (o *OAuthService) ProvidersHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(map[string]bool{
+		"github": o.providerEnabled("github"),
+		"gitlab": o.providerEnabled("gitlab"),
+	})
 }
 
 func (o *OAuthService) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +84,7 @@ func (o *OAuthService) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	provider := r.URL.Query().Get("provider")
 	conf, ok := o.providers[provider]
-	if !ok {
+	if !ok || !o.providerEnabled(provider) {
 		http.Error(w, "provider inconnu", http.StatusBadRequest)
 		return
 	}
@@ -119,8 +149,16 @@ func (o *OAuthService) CallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	email = strings.ToLower(strings.TrimSpace(email))
+	if !o.emailAllowed(email) {
+		http.Error(w, "email non autorisé", http.StatusUnauthorized)
+		return
+	}
 
 	if _, err := o.users.Find(email); err != nil {
+		if !o.autoCreate {
+			http.Error(w, "user failed", http.StatusUnauthorized)
+			return
+		}
 		_ = o.users.Add(&User{
 			ID:        email,
 			Email:     email,
@@ -192,6 +230,26 @@ func (o *OAuthService) fetchEmail(provider string, conf *oauth2.Config, token *o
 	}
 
 	return "", errors.New("provider non supporté")
+}
+
+func (o *OAuthService) providerEnabled(provider string) bool {
+	if !o.enabled {
+		return false
+	}
+	_, ok := o.providers[provider]
+	return ok
+}
+
+func (o *OAuthService) emailAllowed(email string) bool {
+	if len(o.allowedDomains) == 0 {
+		return true
+	}
+	_, domain, ok := strings.Cut(strings.ToLower(strings.TrimSpace(email)), "@")
+	if !ok {
+		return false
+	}
+	_, allowed := o.allowedDomains[domain]
+	return allowed
 }
 
 func randomState() (string, error) {

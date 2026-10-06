@@ -146,7 +146,7 @@ func New(cfg config.Config, settings *config.Settings, logger *slog.Logger) *Ser
 
 	// ---- Services ----
 	authHandler := auth.NewHandler(users, jwt, mailer, logger)
-	oauthSvc := auth.NewOAuthService(cfg.Auth, users, jwt, mailer, settings.Security2.HTTPS)
+	oauthSvc := auth.NewOAuthService(cfg.Auth, settings, users, jwt, mailer, settings.Security2.HTTPS)
 	broker := sse.NewBroker(
 		logger,
 		filepath.Join(settings.Paths.LogDir, "unyport.log"),

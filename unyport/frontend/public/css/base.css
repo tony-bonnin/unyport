@@ -359,3 +359,12 @@ button.oauth:hover {
 }
 
 button.oauth img { width: 16px; }
+
+button.oauth:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+[data-theme="dark"] button.oauth img[alt="GitHub"] {
+  filter: invert(1);
+}

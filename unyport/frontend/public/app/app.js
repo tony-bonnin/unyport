@@ -47,6 +47,7 @@ document.addEventListener('alpine:init', () => {
     loginPasswordVisible: false,
     loginLoading: false,
     loginError: '',
+    oauthProviders: { github: false, gitlab: false },
 
     uptime: '—',
     uptimeSecs: 0,
@@ -678,6 +679,17 @@ document.addEventListener('alpine:init', () => {
       } catch { /* no-op */ }
     },
 
+    async _loadOAuthProviders() {
+      try {
+        const providers = await apiFetch('/api/oauth/providers?_=' + Date.now());
+        this.oauthProviders.github = providers?.github === true;
+        this.oauthProviders.gitlab = providers?.gitlab === true;
+      } catch {
+        this.oauthProviders.github = false;
+        this.oauthProviders.gitlab = false;
+      }
+    },
+
     _applyBrandingCSS() {
       const r = document.documentElement;
       r.style.setProperty('--role-dom0', this.brandingColorDom0);
@@ -967,7 +979,7 @@ document.addEventListener('alpine:init', () => {
       this._updateThemeMetaColor(this.hostRoleRole || 'Dom0');
 
       // Optimisation: Parallélisation des appels indépendants
-      await Promise.all([fetchCSRF(), this._loadBranding(), this._loadPublicVersion()]);
+      await Promise.all([fetchCSRF(), this._loadBranding(), this._loadPublicVersion(), this._loadOAuthProviders()]);
 
       if (localStorage.getItem('_logged_out') === '1') {
         this._showLogin();
@@ -1053,6 +1065,11 @@ document.addEventListener('alpine:init', () => {
           window.location.replace('/');
         }, 120);
       }
+    },
+
+    startOAuth(provider) {
+      if (!this.oauthProviders[provider]) return;
+      window.location.href = '/api/oauth/login?provider=' + encodeURIComponent(provider);
     },
 
     toggleTheme() {

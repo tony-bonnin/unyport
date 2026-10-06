@@ -155,11 +155,11 @@
           <div class="oauth-divider"><span>or continue with</span></div>
 
           <div class="oauth-row">
-            <button type="button" class="oauth" title="Sign in with GitHub" @click="window.location.href='/api/oauth/login?provider=github'">
+            <button type="button" class="oauth" :disabled="!oauthProviders.github" :title="oauthProviders.github ? 'Sign in with GitHub' : 'GitHub OAuth is not configured'" @click="startOAuth('github')">
               <img src="/media/img/logos/github_logo_icon.png" alt="GitHub">
               <span>GitHub</span>
             </button>
-            <button type="button" class="oauth" title="Sign in with GitLab" @click="window.location.href='/api/oauth/login?provider=gitlab'">
+            <button type="button" class="oauth" :disabled="!oauthProviders.gitlab" :title="oauthProviders.gitlab ? 'Sign in with GitLab' : 'GitLab OAuth is not configured'" @click="startOAuth('gitlab')">
               <img src="/media/img/logos/gitlab_logo_icon.png" alt="GitLab">
               <span>GitLab</span>
             </button>
