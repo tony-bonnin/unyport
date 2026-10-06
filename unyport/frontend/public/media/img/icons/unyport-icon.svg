@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="UnyPort">
+  <rect width="512" height="512" rx="112" fill="#101119"/>
+  <path d="M140 142h232c20 0 36 16 36 36v156c0 20-16 36-36 36H140c-20 0-36-16-36-36V178c0-20 16-36 36-36Z" fill="#1d2130" stroke="#3e3aab" stroke-width="18"/>
+  <path d="M160 214h192M160 256h192M160 298h120" stroke="#ffffff" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="368" cy="298" r="20" fill="#e18d4f"/>
+  <path d="M256 404v-62" stroke="#64d8cb" stroke-width="28" stroke-linecap="round"/>
+  <path d="M206 404h100" stroke="#64d8cb" stroke-width="28" stroke-linecap="round"/>
+</svg>
