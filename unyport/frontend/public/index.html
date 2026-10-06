@@ -282,7 +282,7 @@
           <span>Sign out</span>
         </a>
 
-        <a class="sidebar-version" x-show="sysUnyportVersion" href="https://github.com/tony-bonnin/unyport/releases" target="_blank" rel="noopener noreferrer" title="Open UnyPort releases">
+        <a class="sidebar-version" :class="{ 'is-outdated': sysUnyportUpdateLevel === 'outdated' }" x-show="sysUnyportVersion" href="https://github.com/tony-bonnin/unyport/releases" target="_blank" rel="noopener noreferrer" :title="sysUnyportUpdateLevel === 'outdated' ? 'UnyPort update available: v' + sysUnyportLatestVersion : 'Open UnyPort releases'">
           <span class="sidebar-version-label">UnyPort</span>
           <strong class="sidebar-version-value" x-text="'v' + sysUnyportVersion"></strong>
         </a>

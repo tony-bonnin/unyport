@@ -168,6 +168,12 @@
   color: inherit;
 }
 
+.sidebar-version.is-outdated,
+.sidebar-version.is-outdated .sidebar-version-label,
+.sidebar-version.is-outdated .sidebar-version-value {
+  color: var(--err);
+}
+
 .sidebar-user-avatar {
   position: relative;
   width: 30px;

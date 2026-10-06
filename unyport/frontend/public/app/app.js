@@ -140,6 +140,8 @@ document.addEventListener('alpine:init', () => {
     sysOsRelease: 'Alpine Linux',
     sysOsVersion: '',
     sysUnyportVersion: '',
+    sysUnyportLatestVersion: '',
+    sysUnyportUpdateLevel: 'ok',
     sysKernel: '—',
     sysDate: '—',
     sysCpuModel: '—',
@@ -667,6 +669,15 @@ document.addEventListener('alpine:init', () => {
       } catch { /* Ignore, valeurs par défaut */ }
     },
 
+    async _loadPublicVersion() {
+      try {
+        const meta = await apiFetch('/api/public/version?_=' + Date.now());
+        if (meta?.version) this.sysUnyportVersion = meta.version;
+        if (meta?.latest) this.sysUnyportLatestVersion = meta.latest;
+        this.sysUnyportUpdateLevel = meta?.up_to_date === false ? 'outdated' : 'ok';
+      } catch { /* no-op */ }
+    },
+
     _applyBrandingCSS() {
       const r = document.documentElement;
       r.style.setProperty('--role-dom0', this.brandingColorDom0);
@@ -956,7 +967,7 @@ document.addEventListener('alpine:init', () => {
       this._updateThemeMetaColor(this.hostRoleRole || 'Dom0');
 
       // Optimisation: Parallélisation des appels indépendants
-      await Promise.all([fetchCSRF(), this._loadBranding()]);
+      await Promise.all([fetchCSRF(), this._loadBranding(), this._loadPublicVersion()]);
 
       if (localStorage.getItem('_logged_out') === '1') {
         this._showLogin();
