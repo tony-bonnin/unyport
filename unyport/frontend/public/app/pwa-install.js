@@ -129,7 +129,7 @@
 
     const overlay = document.createElement("div");
     overlay.id = nativePromptId;
-    overlay.className = "pwa-ios-install";
+    overlay.className = "pwa-ios-install pwa-system-install";
 
     const dialog = document.createElement("div");
     dialog.className = "pwa-ios-install__dialog";
