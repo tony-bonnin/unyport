@@ -21,19 +21,20 @@ import (
 // (Alpine minimal, BusyBox). http.FileServerFS utilise mime.TypeByExtension
 // qui dépend du système — on enregistre les types essentiels au démarrage.
 var mimeTypes = map[string]string{
-	".css":   "text/css; charset=utf-8",
-	".js":    "text/javascript; charset=utf-8",
-	".html":  "text/html; charset=utf-8",
-	".json":  "application/json; charset=utf-8",
-	".svg":   "image/svg+xml",
-	".png":   "image/png",
-	".jpg":   "image/jpeg",
-	".jpeg":  "image/jpeg",
-	".ico":   "image/x-icon",
-	".woff":  "font/woff",
-	".woff2": "font/woff2",
-	".ttf":   "font/ttf",
-	".map":   "application/json",
+	".css":         "text/css; charset=utf-8",
+	".js":          "text/javascript; charset=utf-8",
+	".html":        "text/html; charset=utf-8",
+	".json":        "application/json; charset=utf-8",
+	".webmanifest": "application/manifest+json; charset=utf-8",
+	".svg":         "image/svg+xml",
+	".png":         "image/png",
+	".jpg":         "image/jpeg",
+	".jpeg":        "image/jpeg",
+	".ico":         "image/x-icon",
+	".woff":        "font/woff",
+	".woff2":       "font/woff2",
+	".ttf":         "font/ttf",
+	".map":         "application/json",
 }
 
 func init() {
@@ -100,6 +101,7 @@ func setupRoutes(
 		mux.Handle("/robots.txt", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/sitemap.xml", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/manifest.json", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
+		mux.Handle("/sw.js", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/", spaFallbackDir(assetsDir))
 	} else {
 		// Mode prod — embed
@@ -123,6 +125,7 @@ func setupRoutes(
 		mux.Handle("/robots.txt", mimeFixFS(http.FileServerFS(pub)))
 		mux.Handle("/sitemap.xml", mimeFixFS(http.FileServerFS(pub)))
 		mux.Handle("/manifest.json", mimeFixFS(http.FileServerFS(pub)))
+		mux.Handle("/sw.js", mimeFixFS(http.FileServerFS(pub)))
 		mux.Handle("/", spaFallback(pub, "index.html"))
 	}
 

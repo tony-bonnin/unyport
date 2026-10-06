@@ -5,6 +5,8 @@
   <title>UnyPort | TRINITY Labs · Xen Alpine Linux - v0.1.0</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#3e3aab">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#3e3aab">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101119">
   <meta name="description" content="UnyPort is an Alpine Linux and Xen control plane for host supervision, live metrics, native operations and daily administration.">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="googlebot" content="index, follow, max-image-preview:large">
@@ -39,6 +41,14 @@
     }
   </script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/media/img/logos/logo-unyport-simple.png">
+  <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+  <meta name="apple-mobile-web-app-title" content="UnyPort">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="color-scheme" content="light dark">
   <link rel="stylesheet" href="/css/main.css">
 
   <script src="/app/theme-color.js"></script>
@@ -56,6 +66,8 @@
   <script defer src="/app/networkmap-hover.js"></script>
   <script defer src="/app/metrics.js"></script>
   <script defer src="/app/app.js"></script>
+  <script defer src="/app/pwa-register.js"></script>
+  <script defer src="/app/pwa-install.js"></script>
   <script defer src="/app/heatmap-hover.js"></script>
   <script defer src="/app/logout.js?v=20260606b"></script>
   <script defer src="/vendor/alpinejs-csp.min.js"></script>

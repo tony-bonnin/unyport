@@ -27,6 +27,8 @@ func Secure(next http.Handler, https bool) http.Handler {
 			"script-src 'self'",
 			"style-src 'self'",
 			"font-src 'self'",
+			"worker-src 'self'",
+			"manifest-src 'self'",
 			"form-action 'self'",
 		}, "; "))
 

@@ -1341,3 +1341,58 @@ label.remember-me span {
     font-size: 0.68rem;
   }
 }
+
+.pwa-ios-install {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(8, 10, 16, 0.58);
+}
+
+.pwa-ios-install__dialog {
+  width: min(100%, 26rem);
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.pwa-ios-install__dialog h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.pwa-ios-install__dialog p {
+  margin: 0;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.pwa-ios-install__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.pwa-ios-install__button {
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pwa-ios-install__button--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
