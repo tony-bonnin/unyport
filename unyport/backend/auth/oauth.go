@@ -44,23 +44,23 @@ func NewOAuthService(cfg map[string]map[string]string, settings *config.Settings
 
 	if enabled {
 		if gh, ok := cfg["github"]; ok && oauthProviderConfigured(gh) {
-		providers["github"] = &oauth2.Config{
-			ClientID:     gh["client_id"],
-			ClientSecret: gh["client_secret"],
-			RedirectURL:  gh["redirect_url"],
-			Scopes:       []string{"user:email"},
-			Endpoint:     github.Endpoint,
+			providers["github"] = &oauth2.Config{
+				ClientID:     gh["client_id"],
+				ClientSecret: gh["client_secret"],
+				RedirectURL:  gh["redirect_url"],
+				Scopes:       []string{"user:email"},
+				Endpoint:     github.Endpoint,
+			}
 		}
-	}
 		if gl, ok := cfg["gitlab"]; ok && oauthProviderConfigured(gl) {
-		providers["gitlab"] = &oauth2.Config{
-			ClientID:     gl["client_id"],
-			ClientSecret: gl["client_secret"],
-			RedirectURL:  gl["redirect_url"],
-			Scopes:       []string{"read_user"},
-			Endpoint:     gitlab.Endpoint,
+			providers["gitlab"] = &oauth2.Config{
+				ClientID:     gl["client_id"],
+				ClientSecret: gl["client_secret"],
+				RedirectURL:  gl["redirect_url"],
+				Scopes:       []string{"read_user"},
+				Endpoint:     gitlab.Endpoint,
+			}
 		}
-	}
 	}
 	return &OAuthService{providers: providers, users: users, jwt: jwt, mailer: mailer, secure: secure, enabled: enabled, allowedDomains: allowedDomains, autoCreate: autoCreate}
 }

@@ -14,6 +14,11 @@ display:
   disk: true
   network: true
 
+oauth:
+  enabled: false
+  allowed_domains: []
+  auto_create_users: false
+
 security_extra:
   rate_limit_login: 5
   session_timeout_mins: 60
