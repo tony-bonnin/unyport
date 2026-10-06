@@ -94,7 +94,7 @@ release_build_lock() {
 
 sync_git() {
   [ -x "$GIT_SYNC_SCRIPT" ] || { echo "[unyport] git sync script absent: $GIT_SYNC_SCRIPT"; return 0; }
-  UNYPORT_GIT_AUTO_BUMP=0 UNYPORT_GIT_BUILD_VERIFIED=1 "$GIT_SYNC_SCRIPT" sync
+  UNYPORT_GIT_PREPARED_VERSION=1 UNYPORT_GIT_BUILD_VERIFIED=1 "$GIT_SYNC_SCRIPT" sync
 }
 
 prepare_git_version() {
