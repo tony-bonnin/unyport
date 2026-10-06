@@ -94,7 +94,12 @@ release_build_lock() {
 
 sync_git() {
   [ -x "$GIT_SYNC_SCRIPT" ] || { echo "[unyport] git sync script absent: $GIT_SYNC_SCRIPT"; return 0; }
-  UNYPORT_GIT_BUILD_VERIFIED=1 "$GIT_SYNC_SCRIPT" sync
+  UNYPORT_GIT_AUTO_BUMP=0 UNYPORT_GIT_BUILD_VERIFIED=1 "$GIT_SYNC_SCRIPT" sync
+}
+
+prepare_git_version() {
+  [ -x "$GIT_SYNC_SCRIPT" ] || { echo "[unyport] git sync script absent: $GIT_SYNC_SCRIPT"; return 0; }
+  "$GIT_SYNC_SCRIPT" prepare-version
 }
 
 build_and_sync() {
@@ -104,7 +109,7 @@ build_and_sync() {
   fi
   rc=0
   load_env
-  if "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT" && sync_git; then
+  if prepare_git_version && "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT" && sync_git; then
     mark_clean
   else
     rc=$?

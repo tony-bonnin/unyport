@@ -148,6 +148,20 @@ commit_and_push() {
   fi
 }
 
+prepare_version_for_build() {
+  git -C "$ROOT_DIR" add -A
+  if git -C "$ROOT_DIR" diff --cached --quiet; then
+    log "aucune modification pour preparer la version"
+    return 0
+  fi
+  if [ -z "$UNYPORT_GIT_RELEASE_VERSION" ] && [ "$UNYPORT_GIT_AUTO_BUMP" = "1" ]; then
+    kind=$(detect_release_kind)
+    "$VERSION_SCRIPT" bump "$kind" >/dev/null
+    git -C "$ROOT_DIR" add -A
+    log "version preparee avant build: v$(release_version)"
+  fi
+}
+
 create_release_tag() {
   version=$(release_version)
   tag="v$version"
@@ -243,6 +257,7 @@ run_sync() {
 
 case "${1:-sync}" in
   sync|all) run_sync ;;
+  prepare-version) load_env; prepare_version_for_build ;;
   release)
     load_env
     version=${2:-}
