@@ -1362,9 +1362,34 @@ label.remember-me span {
   color: var(--text);
 }
 
-.pwa-ios-install__dialog h2 {
-  margin: 0 0 0.5rem;
+.pwa-ios-install__header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.pwa-ios-install__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.65rem;
+  flex: 0 0 48px;
+}
+
+.pwa-ios-install__copy {
+  min-width: 0;
+}
+
+.pwa-ios-install__copy h2 {
+  margin: 0;
   font-size: 1rem;
+}
+
+.pwa-ios-install__copy span {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--text-2);
+  font-size: 0.82rem;
 }
 
 .pwa-ios-install__dialog p {

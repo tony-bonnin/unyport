@@ -25,6 +25,33 @@
     return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
   }
 
+  function createInstallHeader(titleId, titleText) {
+    const header = document.createElement("div");
+    header.className = "pwa-ios-install__header";
+
+    const icon = document.createElement("img");
+    icon.className = "pwa-ios-install__icon";
+    icon.src = "/media/img/icons/unyport-app-192.png";
+    icon.alt = "";
+    icon.width = 48;
+    icon.height = 48;
+    icon.setAttribute("aria-hidden", "true");
+
+    const copy = document.createElement("div");
+    copy.className = "pwa-ios-install__copy";
+
+    const title = document.createElement("h2");
+    title.id = titleId;
+    title.textContent = titleText;
+
+    const appName = document.createElement("span");
+    appName.textContent = "UnyPort";
+
+    copy.append(title, appName);
+    header.append(icon, copy);
+    return header;
+  }
+
   function showIosInstallPrompt() {
     if (
       promptDisplayed ||
@@ -48,9 +75,7 @@
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute("aria-labelledby", `${iosPromptId}-title`);
 
-    const title = document.createElement("h2");
-    title.id = `${iosPromptId}-title`;
-    title.textContent = "Installer UnyPort";
+    const header = createInstallHeader(`${iosPromptId}-title`, "Installer l'app");
 
     const message = document.createElement("p");
     message.textContent =
@@ -78,7 +103,7 @@
     confirm.addEventListener("click", dismiss);
 
     actions.append(close, confirm);
-    dialog.append(title, message, actions);
+    dialog.append(header, message, actions);
     overlay.append(dialog);
     document.body.append(overlay);
   }
@@ -112,9 +137,7 @@
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute("aria-labelledby", `${nativePromptId}-title`);
 
-    const title = document.createElement("h2");
-    title.id = `${nativePromptId}-title`;
-    title.textContent = "Installer UnyPort";
+    const header = createInstallHeader(`${nativePromptId}-title`, "Installer l'app");
 
     const message = document.createElement("p");
     message.textContent = "Ajoutez UnyPort a votre bureau pour y acceder comme une application.";
@@ -152,7 +175,7 @@
     });
 
     actions.append(close, install);
-    dialog.append(title, message, actions);
+    dialog.append(header, message, actions);
     overlay.append(dialog);
     document.body.append(overlay);
   }
