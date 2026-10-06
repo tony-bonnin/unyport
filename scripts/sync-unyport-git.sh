@@ -13,6 +13,7 @@ UNYPORT_GIT_RELEASE_KIND=${UNYPORT_GIT_RELEASE_KIND:-auto}
 UNYPORT_GIT_RELEASE_VERSION=${UNYPORT_GIT_RELEASE_VERSION:-}
 UNYPORT_GIT_AUTO_BUMP=${UNYPORT_GIT_AUTO_BUMP:-1}
 UNYPORT_GIT_RELEASE_PUSH_TAGS=${UNYPORT_GIT_RELEASE_PUSH_TAGS:-1}
+UNYPORT_GIT_AUTO_RELEASE=${UNYPORT_GIT_AUTO_RELEASE:-1}
 UNYPORT_GIT_REQUIRE_BUILD=${UNYPORT_GIT_REQUIRE_BUILD:-1}
 UNYPORT_GIT_BUILD_VERIFIED=${UNYPORT_GIT_BUILD_VERIFIED:-0}
 GH_TOKEN_FILE=${GH_TOKEN_FILE:-${GITHUB_TOKEN_FILE:-}}
@@ -165,6 +166,68 @@ create_release_tag() {
   fi
 }
 
+head_change_notes() {
+  version=$(release_version)
+  printf 'Changes in UnyPort v%s:\n\n' "$version"
+  git -C "$ROOT_DIR" show --format= --name-status HEAD | format_change_list
+}
+
+release_body() {
+  head_change_notes
+  printf '\n'
+  printf 'Commit: %s\n' "$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
+}
+
+publish_github_release() {
+  [ "$UNYPORT_GIT_AUTO_RELEASE" = "1" ] || { log "publication release desactivee"; return 0; }
+  [ "$UNYPORT_GIT_SYNC_PUSH" = "1" ] || { log "push desactive: publication release ignoree"; return 0; }
+  [ -f "$GH_TOKEN_FILE" ] || { log "token GitHub absent: publication release ignoree"; return 0; }
+  command -v jq >/dev/null 2>&1 || { log "jq absent: publication release ignoree"; return 0; }
+
+  token=$(tr -d '\r\n' < "$GH_TOKEN_FILE")
+  [ -n "$token" ] || { log "token GitHub vide: publication release ignoree"; return 0; }
+
+  version=$(release_version)
+  tag="v$version"
+  repo="tony-bonnin/unyport"
+  api="https://api.github.com/repos/$repo/releases"
+  body=$(release_body)
+  tmp="${TMPDIR:-/tmp}/unyport-release.$$"
+
+  status=$(curl -fsS -o "$tmp" -w '%{http_code}' \
+    -H "Authorization: Bearer $token" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "$api/tags/$tag" || true)
+
+  payload=$(jq -n \
+    --arg tag_name "$tag" \
+    --arg name "UnyPort $tag" \
+    --arg body "$body" \
+    '{tag_name:$tag_name,name:$name,body:$body,draft:false,prerelease:false}')
+
+  if [ "$status" = "200" ]; then
+    release_id=$(jq -r '.id' "$tmp")
+    curl -fsS -X PATCH \
+      -H "Authorization: Bearer $token" \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      "$api/$release_id" \
+      -d "$payload" >/dev/null
+    log "release $tag mise a jour"
+  else
+    curl -fsS -X POST \
+      -H "Authorization: Bearer $token" \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      "$api" \
+      -d "$payload" >/dev/null
+    log "release $tag publiee"
+  fi
+
+  rm -f "$tmp"
+}
+
 run_sync() {
   load_env
   [ "$UNYPORT_GIT_SYNC_ENABLED" = "1" ] || { log "sync git desactive"; return 0; }
@@ -175,6 +238,7 @@ run_sync() {
   git_auth fetch origin --prune >/dev/null 2>&1 || true
   commit_and_push
   create_release_tag
+  publish_github_release
 }
 
 case "${1:-sync}" in
