@@ -1,10 +1,8 @@
 (() => {
   let promptDisplayed = false;
-  let deferredInstallPrompt = null;
   const nativeDismissCookie = "unyport_pwa_install_dismissed_v2=true";
   const iosDismissCookie = "unyport_ios_pwa_install_dismissed_v2=true";
   const iosPromptId = "unyport-ios-install-prompt";
-  const nativePromptId = "unyport-native-install-prompt";
 
   function hasCookie(cookieName) {
     return document.cookie.split(";").some((cookie) => cookie.trim() === cookieName);
@@ -23,33 +21,6 @@
 
   function isStandaloneApp() {
     return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone === true;
-  }
-
-  function createInstallHeader(titleId, titleText) {
-    const header = document.createElement("div");
-    header.className = "pwa-ios-install__header";
-
-    const icon = document.createElement("img");
-    icon.className = "pwa-ios-install__icon";
-    icon.src = "/media/img/icons/unyport-app-192.png";
-    icon.alt = "";
-    icon.width = 48;
-    icon.height = 48;
-    icon.setAttribute("aria-hidden", "true");
-
-    const copy = document.createElement("div");
-    copy.className = "pwa-ios-install__copy";
-
-    const title = document.createElement("h2");
-    title.id = titleId;
-    title.textContent = titleText;
-
-    const appName = document.createElement("span");
-    appName.textContent = "UnyPort";
-
-    copy.append(title, appName);
-    header.append(icon, copy);
-    return header;
   }
 
   function showIosInstallPrompt() {
@@ -75,7 +46,9 @@
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute("aria-labelledby", `${iosPromptId}-title`);
 
-    const header = createInstallHeader(`${iosPromptId}-title`, "Installer l'app");
+    const title = document.createElement("h2");
+    title.id = `${iosPromptId}-title`;
+    title.textContent = "Installer UnyPort";
 
     const message = document.createElement("p");
     message.textContent =
@@ -103,79 +76,7 @@
     confirm.addEventListener("click", dismiss);
 
     actions.append(close, confirm);
-    dialog.append(header, message, actions);
-    overlay.append(dialog);
-    document.body.append(overlay);
-  }
-
-  function dismissNativeInstallPrompt(overlay, persist) {
-    if (persist) setCookie(nativeDismissCookie);
-    deferredInstallPrompt = null;
-    overlay.remove();
-  }
-
-  function showNativeInstallPrompt() {
-    if (
-      promptDisplayed ||
-      hasCookie(nativeDismissCookie) ||
-      !deferredInstallPrompt ||
-      isStandaloneApp() ||
-      document.getElementById(nativePromptId)
-    ) {
-      return;
-    }
-
-    promptDisplayed = true;
-
-    const overlay = document.createElement("div");
-    overlay.id = nativePromptId;
-    overlay.className = "pwa-ios-install pwa-system-install";
-
-    const dialog = document.createElement("div");
-    dialog.className = "pwa-ios-install__dialog";
-    dialog.setAttribute("role", "dialog");
-    dialog.setAttribute("aria-modal", "true");
-    dialog.setAttribute("aria-labelledby", `${nativePromptId}-title`);
-
-    const header = createInstallHeader(`${nativePromptId}-title`, "Installer l'app");
-
-    const message = document.createElement("p");
-    message.textContent = "Ajoutez UnyPort a votre bureau pour y acceder comme une application.";
-
-    const actions = document.createElement("div");
-    actions.className = "pwa-ios-install__actions";
-
-    const close = document.createElement("button");
-    close.type = "button";
-    close.className = "pwa-ios-install__button pwa-ios-install__button--secondary";
-    close.textContent = "Plus tard";
-
-    const install = document.createElement("button");
-    install.type = "button";
-    install.className = "pwa-ios-install__button pwa-ios-install__button--primary";
-    install.textContent = "Installer";
-
-    close.addEventListener("click", () => dismissNativeInstallPrompt(overlay, true));
-    install.addEventListener("click", async () => {
-      const installPrompt = deferredInstallPrompt;
-      if (!installPrompt) {
-        dismissNativeInstallPrompt(overlay, false);
-        return;
-      }
-
-      try {
-        await installPrompt.prompt();
-        const { outcome } = await installPrompt.userChoice;
-        if (outcome === "dismissed") setCookie(nativeDismissCookie);
-      } catch (_) {
-        // The browser may reject prompt() if installability changes between event and click.
-      } finally {
-        dismissNativeInstallPrompt(overlay, false);
-      }
-    });
-
-    actions.append(close, install);
-    dialog.append(header, message, actions);
+    dialog.append(title, message, actions);
     overlay.append(dialog);
     document.body.append(overlay);
   }
@@ -184,14 +85,20 @@
     event.preventDefault();
 
     if (promptDisplayed || hasCookie(nativeDismissCookie)) return;
-    deferredInstallPrompt = event;
-    setTimeout(showNativeInstallPrompt, 5000);
+    promptDisplayed = true;
+
+    setTimeout(() => {
+      event.prompt();
+      event.userChoice
+        .then(({ outcome }) => {
+          if (outcome === "dismissed") setCookie(nativeDismissCookie);
+        })
+        .catch(() => {});
+    }, 5000);
   });
 
   window.addEventListener("appinstalled", () => {
-    deferredInstallPrompt = null;
-    const overlay = document.getElementById(nativePromptId);
-    if (overlay) overlay.remove();
+    promptDisplayed = true;
   });
 
   window.addEventListener("DOMContentLoaded", () => {
