@@ -6,6 +6,7 @@ ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 ENV_FILE=${UNYPORT_GIT_SYNC_ENV:-"$ROOT_DIR/unyport-git-sync.env"}
 GIT_SYNC_SCRIPT=${GIT_SYNC_SCRIPT:-"$ROOT_DIR/scripts/sync-unyport-git.sh"}
 BUILD_SCRIPT=${BUILD_SCRIPT:-"$ROOT_DIR/scripts/build-unyport.sh"}
+SECURITY_SCAN_SCRIPT=${SECURITY_SCAN_SCRIPT:-"$ROOT_DIR/scripts/security-scan.sh"}
 POLL_INTERVAL=${POLL_INTERVAL:-30}
 WATCH_DEBOUNCE=${WATCH_DEBOUNCE:-6}
 WATCH_QUIET_CHECKS=${WATCH_QUIET_CHECKS:-3}
@@ -103,7 +104,7 @@ build_and_sync() {
   fi
   rc=0
   load_env
-  if "$BUILD_SCRIPT" && sync_git; then
+  if "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT" && sync_git; then
     mark_clean
   else
     rc=$?
@@ -154,4 +155,3 @@ case "$MODE" in
   watch) watch_loop ;;
   *) echo "usage: $0 [start|stop|status|once|watch]" >&2; exit 1 ;;
 esac
-

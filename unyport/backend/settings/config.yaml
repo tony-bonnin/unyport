@@ -1,9 +1,3 @@
-apps:
-  - name: TTYd
-    host: ttyd
-    port: 7681
-    type: terminal
-
 auth:
   github:
     client_id: "Iv1.abcdef1234567890"

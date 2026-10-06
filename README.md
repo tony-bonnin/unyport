@@ -77,7 +77,6 @@ That project is archived on Codeberg: [codeberg.org/trinity-labs/official](https
 | **Security** | CSRF, JWT, CSP, TLS, 2FA, OAuth status |
 | **Logs** | Recent system logs with severity |
 | **Thermal** | CPU pkg, core avg, board, NVMe temps |
-| **Apps** | Proxy status, active connections |
 | **Xen** | Dom0/DomU detection, VM lifecycle |
 
 ---
@@ -232,8 +231,6 @@ Role     : admin
 
 - OAuth client IDs and secrets in `settings/config.yaml` are placeholders and must be replaced before use.
 - In this repository source layout, that file lives at [unyport/backend/settings/config.yaml](./unyport/backend/settings/config.yaml).
-- The default app proxy points to `ttyd`. If no `ttyd` service exists on the same network, `/proxy/ttyd/` will stay unavailable until you adapt the UnyPort app config.
-
 ---
 
 <br>

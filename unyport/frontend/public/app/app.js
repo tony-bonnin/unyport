@@ -55,7 +55,6 @@ document.addEventListener('alpine:init', () => {
     memPct: 0,
 
     sseConnected: false,
-    apps: [],
     vms: [],
     lbuPresent: false,
     lbuState: 'absent',
@@ -211,7 +210,6 @@ document.addEventListener('alpine:init', () => {
     _fmtBytes: fmtBytes,
     _cleanCPU: cleanCPU,
     _formatUptime: formatUptime,
-    _appIcon: appIcon,
     _xenRoleLabel: xenRoleLabel,
 
     _hostRoleIcon: (role) => {
@@ -1264,7 +1262,7 @@ document.addEventListener('alpine:init', () => {
       this.page = 'app';
       document.documentElement.removeAttribute('data-auth-page');
       this._lockShellScroll(false);
-      await Promise.all([this._loadApps(), this._loadSysInfo(), this.loadRebootHistory()]);
+      await Promise.all([this._loadSysInfo(), this.loadRebootHistory()]);
       this._initRouter();
 
       if (window.FontAwesome?.dom) window.FontAwesome.dom.i2svg();
@@ -1276,13 +1274,6 @@ document.addEventListener('alpine:init', () => {
         this._startSSE();
         this._loadExtended();
       }, 500);
-    },
-
-    async _loadApps() {
-      try {
-        const list = await apiFetch('/api/apps');
-        this.apps = Array.isArray(list) ? list : [];
-      } catch { this.apps = []; }
     },
 
     async _loadSysInfo() {
@@ -1765,7 +1756,6 @@ document.addEventListener('alpine:init', () => {
       this.hostRoleRuntime = '';
       this.hostRoleLabelStr = '—';
       this.hostRoleVerified = false;
-      this.apps = [];
       this.vms = [];
       this.uptime = '—';
       this.uptimeSecs = 0;

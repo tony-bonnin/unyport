@@ -1,21 +1,18 @@
 package server
 
 import (
-	"encoding/json"
 	"io"
 	"io/fs"
 	"log/slog"
 	"mime"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
 	"unyport/auth"
 	"unyport/config"
 	"unyport/middleware"
-	"unyport/proxy"
 	"unyport/sse"
 	"unyport/xenctl"
 )
@@ -156,32 +153,6 @@ func setupRoutes(
 	mux.Handle("/api/xen/domains/create", adminMW(http.HandlerFunc(xenHandler.Create)))
 	mux.Handle("/api/xen/domains/", writeMW(http.HandlerFunc(xenHandler.DomainAction)))
 
-	// ---- /api/apps : liste des apps proxifiées (protégé — tous rôles) ----
-	mux.Handle("/api/apps", authMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		type appInfo struct {
-			Name   string `json:"name"`
-			Host   string `json:"host"`
-			Port   int    `json:"port"`
-			Path   string `json:"path"`
-			Target string `json:"target"`
-			Type   string `json:"type"`
-		}
-		list := make([]appInfo, 0, len(cfg.Apps))
-		for _, app := range cfg.Apps {
-			name := strings.ToLower(app.Name)
-			list = append(list, appInfo{
-				Name:   name,
-				Host:   strings.ToLower(app.Host),
-				Port:   app.Port,
-				Path:   "/proxy/" + name + "/",
-				Target: app.TargetURL(),
-				Type:   strings.ToLower(app.Type),
-			})
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(list)
-	})))
-
 	// ---- Profil utilisateur (protégé — tous rôles) ----
 	mux.Handle("/api/profile", authMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -207,30 +178,12 @@ func setupRoutes(
 	mux.Handle("/api/admin/users", adminMW(http.HandlerFunc(authHandler.AdminUsers)))
 	mux.Handle("/api/admin/users/", adminMW(http.HandlerFunc(authHandler.AdminUserByEmail)))
 
-	// ---- Proxies (protégés — tous rôles) ----
-	for _, app := range cfg.Apps {
-		lname := strings.ToLower(app.Name)
-		prefix := path.Clean("/proxy/" + lname)
-		handler := proxy.Make(app, prefix, logger)
-
-		mux.Handle(prefix+"/", authMW(handler))
-		func(p string) {
-			mux.Handle(p, authMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				http.Redirect(w, r, p+"/", http.StatusMovedPermanently)
-			})))
-		}(prefix)
-	}
-
-	mux.Handle("/proxy/", authMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.NotFound(w, r)
-	})))
-
 	return mux
 }
 
 // spaFallback — mode prod (embed FS)
 func spaFallback(fsys fs.FS, index string) http.Handler {
-	deny := []string{"/api/", "/proxy/", "/sse/", "/css/", "/app/", "/media/", "/assets/", "/static/", "/vendor/"}
+	deny := []string{"/api/", "/sse/", "/css/", "/app/", "/media/", "/assets/", "/static/", "/vendor/"}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
@@ -264,7 +217,7 @@ func spaFallback(fsys fs.FS, index string) http.Handler {
 
 // spaFallbackDir — mode dev (http.Dir)
 func spaFallbackDir(assetsDir string) http.Handler {
-	deny := []string{"/api/", "/proxy/", "/sse/", "/css/", "/app/", "/media/", "/assets/", "/static/", "/vendor/"}
+	deny := []string{"/api/", "/sse/", "/css/", "/app/", "/media/", "/assets/", "/static/", "/vendor/"}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {

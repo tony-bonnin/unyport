@@ -2,7 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /auth/
-Disallow: /proxy/
 Disallow: /sse/
 
 Sitemap: https://unyport.app/sitemap.xml

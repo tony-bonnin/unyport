@@ -70,20 +70,6 @@ function vmStatusClass(status) {
   return 'status-unknown';
 }
 
-// ── Apps proxy ─────────────────────────────────────────────
-
-function appIcon(type) {
-  const map = {
-    terminal: 'bi bi-terminal-fill',
-    database: 'fa-solid fa-database',
-    code: 'fa-solid fa-file-code',
-    editor: 'fa-solid fa-file-code',
-    web: 'fa-solid fa-globe',
-    monitor: 'fa-solid fa-chart-line',
-  };
-  return map[String(type)] || 'fa-solid fa-circle-nodes';
-}
-
 // ── LBU ────────────────────────────────────────────────────
 
 // Retourne true si le statut LBU indique des changements non commités

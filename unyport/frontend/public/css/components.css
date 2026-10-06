@@ -1108,7 +1108,9 @@ label.remember-me span {
 }
 
 .reboot-heatmap-cell.is-today {
-  border-color: var(--brand);
+  background: #22c55e;
+  border-color: #4ade80;
+  opacity: 1;
 }
 
 .reboot-heatmap-cell.is-today::after {
@@ -1116,8 +1118,14 @@ label.remember-me span {
   position: absolute;
   inset: -2px;
   border-radius: 0.36rem;
-  opacity: 0.33;
+  border: 1px solid rgba(134, 239, 172, 0.72);
+  opacity: 1;
   pointer-events: none;
+}
+
+[data-theme="dark"] .reboot-heatmap-cell.is-today {
+  background: #22c55e;
+  border-color: #86efac;
 }
 
 .reboot-heatmap-cell:focus-visible {

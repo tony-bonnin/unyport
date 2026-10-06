@@ -91,7 +91,7 @@ detect_release_kind() {
     path=${2:-}
     case "$1" in R*|C*) path=${3:-$path} ;; esac
     case "$path" in
-      unyport/backend/go.mod|unyport/backend/go.sum|unyport/backend/cmd/*|unyport/backend/server/*|unyport/backend/auth/*|unyport/backend/middleware/*|unyport/backend/sse/*|unyport/backend/proxy/*|docker-compose.yml|scripts/*)
+      unyport/backend/go.mod|unyport/backend/go.sum|unyport/backend/cmd/*|unyport/backend/server/*|unyport/backend/auth/*|unyport/backend/middleware/*|unyport/backend/sse/*|docker-compose.yml|scripts/*)
         kind=$(max_kind "$kind" minor)
         ;;
     esac
