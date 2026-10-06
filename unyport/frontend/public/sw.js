@@ -1,4 +1,4 @@
-const CACHE_NAME = "unyport-shell-v2";
+const CACHE_NAME = "unyport-shell-v3";
 const OFFLINE_URL = "/offline.html";
 const CACHEABLE_PREFIXES = [
   "/app/",
@@ -18,7 +18,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(["/", OFFLINE_URL, "/manifest.json", "/favicon.ico", "/media/img/icons/unyport-icon.svg"]))
+      .then((cache) => cache.addAll(["/", OFFLINE_URL, "/manifest.json", "/favicon.ico", "/media/img/icons/unyport-app.png"]))
       .then(() => self.skipWaiting())
   );
 });

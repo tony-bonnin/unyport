@@ -12,9 +12,9 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/media/img/icons/unyport-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/media/img/icons/unyport-app.png",
+      "sizes": "1000x1000",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
