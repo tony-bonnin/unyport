@@ -1,4 +1,4 @@
-const CACHE_NAME = "unyport-shell-v3";
+const CACHE_NAME = "unyport-shell-v4";
 const OFFLINE_URL = "/offline.html";
 const CACHEABLE_PREFIXES = [
   "/app/",
@@ -18,7 +18,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then((cache) => cache.addAll(["/", OFFLINE_URL, "/manifest.json", "/favicon.ico", "/media/img/icons/unyport-app.png"]))
+      .then((cache) => cache.addAll(["/", OFFLINE_URL, "/manifest.json", "/favicon.ico", "/media/img/icons/unyport-app-192.png", "/media/img/icons/unyport-app-512.png"]))
       .then(() => self.skipWaiting())
   );
 });
@@ -48,7 +48,7 @@ self.addEventListener("fetch", (event) => {
   if (!cacheable && !isNavigation) return;
 
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: "no-store" })
       .then((response) => {
         if (response.ok && cacheable) {
           const copy = response.clone();

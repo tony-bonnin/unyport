@@ -1,6 +1,8 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -9,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"unyport/auth"
 	"unyport/config"
@@ -16,6 +20,12 @@ import (
 	"unyport/sse"
 	"unyport/xenctl"
 )
+
+var publicVersionCache struct {
+	sync.Mutex
+	checked time.Time
+	latest  string
+}
 
 // mimeTypes — table explicite pour les environnements sans /etc/mime.types
 // (Alpine minimal, BusyBox). http.FileServerFS utilise mime.TypeByExtension
@@ -47,6 +57,10 @@ func init() {
 // Immunise contre les Alpine sans /etc/mime.types (embed prod).
 func mimeFixFS(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/sw.js", "/manifest.json":
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		}
 		if r.URL.Path == "/manifest.json" {
 			w.Header().Set("Content-Type", "application/manifest+json; charset=utf-8")
 			h.ServeHTTP(w, r)
@@ -58,6 +72,74 @@ func mimeFixFS(h http.Handler) http.Handler {
 		}
 		h.ServeHTTP(w, r)
 	})
+}
+
+func publicVersionHandler(w http.ResponseWriter, r *http.Request) {
+	latest := latestUnyPortRelease()
+	resp := map[string]any{
+		"version":    config.Version,
+		"latest":     latest,
+		"up_to_date": latest == "" || compareDotVersions(strings.TrimPrefix(config.Version, "v"), strings.TrimPrefix(latest, "v")) >= 0,
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func latestUnyPortRelease() string {
+	publicVersionCache.Lock()
+	defer publicVersionCache.Unlock()
+	if publicVersionCache.latest != "" && time.Since(publicVersionCache.checked) < 10*time.Minute {
+		return publicVersionCache.latest
+	}
+	publicVersionCache.checked = time.Now()
+
+	client := &http.Client{Timeout: 3 * time.Second}
+	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/tony-bonnin/unyport/releases/latest", nil)
+	if err != nil {
+		return publicVersionCache.latest
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", "unyport-version-check")
+	res, err := client.Do(req)
+	if err != nil {
+		return publicVersionCache.latest
+	}
+	defer res.Body.Close()
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		return publicVersionCache.latest
+	}
+	var payload struct {
+		TagName string `json:"tag_name"`
+	}
+	if json.NewDecoder(res.Body).Decode(&payload) != nil {
+		return publicVersionCache.latest
+	}
+	if payload.TagName != "" {
+		publicVersionCache.latest = strings.TrimPrefix(payload.TagName, "v")
+	}
+	return publicVersionCache.latest
+}
+
+func compareDotVersions(a, b string) int {
+	as := strings.Split(a, ".")
+	bs := strings.Split(b, ".")
+	for i := 0; i < 3; i++ {
+		av, bv := 0, 0
+		if i < len(as) {
+			_, _ = fmt.Sscanf(as[i], "%d", &av)
+		}
+		if i < len(bs) {
+			_, _ = fmt.Sscanf(bs[i], "%d", &bv)
+		}
+		if av > bv {
+			return 1
+		}
+		if av < bv {
+			return -1
+		}
+	}
+	return 0
 }
 
 func setupRoutes(
@@ -82,6 +164,7 @@ func setupRoutes(
 
 	// ---- Publiques ----
 	mux.HandleFunc("/api/csrf", middleware.CSRFTokenHandler)
+	mux.HandleFunc("/api/public/version", publicVersionHandler)
 	mux.Handle("/api/login", loginRL(http.HandlerFunc(authHandler.Login)))
 	mux.HandleFunc("/api/logout", authHandler.Logout)
 	mux.HandleFunc("/api/session", authHandler.Session)
