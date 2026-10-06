@@ -90,6 +90,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
    ============================================================ */
 .page-login {
   height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   height: -webkit-fill-available;
   display: flex;
 }

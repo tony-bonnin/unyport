@@ -819,7 +819,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 
 @media (max-width: 900px) {
   body { overflow: auto; }
-  #app { height: auto; min-height: 100vh; min-height: -webkit-fill-available; }
+  #app { height: auto; min-height: 100vh; min-height: 100dvh; min-height: -webkit-fill-available; }
   .main-inner { width: calc(100% - 32px); gap: 20px; }
   .action-grid { grid-template-columns: 1fr 1fr; }
   .resources-grid { grid-template-columns: 1fr; }
@@ -833,9 +833,20 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 }
 
 @media (max-width: 700px) {
+.page-login {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    align-items: stretch;
+    background: #3e3aab;
+}
 .login-left { display: none; }
 .login-right {
-    padding: 2.33rem;
+    min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2.33rem 2.33rem max(2.33rem, env(safe-area-inset-bottom));
     background: url(/media/img/logos/logo-unyport-white-full.png) no-repeat #3e3aab;
     color: white;
     background-size: 10rem;
