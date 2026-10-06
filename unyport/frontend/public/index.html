@@ -1429,7 +1429,7 @@
           </div>
         </div>
 
-        <div x-show="profilePage === 'password'">
+        <form x-show="profilePage === 'password'" @submit.prevent="savePassword()">
           <div class="form-row">
             <label>Current password</label>
             <input type="password" x-model="pwdOld" autocomplete="current-password" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Current password'">
@@ -1445,10 +1445,10 @@
           <p class="form-error"   x-show="pwdError"   x-text="pwdError"></p>
           <p class="form-success" x-show="pwdSuccess" x-text="pwdSuccess"></p>
           <div class="modal-actions">
-            <button class="btn-ghost" title="Cancel password change" @click="closeProfile()">Cancel</button>
-            <button class="btn-primary" title="Update your password" @click="savePassword()" :disabled="isViewer">Change password</button>
+            <button type="button" class="btn-ghost" title="Cancel password change" @click="closeProfile()">Cancel</button>
+            <button type="submit" class="btn-primary" title="Update your password" :disabled="isViewer">Change password</button>
           </div>
-        </div>
+        </form>
 
         <div x-show="profilePage === 'ssh'">
           <div class="form-row">
@@ -1521,7 +1521,7 @@
           <div class="spinner"></div>
         </div>
 
-        <div class="admin-create-form">
+        <form class="admin-create-form" @submit.prevent="adminCreateUser()">
           <h3>Add a user</h3>
           <div class="admin-create-row">
             <input type="email" x-model="adminNewEmail" placeholder="email@domain.com" class="input-sm" title="New user email address">
@@ -1531,12 +1531,12 @@
               <option value="operator">Operator</option>
               <option value="viewer">Viewer</option>
             </select>
-            <button class="btn-primary-sm" title="Create user" @click="adminCreateUser()">
+            <button type="submit" class="btn-primary-sm" title="Create user">
               <i class="fa-solid fa-plus"></i> Create
             </button>
           </div>
           <p class="form-error" x-show="adminCreateError" x-text="adminCreateError"></p>
-        </div>
+        </form>
 
       </div>
     </div>
