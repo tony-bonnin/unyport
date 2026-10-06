@@ -1,8 +1,8 @@
 (() => {
   let promptDisplayed = false;
   let deferredInstallPrompt = null;
-  const nativeDismissCookie = "unyport_pwa_install_dismissed=true";
-  const iosDismissCookie = "unyport_ios_pwa_install_dismissed=true";
+  const nativeDismissCookie = "unyport_pwa_install_dismissed_v2=true";
+  const iosDismissCookie = "unyport_ios_pwa_install_dismissed_v2=true";
   const iosPromptId = "unyport-ios-install-prompt";
   const nativePromptId = "unyport-native-install-prompt";
 
