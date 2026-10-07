@@ -2,17 +2,23 @@ package xenctl
 
 import (
 	"context"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 )
 
 type fakeRunner struct {
-	name string
-	args []string
-	out  string
+	name  string
+	args  []string
+	out   string
+	calls int
 }
 
 func (f *fakeRunner) Run(_ context.Context, name string, args ...string) ([]byte, error) {
+	f.calls++
 	f.name = name
 	f.args = append([]string(nil), args...)
 	return []byte(f.out), nil
@@ -65,5 +71,50 @@ func TestCreateAllowsOnlyXenConfigPaths(t *testing.T) {
 	}
 	if _, err := client.Create(context.Background(), "/etc/xen/configs/app.cfg", true); err != nil {
 		t.Fatalf("expected config path to be accepted: %v", err)
+	}
+}
+
+func TestHandlerSkipsXLWhenHostIsNotDom0(t *testing.T) {
+	runner := &fakeRunner{}
+	handler := NewHandler(&Client{Runner: runner}, slog.Default(), func() bool { return false })
+
+	req := httptest.NewRequest(http.MethodGet, "/api/xen/domains", nil)
+	rec := httptest.NewRecorder()
+	handler.Domains(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("domains status = %d, want %d", rec.Code, http.StatusOK)
+	}
+	if runner.calls != 0 {
+		t.Fatalf("domains called xl %d time(s), want 0", runner.calls)
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/xen/info", nil)
+	rec = httptest.NewRecorder()
+	handler.Info(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("info status = %d, want %d", rec.Code, http.StatusOK)
+	}
+	if runner.calls != 0 {
+		t.Fatalf("info called xl %d time(s), want 0", runner.calls)
+	}
+
+	req = httptest.NewRequest(http.MethodPost, "/api/xen/domains/app.vm/actions", strings.NewReader(`{"action":"shutdown"}`))
+	rec = httptest.NewRecorder()
+	handler.DomainAction(rec, req)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("action status = %d, want %d", rec.Code, http.StatusForbidden)
+	}
+	if runner.calls != 0 {
+		t.Fatalf("action called xl %d time(s), want 0", runner.calls)
+	}
+
+	req = httptest.NewRequest(http.MethodPost, "/api/xen/domains/create", strings.NewReader(`{"config_path":"/etc/xen/configs/app.cfg"}`))
+	rec = httptest.NewRecorder()
+	handler.Create(rec, req)
+	if rec.Code != http.StatusForbidden {
+		t.Fatalf("create status = %d, want %d", rec.Code, http.StatusForbidden)
+	}
+	if runner.calls != 0 {
+		t.Fatalf("create called xl %d time(s), want 0", runner.calls)
 	}
 }

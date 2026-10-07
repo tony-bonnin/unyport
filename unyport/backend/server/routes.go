@@ -238,8 +238,8 @@ func setupRoutes(
 	mux.Handle("/api/logs", authMW(http.HandlerFunc(broker.LogsListHandler)))
 	mux.Handle("/api/logs/tail", authMW(http.HandlerFunc(broker.LogsTailHandler)))
 
-	// ---- API Xen native xl | lecture tous rôles, actions operator/admin ----
-	xenHandler := xenctl.NewHandler(xenctl.NewClient(), logger)
+	// ---- API Xen native xl | xl uniquement sur Dom0, actions operator/admin ----
+	xenHandler := xenctl.NewHandler(xenctl.NewClient(), logger, broker.IsXenDom0)
 	mux.Handle("/api/xen/info", authMW(http.HandlerFunc(xenHandler.Info)))
 	mux.Handle("/api/xen/domains", authMW(http.HandlerFunc(xenHandler.Domains)))
 	mux.Handle("/api/xen/domains/create", adminMW(http.HandlerFunc(xenHandler.Create)))

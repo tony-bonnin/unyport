@@ -12,6 +12,7 @@ import (
 type Handler struct {
 	client *Client
 	logger *slog.Logger
+	isDom0 func() bool
 }
 
 type actionRequest struct {
@@ -22,13 +23,25 @@ type actionRequest struct {
 	DryRun     bool   `json:"dry_run"`
 }
 
-func NewHandler(client *Client, logger *slog.Logger) *Handler {
-	return &Handler{client: client, logger: logger}
+func NewHandler(client *Client, logger *slog.Logger, isDom0 func() bool) *Handler {
+	return &Handler{client: client, logger: logger, isDom0: isDom0}
+}
+
+func (h *Handler) dom0Ready() bool {
+	return h.isDom0 != nil && h.isDom0()
 }
 
 func (h *Handler) Domains(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !h.dom0Ready() {
+		jsonOK(w, map[string]any{
+			"available": false,
+			"reason":    "not_xen_dom0",
+			"domains":   []Domain{},
+		})
 		return
 	}
 	domains, err := h.client.ListDomains(r.Context())
@@ -44,6 +57,17 @@ func (h *Handler) Info(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	if !h.dom0Ready() {
+		jsonOK(w, map[string]any{
+			"available": false,
+			"reason":    "not_xen_dom0",
+			"info": map[string]any{
+				"available": false,
+				"reason":    "not_xen_dom0",
+			},
+		})
+		return
+	}
 	info, err := h.client.Info(r.Context())
 	if err != nil {
 		jsonError(w, err.Error(), http.StatusBadGateway)
@@ -55,6 +79,13 @@ func (h *Handler) Info(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DomainAction(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !h.dom0Ready() {
+		if h.logger != nil {
+			h.logger.Warn("xen action refused", "reason", "not_xen_dom0", "path", r.URL.Path)
+		}
+		jsonError(w, "xen dom0 required", http.StatusForbidden)
 		return
 	}
 	domain, ok := domainFromActionPath(r.URL.Path)
@@ -85,6 +116,13 @@ func (h *Handler) DomainAction(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		jsonError(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	if !h.dom0Ready() {
+		if h.logger != nil {
+			h.logger.Warn("xen create refused", "reason", "not_xen_dom0")
+		}
+		jsonError(w, "xen dom0 required", http.StatusForbidden)
 		return
 	}
 	if middleware.UserRoleFromCtx(r.Context()) != "admin" {

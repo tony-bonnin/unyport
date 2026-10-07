@@ -22,14 +22,14 @@ const (
 
 // Broker collecte les métriques et diffuse vers N clients SSE connectés.
 type Broker struct {
-	mu            sync.RWMutex
-	ring          [ringSize]Snapshot
-	head          int
-	count         int
-	clients       map[chan Snapshot]struct{}
-	logger        *slog.Logger
-	hostRole      HostRole // détecté une fois au démarrage, immuable
-	rebootLogPath string
+	mu                 sync.RWMutex
+	ring               [ringSize]Snapshot
+	head               int
+	count              int
+	clients            map[chan Snapshot]struct{}
+	logger             *slog.Logger
+	hostRole           HostRole // détecté une fois au démarrage, immuable
+	rebootLogPath      string
 	startupHistoryPath string
 }
 
@@ -43,14 +43,18 @@ func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath str
 	)
 
 	b := &Broker{
-		clients:  make(map[chan Snapshot]struct{}),
-		logger:   logger,
-		hostRole: role,
-		rebootLogPath: rebootLogPath,
+		clients:            make(map[chan Snapshot]struct{}),
+		logger:             logger,
+		hostRole:           role,
+		rebootLogPath:      rebootLogPath,
 		startupHistoryPath: startupHistoryPath,
 	}
 	go b.loop()
 	return b
+}
+
+func (b *Broker) IsXenDom0() bool {
+	return b.hostRole.Role == "Dom0"
 }
 
 func (b *Broker) loop() {
@@ -616,11 +620,11 @@ type rebootHeatmapCell struct {
 }
 
 type rebootHeatmapResp struct {
-	Year        int                 `json:"year"`
-	TotalReboots int                `json:"total_reboots"`
-	MaxPerDay   int                 `json:"max_per_day"`
-	LeadBlank   int                 `json:"lead_blank"`
-	Days        []rebootHeatmapCell `json:"days"`
+	Year         int                 `json:"year"`
+	TotalReboots int                 `json:"total_reboots"`
+	MaxPerDay    int                 `json:"max_per_day"`
+	LeadBlank    int                 `json:"lead_blank"`
+	Days         []rebootHeatmapCell `json:"days"`
 }
 
 type startupHistoryRecord struct {
@@ -690,7 +694,6 @@ func (b *Broker) RebootsHandler(w http.ResponseWriter, r *http.Request) {
 		Days:         cells,
 	})
 }
-
 
 func parseStartupRebootsByDay(path string, year int, loc *time.Location) (map[string]int, error) {
 	out := make(map[string]int)

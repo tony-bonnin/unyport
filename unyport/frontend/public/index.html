@@ -540,7 +540,7 @@
                   <div class="hyp-status-dot"></div>
                   <div>
                     <strong x-text="sysHostname"></strong>
-                    <p>Management panel · Alpine Xen</p>
+                    <p x-text="hostPanelSubtitle"></p>
                   </div>
                 </div>
 
@@ -553,7 +553,7 @@
                     <span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span>
                     <span x-text="kernelLts || kernelShort || sysKernel || '|'"></span>
                   </dd></div>
-                  <div class="hyp-row"><dt>Xen role</dt><dd x-text="xenLabel || '|'"></dd></div>
+                  <div class="hyp-row"><dt x-text="hostRoleRowLabel"></dt><dd x-text="xenLabel || '|'"></dd></div>
                   <div class="hyp-row"><dt>IP address</dt><dd x-text="netIpDisplay"></dd></div>
                   <div class="hyp-row"><dt>Interface</dt><dd x-text="netIfaceDisplay"></dd></div>
                 </dl>
@@ -561,7 +561,7 @@
                 <div class="hyp-actions">
                   <a href="/hypervisor" class="btn-primary" :title="hostMenuTitle" @click.prevent="navigate('/hypervisor')">
                     <i class="fa-solid fa-server"></i>
-                    <span x-text="isXenDom0 ? 'View machines' : 'View host'"></span>
+                    <span x-text="hostPrimaryActionLabel"></span>
                   </a>
                   <a href="/security" class="btn-ghost" title="Review security settings" @click.prevent="navigate('/security')">
                     <i class="fa-solid fa-shield-halved"></i>
@@ -731,12 +731,12 @@
               </div>
               <div class="hyp-info-card">
                 <div class="hyp-info-card-head">
-                  <div class="res-icon res-orange"><i class="fa-solid fa-cubes"></i></div>
-                  <h3>Xen / Virtualization</h3>
+                  <div class="res-icon res-orange"><i :class="hostProfileIcon"></i></div>
+                  <h3 x-text="hostProfileTitle"></h3>
                 </div>
-	                <dl class="res-kv">
-	                  <dt>Role</dt><dd x-text="xenLabel || '|'"></dd>
-	                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
+                <dl class="res-kv">
+                  <dt x-text="hostRoleRowLabel"></dt><dd x-text="xenLabel || '|'"></dd>
+                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
 	                  <dt x-show="showXenInfo">Xen</dt><dd x-show="showXenInfo" x-text="xenInfo.xen_version || '|'"></dd>
 	                  <dt x-show="showXenInfo">Scheduler</dt><dd x-show="showXenInfo" x-text="xenInfo.scheduler || '|'"></dd>
 	                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
@@ -773,50 +773,54 @@
               </div>
             </div>
 
-	            <div class="section-head"><h2>Virtual machines</h2><p>Live domains from the Xen xl toolstack.</p></div>
-	            <div class="proc-table-wrap" x-show="showXenDomains">
-	              <table class="proc-table">
-	                <thead>
-	                  <tr>
-	                    <th>ID</th>
-	                    <th>Name</th>
-	                    <th>State</th>
-		                    <th>vCPUs</th>
-		                    <th>Memory</th>
-		                    <th>CPU</th>
-		                    <th x-show="canRunXenActions">Actions</th>
-		                  </tr>
-	                </thead>
-	                <tbody>
-	                  <template x-for="dom in xenDomains" :key="dom.domid">
-	                    <tr>
-	                      <td class="proc-pid" x-text="dom.domid"></td>
-	                      <td x-text="dom.name"></td>
-	                      <td><span class="badge" x-text="dom.state || '|'"></span></td>
-		                      <td x-text="dom.vcpus"></td>
-		                      <td x-text="_fmtMB((dom.mem_mb || 0) * 1024)"></td>
-		                      <td x-text="pct1(dom.cpu_pct)"></td>
-		                      <td x-show="canRunXenActions">
-		                        <div class="xen-action-row" x-show="canActOnXenDomain(dom)">
-		                          <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'shutdown')" title="Shutdown domain" @click="runXenAction(dom, 'shutdown')">Shutdown</button>
-		                          <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'reboot')" title="Reboot domain" @click="runXenAction(dom, 'reboot')">Reboot</button>
-		                          <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'pause')" title="Pause domain" @click="runXenAction(dom, 'pause')">Pause</button>
-		                          <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'unpause')" title="Unpause domain" @click="runXenAction(dom, 'unpause')">Unpause</button>
-		                          <button class="btn-danger-sm" x-show="isAdmin" :disabled="xenActionBusy === xenActionKey(dom, 'destroy')" title="Force destroy domain" @click="runXenAction(dom, 'destroy')">
-		                            <i class="fa-solid fa-bolt"></i>
-		                          </button>
-		                        </div>
-		                      </td>
-		                    </tr>
-	                  </template>
-	                </tbody>
-	              </table>
-	            </div>
-	            <div class="placeholder-card" x-show="!showXenDomains">
-	              <i class="fa-solid fa-terminal placeholder-icon"></i>
-	              <h3>No Xen domains reported</h3>
-	              <p>The xl toolstack is unavailable or this host is not a Xen Dom0.</p>
-	            </div>
+            <template x-if="showVirtualMachinesSection">
+              <div>
+                <div class="section-head"><h2>Virtual machines</h2><p>Live domains from the Xen Dom0 xl toolstack.</p></div>
+                <div class="proc-table-wrap" x-show="showXenDomains">
+                  <table class="proc-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>State</th>
+                        <th>vCPUs</th>
+                        <th>Memory</th>
+                        <th>CPU</th>
+                        <th x-show="canRunXenActions">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <template x-for="dom in xenDomains" :key="dom.domid">
+                        <tr>
+                          <td class="proc-pid" x-text="dom.domid"></td>
+                          <td x-text="dom.name"></td>
+                          <td><span class="badge" x-text="dom.state || '|'"></span></td>
+                          <td x-text="dom.vcpus"></td>
+                          <td x-text="_fmtMB((dom.mem_mb || 0) * 1024)"></td>
+                          <td x-text="pct1(dom.cpu_pct)"></td>
+                          <td x-show="canRunXenActions">
+                            <div class="xen-action-row" x-show="canActOnXenDomain(dom)">
+                              <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'shutdown')" title="Shutdown domain" @click="runXenAction(dom, 'shutdown')">Shutdown</button>
+                              <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'reboot')" title="Reboot domain" @click="runXenAction(dom, 'reboot')">Reboot</button>
+                              <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'pause')" title="Pause domain" @click="runXenAction(dom, 'pause')">Pause</button>
+                              <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'unpause')" title="Unpause domain" @click="runXenAction(dom, 'unpause')">Unpause</button>
+                              <button class="btn-danger-sm" x-show="isAdmin" :disabled="xenActionBusy === xenActionKey(dom, 'destroy')" title="Force destroy domain" @click="runXenAction(dom, 'destroy')">
+                                <i class="fa-solid fa-bolt"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </template>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="placeholder-card" x-show="!showXenDomains">
+                  <i class="fa-solid fa-terminal placeholder-icon"></i>
+                  <h3>No Xen domains reported</h3>
+                  <p>No domains were reported by the Xen Dom0 xl toolstack.</p>
+                </div>
+              </div>
+            </template>
 
           </div><!-- /page hypervisor -->
 

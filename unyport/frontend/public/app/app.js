@@ -318,8 +318,31 @@ document.addEventListener('alpine:init', () => {
     get isInContainer() { return this.hostRoleRole === 'Container'; },
     get isBaremetal() { return this.hostRoleRole === 'Alpine'; },
     get isXen() { return this.isXenDom0 || this.isXenDomU; },
+    get showVirtualMachinesSection() { return this.isXenDom0; },
     get showXenDomains() { return this.isXenDom0 && this.xenDomains?.length > 0; },
     get showXenInfo() { return this.isXenDom0 && this.xenInfo?.available === true; },
+    get hostPanelSubtitle() {
+      const label = this.xenLabel && this.xenLabel !== '|' ? this.xenLabel : this.hostPageTitle;
+      return `Management panel | ${label}`;
+    },
+    get hostRoleRowLabel() {
+      if (this.isXen) return 'Xen role';
+      if (this.isInContainer) return 'Container';
+      return 'Host role';
+    },
+    get hostProfileTitle() {
+      if (this.isXenDom0) return 'Xen / Virtualization';
+      if (this.isXenDomU) return 'Virtualization';
+      if (this.isInContainer) return 'Container runtime';
+      return 'Host profile';
+    },
+    get hostProfileIcon() {
+      if (this.isXenDom0) return 'fa-solid fa-cubes';
+      if (this.isXenDomU) return 'fa-solid fa-cube';
+      if (this.isInContainer) return 'fa-solid fa-box';
+      return 'fa-solid fa-server';
+    },
+    get hostPrimaryActionLabel() { return this.isXenDom0 ? 'View machines' : 'View host'; },
     get xenCPUCount() { return Number(this.xenInfo?.cpus) || this.sysCpuCores || 0; },
     get xenMemoryUsedMB() {
       const total = Number(this.xenInfo?.total_memory_mb) || 0;
@@ -1339,8 +1362,7 @@ document.addEventListener('alpine:init', () => {
         if (info.load_avg) this.sysLoadAvg = info.load_avg;
         if (info.cpu_temps) this.sysCPUTemps = info.cpu_temps;
         if (info.top_procs) this.sysTopProcs = info.top_procs;
-        if (info.xen_info) this.xenInfo = info.xen_info;
-        if (info.xen_domains) this.xenDomains = info.xen_domains;
+        this._applyXenState(info);
         if (info.board_name) this.sysBoardName = info.board_name;
         if (info.board_vendor) this.sysBoardVendor = info.board_vendor;
         if (info.board_version) this.boardVersion = info.board_version;
@@ -1556,8 +1578,7 @@ document.addEventListener('alpine:init', () => {
       if (snap.cpu_temps) this.sysCPUTemps = snap.cpu_temps;
       if (snap.top_procs) this.sysTopProcs = snap.top_procs;
       if (snap.mem_cached_mb !== undefined) this.sysMemCachedMb = Number(snap.mem_cached_mb) || 0;
-      if (snap.xen_info) this.xenInfo = snap.xen_info;
-      if (snap.xen_domains) this.xenDomains = snap.xen_domains;
+      this._applyXenState(snap);
 
       // Bridges globaux
       if (typeof _updateNetGauge === 'function') _updateNetGauge(this, snap.net_rx_bps || 0, snap.net_tx_bps || 0);
@@ -1625,6 +1646,19 @@ document.addEventListener('alpine:init', () => {
       this.memPct = mt > 0 ? Math.round((mu / mt) * 100) : 0;
 
       this._updateCSS();
+    },
+
+    _applyXenState(d) {
+      if (!this.isXenDom0) {
+        this.xenInfo = {};
+        this.xenDomains = [];
+        this.xenActionBusy = '';
+        this.xenActionError = '';
+        return;
+      }
+      if (!d) return;
+      if (Object.prototype.hasOwnProperty.call(d, 'xen_info')) this.xenInfo = d.xen_info || {};
+      if (Object.prototype.hasOwnProperty.call(d, 'xen_domains')) this.xenDomains = Array.isArray(d.xen_domains) ? d.xen_domains : [];
     },
 
     _applyHostRole(hostRole, xenRoleLegacy) {
