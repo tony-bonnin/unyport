@@ -742,6 +742,16 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
   letter-spacing: -.01em;
 }
 
+.res-net-block strong.rx-network-val,
+.stat-value.rx-network-val {
+  color: #5454ff;
+}
+
+.res-net-block strong.tx-network-val,
+.stat-value.tx-network-val {
+  color: #ff5555;
+}
+
 /* ============================================================
    CHARTS
    ============================================================ */

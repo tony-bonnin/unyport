@@ -42,8 +42,8 @@ function _updateNetIfacesGrid(netMap) {
         <span class="metric-badge ${up ? 'badge-up' : 'badge-down'}">${up ? 'UP' : 'DOWN'}</span>
       </div>
       <div class="res-net-row">
-        <div class="res-net-block"><span>↓ RX</span><strong>${rx}</strong></div>
-        <div class="res-net-block"><span>↑ TX</span><strong>${tx}</strong></div>
+        <div class="res-net-block"><span>↓ RX</span><strong class="rx-network-val">${rx}</strong></div>
+        <div class="res-net-block"><span>↑ TX</span><strong class="tx-network-val">${tx}</strong></div>
       </div>
       <dl class="res-kv">
         <dt>IP</dt><dd>${iface.ip || '—'}</dd>

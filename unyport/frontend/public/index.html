@@ -622,8 +622,8 @@
                   <h3>Network</h3>
                 </div>
                 <div class="res-net-row">
-                  <div class="res-net-block"><span>↓ RX</span><strong x-text="netRxVal"></strong></div>
-                  <div class="res-net-block"><span>↑ TX</span><strong x-text="netTxVal"></strong></div>
+                  <div class="res-net-block"><span>↓ RX</span><strong class="rx-network-val" x-text="netRxVal"></strong></div>
+                  <div class="res-net-block"><span>↑ TX</span><strong class="tx-network-val" x-text="netTxVal"></strong></div>
                 </div>
                 <dl class="res-kv">
                   <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
@@ -939,14 +939,14 @@
               <div class="stat-block">
                 <div class="stat-icon stat-blue"><i class="fa-solid fa-arrow-down"></i></div>
                 <div class="stat-body">
-                  <div class="stat-value" x-text="netRxVal"></div>
+                  <div class="stat-value rx-network-val" x-text="netRxVal"></div>
                   <div class="stat-label">RX throughput</div>
                 </div>
               </div>
               <div class="stat-block">
                 <div class="stat-icon stat-orange"><i class="fa-solid fa-arrow-up"></i></div>
                 <div class="stat-body">
-                  <div class="stat-value" x-text="netTxVal"></div>
+                  <div class="stat-value tx-network-val" x-text="netTxVal"></div>
                   <div class="stat-label">TX throughput</div>
                 </div>
               </div>
@@ -980,8 +980,8 @@
                   <span class="metric-badge badge-up">UP</span>
                 </div>
                 <div class="res-net-row">
-                  <div class="res-net-block"><span>↓ RX</span><strong x-text="netRxVal"></strong></div>
-                  <div class="res-net-block"><span>↑ TX</span><strong x-text="netTxVal"></strong></div>
+                  <div class="res-net-block"><span>↓ RX</span><strong class="rx-network-val" x-text="netRxVal"></strong></div>
+                  <div class="res-net-block"><span>↑ TX</span><strong class="tx-network-val" x-text="netTxVal"></strong></div>
                 </div>
                 <dl class="res-kv">
                   <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
