@@ -377,7 +377,7 @@ document.addEventListener('alpine:init', () => {
     },
 
 	    get panelHostTitle() {
-	      if (this.isXenDom0) return 'Xen Hypervisor';
+	      if (this.isXenDom0) return 'Xen Alpine Linux';
 	      if (this.isInContainer) return 'Container environment';
 	      if (this.isVirtualMachine) return 'Virtual machine';
 	      return 'Alpine host';
