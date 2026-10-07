@@ -62,7 +62,7 @@
 
   function rowsHtml(rows) {
     return (rows || []).map((row) => (
-      `<div class="nm-detail-row"><span>${escapeHtml(row.key || '')}</span><strong>${escapeHtml(row.value || '—')}</strong></div>`
+      `<div class="nm-detail-row"><span>${escapeHtml(row.key || '')}</span><strong>${escapeHtml(row.value || '|')}</strong></div>`
     )).join('');
   }
 
@@ -88,7 +88,7 @@
             <span id="nm-hover-icon" class="nm-detail-icon" aria-hidden="true"></span>
             <strong id="nm-hover-title">Network node</strong>
           </div>
-          <span id="nm-hover-subtitle">—</span>
+          <span id="nm-hover-subtitle">|</span>
         </div>
         <span id="nm-hover-badge" class="nm-detail-badge is-muted">Info</span>
       </div>
@@ -115,7 +115,7 @@
               <span id="nm-modal-icon" class="nm-detail-icon is-modal" aria-hidden="true"></span>
               <h2 id="nm-modal-title">Network node</h2>
             </div>
-            <span id="nm-modal-subtitle" class="modal-email">—</span>
+            <span id="nm-modal-subtitle" class="modal-email">|</span>
           </div>
           <div class="nm-modal-header-meta">
             <span id="nm-modal-badge" class="nm-detail-badge is-muted">Info</span>
@@ -186,7 +186,7 @@
     const rows = card.querySelector('#nm-hover-rows');
     renderNodeIcon(target, state.hoverIcon);
     if (title) title.textContent = payload.title || payload.label || 'Network node';
-    if (subtitle) subtitle.textContent = payload.subtitle || '—';
+    if (subtitle) subtitle.textContent = payload.subtitle || '|';
     if (badge) {
       badge.textContent = payload.badge || payload.kind || 'Info';
       badge.className = `nm-detail-badge ${badgeToneClass(payload)}`;
@@ -211,7 +211,7 @@
     if (!payload || !overlay) return;
     renderNodeIcon(target, state.modalIcon);
     state.modalTitle.textContent = payload.title || payload.label || 'Network node';
-    state.modalSubtitle.textContent = payload.subtitle || '—';
+    state.modalSubtitle.textContent = payload.subtitle || '|';
     state.modalBadge.textContent = payload.badge || payload.kind || 'Info';
     state.modalBadge.className = `nm-detail-badge ${badgeToneClass(payload)}`;
     state.modalSummary.textContent = payload.summary || 'Network details';

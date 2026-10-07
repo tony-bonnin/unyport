@@ -1,4 +1,4 @@
-// auth.js — CSRF + fetch wrapper + actions auth
+// auth.js | CSRF + fetch wrapper + actions auth
 
 let _csrf = null;
 
@@ -60,18 +60,18 @@ async function login(email, password) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  // Effacer le flag logout — l'utilisateur se reconnecte volontairement.
+  // Effacer le flag logout | l'utilisateur se reconnecte volontairement.
   localStorage.removeItem('_logged_out');
   await fetchCSRF();
   return resp;
 }
 
 async function logout() {
-  // Poser le flag AVANT la requête — si le fetch échoue (403 CSRF, réseau),
+  // Poser le flag AVANT la requête | si le fetch échoue (403 CSRF, réseau),
   // init() verra le flag et refusera la session au prochain chargement.
   localStorage.setItem('_logged_out', '1');
   _csrf = null;
-  // Rafraîchir le CSRF — peut être périmé après longue session (MaxAge 3600s).
+  // Rafraîchir le CSRF | peut être périmé après longue session (MaxAge 3600s).
   // Sans token valide gorilla/csrf renvoie 403 et le Set-Cookie n'est jamais émis.
   await fetchCSRF();
   try {

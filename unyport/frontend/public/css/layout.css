@@ -1,19 +1,19 @@
 /* ============================================================
-   layout.css — TRINITY · Dashboard root, sidebar, workspace,
+   layout.css | TRINITY · Dashboard root, sidebar, workspace,
                 topbar, main scroll, page header
    ============================================================ */
 /* ============================================================
    DASHBOARD ROOT
    ============================================================ */
 .page-dashboard {
-  display: flex !important; /* x-show Alpine remet display:block — on force flex */
+  display: flex !important; /* x-show Alpine remet display:block | on force flex */
   height: 100vh;
   height: -webkit-fill-available;
   background: var(--bg);
 }
 
 /* ============================================================
-   SIDEBAR — dashboard claire, neutre et structurée
+   SIDEBAR | dashboard claire, neutre et structurée
    ============================================================ */
 .sidebar {
     width: var(--sidebar-w);
@@ -256,7 +256,7 @@
 }
 
 /* ============================================================
-   TOPBAR — plate, fine, recherche centrée
+   TOPBAR | plate, fine, recherche centrée
    ============================================================ */
 #topbar {
     height: 1rem;

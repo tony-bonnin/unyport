@@ -204,10 +204,10 @@ func New(cfg config.Config, settings *config.Settings, logger *slog.Logger) *Ser
 
 	srv := &Server{HTTP: httpSrv, addr: httpAddr}
 
-	// ---- HTTP/3 (QUIC) — optionnel ----
+	// ---- HTTP/3 (QUIC) | optionnel ----
 	if settings.HTTP3.Enabled {
 		if settings.HTTP3.CertFile == "" || settings.HTTP3.KeyFile == "" {
-			logger.Error("http3 enabled but cert_file/key_file missing — falling back to HTTP")
+			logger.Error("http3 enabled but cert_file/key_file missing | falling back to HTTP")
 		} else {
 			cert, err := tls.LoadX509KeyPair(settings.HTTP3.CertFile, settings.HTTP3.KeyFile)
 			if err != nil {

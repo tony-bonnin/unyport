@@ -379,7 +379,7 @@ func NewBrandingHandler(store *config.BrandingStore, logger *slog.Logger) *Brand
 	return &BrandingHandler{store: store, logger: logger}
 }
 
-// GetBranding — GET /api/branding
+// GetBranding | GET /api/branding
 // Public (avant auth) : le frontend en a besoin au chargement initial
 // pour appliquer les couleurs et le logo avant même le login.
 func (h *BrandingHandler) GetBranding(w http.ResponseWriter, r *http.Request) {
@@ -401,7 +401,7 @@ func (h *BrandingHandler) GetBranding(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// UpdateBranding — PATCH /api/branding/update (admin uniquement)
+// UpdateBranding | PATCH /api/branding/update (admin uniquement)
 func (h *BrandingHandler) UpdateBranding(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -446,7 +446,7 @@ func (h *BrandingHandler) UpdateBranding(w http.ResponseWriter, r *http.Request)
 	jsonOK(w)
 }
 
-// ResetBranding — DELETE /api/branding/reset (admin) — remet les valeurs par défaut
+// ResetBranding | DELETE /api/branding/reset (admin) | remet les valeurs par défaut
 func (h *BrandingHandler) ResetBranding(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

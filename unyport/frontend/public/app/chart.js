@@ -1,4 +1,4 @@
-// chart.js — TRINITY · oscilloscopes + Network Map HTML
+// chart.js | TRINITY · oscilloscopes + Network Map HTML
 // #chartFreq → Effective CPU frequency (MHz) = usage × freqMax / 100
 // #chartMem  → Memory used (MiB)
 //
@@ -62,7 +62,7 @@ let _memChart = null;
 let _initTimer = null;
 let _chartsSuspended = false;
 
-// initCharts — appelé depuis app.js après $nextTick.
+// initCharts | appelé depuis app.js après $nextTick.
 // Les canvas existent dans le DOM mais peuvent être dans une section masquée
 // (x-show → display:none). chartjs-streaming tente de styler les datasets
 // avant que le canvas soit rendu → _setStyle crash.
@@ -240,7 +240,7 @@ function pushFreq() { }
 function pushMem() { }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// NETWORK MAP — HTML pur, zéro SVG
+// NETWORK MAP | HTML pur, zéro SVG
 // ─────────────────────────────────────────────────────────────────────────────
 // Layout hiérarchique : host → interfaces → voisins ARP
 // Tooltip flottant au survol de chaque node (positionné via CSS custom props)
@@ -284,7 +284,7 @@ function _showNmTooltip(node, data) {
   const tt = _getNmTooltip();
   let rows = '';
   for (const [k, v] of Object.entries(data)) {
-    if (v === undefined || v === null || v === '' || v === '—') continue;
+    if (v === undefined || v === null || v === '' || v === '|') continue;
     rows += `<div class="nm-tt-row"><span class="nm-tt-key">${k}</span><span class="nm-tt-val">${v}</span></div>`;
   }
   tt.innerHTML = `<div class="nm-tt-inner">${rows}</div>`;
@@ -323,7 +323,7 @@ function _nmConn(cls) {
   return el;
 }
 
-// ── renderNetworkMap — point d'entrée ─────────────────────────────────────────
+// ── renderNetworkMap | point d'entrée ─────────────────────────────────────────
 function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, containerId) {
   const el = document.getElementById(containerId || 'netmap-container');
   if (!el) return;
@@ -338,7 +338,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         const nb = neighbors.filter(function (n) { return n.iface === iface.name; });
         return '<div class="nm-list-iface">' +
           '<span class="nm-list-name">' + iface.name + '</span>' +
-          '<span class="nm-list-ip">' + (iface.ip || '—') + '</span>' +
+          '<span class="nm-list-ip">' + (iface.ip || '|') + '</span>' +
           nb.map(function (n) {
             return '<div class="nm-list-nb"><span>' + n.ip + '</span>' +
               '<span class="nm-list-state nm-state-' + n.state + '">' + n.state + '</span></div>';
@@ -375,9 +375,9 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
   hostRow.className = 'nm-row-host';
   hostRow.appendChild(_nmNode(
     'host', hostIcon,
-    hostName || 'host', hostIP || '—', hostRole || 'Alpine',
+    hostName || 'host', hostIP || '|', hostRole || 'Alpine',
     roleClass,
-    { Role: hostRole, IP: hostIP, Runtime: hostRuntime || '—', Hostname: hostName }
+    { Role: hostRole, IP: hostIP, Runtime: hostRuntime || '|', Hostname: hostName }
   ));
   wrap.appendChild(hostRow);
   wrap.appendChild(_nmConn('nm-conn nm-conn-host'));
@@ -391,8 +391,8 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
     const isUp = iface.up !== false;
     const rx = _fmtBpsMap(iface.rx_bps || 0);
     const tx = _fmtBpsMap(iface.tx_bps || 0);
-    const rxTotal = iface.rx_bytes ? _fmtBytes(iface.rx_bytes) : '—';
-    const txTotal = iface.tx_bytes ? _fmtBytes(iface.tx_bytes) : '—';
+    const rxTotal = iface.rx_bytes ? _fmtBytes(iface.rx_bytes) : '|';
+    const txTotal = iface.tx_bytes ? _fmtBytes(iface.tx_bytes) : '|';
 
     const col = document.createElement('div');
     col.className = 'nm-col';
@@ -401,17 +401,17 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
 
     col.appendChild(_nmNode(
       'iface', 'fa-solid fa-network-wired',
-      iface.name, iface.ip || '—', '\u2193' + rx + ' \u2191' + tx,
+      iface.name, iface.ip || '|', '\u2193' + rx + ' \u2191' + tx,
       isUp ? 'nm-iface-up' : 'nm-iface-dn',
       {
         Interface: iface.name,
-        IP: iface.ip || '—',
+        IP: iface.ip || '|',
         Status: isUp ? 'UP' : 'DOWN',
         '↓ RX': rx,
         '↑ TX': tx,
         'RX total': rxTotal,
         'TX total': txTotal,
-        MAC: iface.mac || '—',
+        MAC: iface.mac || '|',
       }
     ));
 
@@ -440,7 +440,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
           'neighbor', 'fa-solid fa-display',
           n.ip, (n.mac || '').substring(0, 17), n.state,
           nbCls,
-          { IP: n.ip, MAC: n.mac || '—', Status: n.state, Via: n.iface || iface.name, Vendor: n.vendor || '—' }
+          { IP: n.ip, MAC: n.mac || '|', Status: n.state, Via: n.iface || iface.name, Vendor: n.vendor || '|' }
         ));
         nbRow.appendChild(nbWrap);
       });

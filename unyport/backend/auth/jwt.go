@@ -104,7 +104,7 @@ func (j *JWTService) ClearCookie(w http.ResponseWriter) {
 		Name:     cookieName,
 		Value:    "",
 		MaxAge:   -1,
-		Expires:  time.Unix(0, 0), // epoch — force suppression même si MaxAge ignoré
+		Expires:  time.Unix(0, 0), // epoch | force suppression même si MaxAge ignoré
 		HttpOnly: true,
 		Secure:   j.secureCookie,
 		SameSite: http.SameSiteLaxMode,

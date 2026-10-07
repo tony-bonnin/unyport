@@ -1,5 +1,5 @@
-// networkmap.js — TRINITY · Network Map
-// Layout : CSS Grid (nm-grid-N, nm-col-N) — zéro marginLeft/marginRight
+// networkmap.js | TRINITY · Network Map
+// Layout : CSS Grid (nm-grid-N, nm-col-N) | zéro marginLeft/marginRight
 // Positions X calculées depuis n° colonne (trivial, pas de DOM measurement)
 // Seule la hauteur du manche est mesurée via getBoundingClientRect
 
@@ -42,7 +42,7 @@ function _decorateCard(card, payload) {
   return card;
 }
 function _nbCard(nb) {
-  var ip = nb.ip || '?', mac = nb.mac || '—', state = nb.state || '—', iface = nb.iface || '—';
+  var ip = nb.ip || '?', mac = nb.mac || '|', state = nb.state || '|', iface = nb.iface || '|';
   var card = _mkCard(function (s, cx, cy) { if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, ip, nb.mac ? mac.substring(0, 17) : state);
   return _decorateCard(card, {
     kind: 'neighbor',
@@ -121,7 +121,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
     kind: 'host',
     title: hostName || 'Host',
     label: hostName || 'host',
-    subtitle: hostIP || '—',
+    subtitle: hostIP || '|',
     badge: role,
     badgeTone: role === 'DomU' ? 'danger' : (role === 'Container' ? 'warn' : 'ok'),
     summary: 'Primary host node',
@@ -129,8 +129,8 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
     rows: [
       { key: 'Type', value: 'Host' },
       { key: 'Role', value: role || 'Alpine' },
-      { key: 'Runtime', value: hostRuntime || '—' },
-      { key: 'IP address', value: hostIP || '—' },
+      { key: 'Runtime', value: hostRuntime || '|' },
+      { key: 'IP address', value: hostIP || '|' },
       { key: 'Interfaces', value: String(ifaces.length) },
       { key: 'Neighbors', value: String(neighbors.length) }
     ]
@@ -151,12 +151,12 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
       var idx = start + pos;
       var iface = ifaces[idx], up = iface.up !== false;
       var col = pos + 1;
-      var card = _mkCard(function (s, cx, cy) { up ? _icoIfaceUp(s, cx, cy) : _icoIfaceDn(s, cx, cy); }, iface.name, iface.ip || '—');
+      var card = _mkCard(function (s, cx, cy) { up ? _icoIfaceUp(s, cx, cy) : _icoIfaceDn(s, cx, cy); }, iface.name, iface.ip || '|');
       _decorateCard(card, {
         kind: 'interface',
         title: iface.name,
         label: iface.name,
-        subtitle: iface.ip || '—',
+        subtitle: iface.ip || '|',
         badge: up ? 'UP' : 'DOWN',
         badgeTone: up ? 'ok' : 'warn',
         summary: 'Live interface throughput',
@@ -164,7 +164,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         rows: [
           { key: 'Type', value: 'Interface' },
           { key: 'Status', value: up ? 'UP' : 'DOWN' },
-          { key: 'IP address', value: iface.ip || '—' },
+          { key: 'IP address', value: iface.ip || '|' },
           { key: 'RX rate', value: _fmtBpsMap(iface.rx_bps || 0) },
           { key: 'TX rate', value: _fmtBpsMap(iface.tx_bps || 0) },
           { key: 'Neighbors', value: String((nbPerIface[iface.name] || []).length) }

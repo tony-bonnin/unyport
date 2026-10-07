@@ -1,5 +1,5 @@
 /* ============================================================
-   ui.css — TRINITY · Dropdown, sidebar user, badges, modals,
+   ui.css | TRINITY · Dropdown, sidebar user, badges, modals,
              admin users, sections, avatar, photo widget,
              role CSS vars, settings, logo preview, color grid
    ============================================================ */
@@ -128,7 +128,7 @@
 .topbar-dropdown-danger:hover { background: #fef2f2; }
 
 /* ============================================================
-   SIDEBAR — UTILISATEUR COMPACT
+   SIDEBAR | UTILISATEUR COMPACT
    ============================================================ */
 .sidebar-user {
   display: flex;
@@ -575,7 +575,7 @@
 }
 
 /* ============================================================
-   ADMIN USERS — LISTE
+   ADMIN USERS | LISTE
    ============================================================ */
 .admin-users-list {
   display: flex;
@@ -725,14 +725,14 @@
 }
 
 /* ============================================================
-   SECTIONS — ancres de navigation
+   SECTIONS | ancres de navigation
    ============================================================ */
 .main-inner > section {
   scroll-margin-top: 24px;
 }
 
 /* ============================================================
-   PLACEHOLDER CARDS — sections à venir
+   PLACEHOLDER CARDS | sections à venir
    ============================================================ */
 .placeholder-card {
   display: flex;
@@ -768,7 +768,7 @@
 }
 
 /* ============================================================
-   AVATAR — rendu photo vs initiales
+   AVATAR | rendu photo vs initiales
    ============================================================ */
 .avatar-img {
   width: 100%;
@@ -780,7 +780,7 @@
 }
 
 /* ============================================================
-   PHOTO WIDGET — modal profil
+   PHOTO WIDGET | modal profil
    ============================================================ */
 .modal.modal-profile {
     min-height: 640px;
@@ -828,7 +828,7 @@
   gap: 8px;
 }
 
-/* Bouton upload — label qui wrapp l'input file caché */
+/* Bouton upload | label qui wrapp l'input file caché */
 .photo-upload-label {
   display: inline-flex;
   align-items: center;

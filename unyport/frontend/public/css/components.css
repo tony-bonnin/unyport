@@ -1,4 +1,4 @@
-/* components.css — TRINITY · Stats strip, main grid,
+/* components.css | TRINITY · Stats strip, main grid,
                     section heading, resources grid, charts,
                     responsive breakpoints (desktop)
    ============================================================ */
@@ -49,7 +49,7 @@
     color: #fff;
 }
 
-/* Icône du stat-block "Rôle de l'hôte" — suit --brand selon data-role */
+/* Icône du stat-block "Rôle de l'hôte" | suit --brand selon data-role */
 .stat-role {
     background: var(--brand-100);
     color: var(--brand);
@@ -93,7 +93,7 @@
   background-color: transparent;
 }
 
-/* Alpine Linux — logo officiel PNG */
+/* Alpine Linux | logo officiel PNG */
 .icon-alpine {
   -webkit-mask-image: none;
   mask-image: none;
@@ -104,7 +104,7 @@
   background-size: contain;
 }
 
-/* Xen Project — logo TRINITY (xen.png dans /assets/) */
+/* Xen Project | logo TRINITY (xen.png dans /assets/) */
 .icon-xen {
   -webkit-mask-image: none;
   mask-image: none;
@@ -167,7 +167,7 @@
 }
 
 /* ============================================================
-   MAIN GRID — actions à gauche, hyperviseur à droite
+   MAIN GRID | actions à gauche, hyperviseur à droite
    ============================================================ */
 .main-grid {
     display: grid;
@@ -195,7 +195,7 @@
   letter-spacing: -.005em;
 }
 
-/* Actions — vraies tuiles TeamViewer */
+/* Actions | vraies tuiles TeamViewer */
 .action-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -499,7 +499,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
     color: #fff;
 }
 
-/* res-* : brand unifié — couleurs arbitraires par catégorie supprimées.
+/* res-* : brand unifié | couleurs arbitraires par catégorie supprimées.
    Les états sémantiques (LBU clean/dirty) utilisent res-ok / res-warn. */
 .res-blue,
 .res-indigo,
@@ -782,12 +782,12 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 }
 
 
-/* 2 colonnes égales — CPU + Fréquence */
+/* 2 colonnes égales | CPU + Fréquence */
 .charts-2col {
   grid-template-columns: 1fr 1fr;
 }
 
-/* Mémoire — pleine largeur, hauteur réduite */
+/* Mémoire | pleine largeur, hauteur réduite */
 .chart-mem-full {
   height: 200px;
 }

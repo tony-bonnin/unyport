@@ -1,4 +1,4 @@
-// _ROUTES — constante module-level (hors state Alpine CSP)
+// _ROUTES | constante module-level (hors state Alpine CSP)
 const _ROUTES = {
   '/': { key: 'dashboard', role: 'viewer' },
   '/dashboard': { key: 'dashboard', role: 'viewer' },
@@ -33,7 +33,7 @@ const SYS_STATE_MAP = {
   net_tx_bps: 'sysNetTxBps',
 };
 
-// app.js — TRINITY · point d'entrée Alpine.js (CSP build)
+// app.js | TRINITY · point d'entrée Alpine.js (CSP build)
 document.addEventListener('alpine:init', () => {
   Alpine.data('unyport', () => ({
 
@@ -49,7 +49,7 @@ document.addEventListener('alpine:init', () => {
     loginError: '',
     oauthProviders: { github: false, gitlab: false },
 
-    uptime: '—',
+    uptime: '|',
     uptimeSecs: 0,
     _uptimeTimer: null,
     cpuPct: 0,
@@ -137,16 +137,16 @@ document.addEventListener('alpine:init', () => {
     adminNewRole: 'viewer',
     adminCreateError: '',
 
-    sysHostname: '—',
+    sysHostname: '|',
     sysOsRelease: 'Alpine Linux',
     sysOsVersion: '',
     sysUnyportVersion: '',
     sysUnyportLatestVersion: '',
     sysUnyportUpdateLevel: 'ok',
-    sysKernel: '—',
-    sysDate: '—',
-    sysCpuModel: '—',
-    sysCpuVendor: '—',
+    sysKernel: '|',
+    sysDate: '|',
+    sysCpuModel: '|',
+    sysCpuVendor: '|',
     sysCpuCores: 0,
     sysCpuUsage: 0,
     sysCpuFreqAvg: 0,
@@ -154,8 +154,8 @@ document.addEventListener('alpine:init', () => {
     sysMemTotalMb: 0,
     sysMemUsedMb: 0,
     sysMemFreeMb: 0,
-    sysNetIface: '—',
-    sysNetIp: '—',
+    sysNetIface: '|',
+    sysNetIp: '|',
     sysNetRxBytes: 0,
     sysNetTxBytes: 0,
     sysNetRxBps: 0,
@@ -203,7 +203,7 @@ document.addEventListener('alpine:init', () => {
 
     hostRoleRole: '',
     hostRoleRuntime: '',
-    hostRoleLabelStr: '—',
+    hostRoleLabelStr: '|',
     hostRoleVerified: false,
 
     // ── Fonctions utilitaires ─────────────────────────────────
@@ -229,16 +229,16 @@ document.addEventListener('alpine:init', () => {
     // ── Getters ─────────────────────────────────────────────
     get cpuModelClean() { return this._cleanCPU(this.sysCpuModel); },
     get cpuFreqFmt() { return this._fmtFreq(this.sysCpuFreqAvg); },
-    get cpuCoresDisplay() { return this.sysCpuCores || '—'; },
+    get cpuCoresDisplay() { return this.sysCpuCores || '|'; },
     get memUsedFmt() { return this._fmtMB(this.sysMemUsedMb); },
     get memTotalFmt() { return this._fmtMB(this.sysMemTotalMb); },
     get memFreeFmt() { return this._fmtMB(this.sysMemFreeMb); },
     get memCachedFmt() { return this._fmtMB(this.sysMemCachedMb); },
-    get netIfaceDisplay() { return this.sysNetIface || '—'; },
-    get netIpDisplay() { return this.sysNetIp || '—'; },
+    get netIfaceDisplay() { return this.sysNetIface || '|'; },
+    get netIpDisplay() { return this.sysNetIp || '|'; },
 
     get roleWithRuntime() {
-      const role = this.hostRoleRole || '—';
+      const role = this.hostRoleRole || '|';
       const rt = this.hostRoleRuntime;
       if (!rt || rt === 'native' || rt === '') return role;
       return `${role} · ${rt}`;
@@ -246,12 +246,12 @@ document.addEventListener('alpine:init', () => {
 
     get kernelShort() {
       const k = this.sysKernel;
-      return k.split('-')[0] || k || '—';
+      return k.split('-')[0] || k || '|';
     },
 
     get kernelLts() {
       const k = this.sysKernel;
-      if (!k || k === '—') return '—';
+      if (!k || k === '|') return '|';
       return k.replace(/-\d+(-lts)$/, '$1') || k;
     },
 
@@ -287,10 +287,10 @@ document.addEventListener('alpine:init', () => {
       return this.kernelLatestVer ? `${this.kernelLatestVer} available` : lvl;
     },
 
-    get roleLabel() { return this.hostRoleLabelStr || '—'; },
+    get roleLabel() { return this.hostRoleLabelStr || '|'; },
     get roleIcon() { return this._hostRoleIcon(this.hostRoleRole); },
     get roleVerified() { return this.hostRoleVerified; },
-    get runtimeName() { return this.hostRoleRuntime || '—'; },
+    get runtimeName() { return this.hostRoleRuntime || '|'; },
 
     get statHostIcon() {
       const rt = this.hostRoleRuntime;
@@ -309,10 +309,10 @@ document.addEventListener('alpine:init', () => {
 
     get showRuntime() {
       const r = this.hostRoleRuntime;
-      return r !== '' && r !== 'native' && r !== '—';
+      return r !== '' && r !== 'native' && r !== '|';
     },
 
-    get xenLabel() { return this.hostRoleLabelStr || '—'; },
+    get xenLabel() { return this.hostRoleLabelStr || '|'; },
     get isXenDom0() { return this.hostRoleRole === 'Dom0'; },
     get isXenDomU() { return this.hostRoleRole === 'DomU'; },
     get isInContainer() { return this.hostRoleRole === 'Container'; },
@@ -385,18 +385,18 @@ document.addEventListener('alpine:init', () => {
     get lbuText() {
       if (this.lbuState === 'clean') return 'Committed';
       if (this.lbuState === 'dirty') return 'Uncommitted';
-      return '—';
+      return '|';
     },
 
     get loadAvgFmt() {
       const l = this.sysLoadAvg;
-      if (!l) return '— — —';
+      if (!l) return '| | |';
       return `${l.load1.toFixed(2)}  ${l.load5.toFixed(2)}  ${l.load15.toFixed(2)}`;
     },
 
     get cpuTempFmt() {
       const t = this.sysCPUTemps;
-      return (t && t.length) ? `${t[0].temp_c.toFixed(1)}°C` : '—';
+      return (t && t.length) ? `${t[0].temp_c.toFixed(1)}°C` : '|';
     },
 
     get diskTotalFmt() {
@@ -509,12 +509,12 @@ document.addEventListener('alpine:init', () => {
 
     get rebootHeatmapDetailLabel() {
       const detail = this.rebootHeatmapDetail || {};
-      return detail.label || detail.date || '—';
+      return detail.label || detail.date || '|';
     },
 
     get rebootHeatmapDetailDate() {
       const detail = this.rebootHeatmapDetail || {};
-      return detail.date || '—';
+      return detail.date || '|';
     },
 
     get rebootHeatmapDetailLevel() {
@@ -1494,7 +1494,7 @@ document.addEventListener('alpine:init', () => {
     _compareKernel(latestLts) {
       if (!latestLts) return;
       const cur = this.sysKernel;
-      if (!cur || cur === '—') return;
+      if (!cur || cur === '|') return;
       const parseKer = (value) => {
         const match = String(value || '').match(/(\d+)\.(\d+)\.(\d+)/);
         if (!match) return null;
@@ -1613,7 +1613,7 @@ document.addEventListener('alpine:init', () => {
         if (d[srcKey] !== undefined) {
           this[destKey] = (srcKey.includes('_mb') || srcKey.includes('_bytes') || srcKey.includes('_bps') || srcKey.includes('cores') || srcKey.includes('usage'))
             ? n(d[srcKey])
-            : s(d[srcKey], destKey.startsWith('sysNet') ? '—' : (destKey === 'sysOsRelease' ? 'Alpine Linux' : '—'));
+            : s(d[srcKey], destKey.startsWith('sysNet') ? '|' : (destKey === 'sysOsRelease' ? 'Alpine Linux' : '|'));
         }
       }
 
@@ -1629,7 +1629,7 @@ document.addEventListener('alpine:init', () => {
 
     _applyHostRole(hostRole, xenRoleLegacy) {
       if (hostRole && typeof hostRole === 'object') {
-        const { role = '', runtime = '', label = role || '—', verified = false } = hostRole;
+        const { role = '', runtime = '', label = role || '|', verified = false } = hostRole;
         if (role) {
           this.hostRoleRole = role;
           this.hostRoleRuntime = runtime;
@@ -1728,7 +1728,7 @@ document.addEventListener('alpine:init', () => {
 
     _formatUptime(str) {
       const secs = parseInt(String(str || '').split(' ')[0], 10);
-      if (!Number.isFinite(secs)) return '—';
+      if (!Number.isFinite(secs)) return '|';
       let r = secs;
       const d = Math.floor(r / 86400); r %= 86400;
       const h = Math.floor(r / 3600); r %= 3600;
@@ -1743,9 +1743,9 @@ document.addEventListener('alpine:init', () => {
     },
 
     _primaryFirst(value) {
-      const text = String(value ?? '—').trim();
-      if (!text) return '—';
-      return text.split(/\s+/)[0] || '—';
+      const text = String(value ?? '|').trim();
+      if (!text) return '|';
+      return text.split(/\s+/)[0] || '|';
     },
 
     _primaryRest(value) {
@@ -1770,17 +1770,17 @@ document.addEventListener('alpine:init', () => {
     _resetState() {
       this._stopSSE();
       document.documentElement.removeAttribute('data-role');
-      this.sysHostname = '—';
+      this.sysHostname = '|';
       this.sysOsRelease = 'Alpine Linux';
       this.sysOsVersion = '';
-      this.sysKernel = '—';
+      this.sysKernel = '|';
       this.alpineLatestVer = '';
       this.alpineUpdateLevel = '';
       this.kernelLatestVer = '';
       this.kernelUpdateLevel = '';
-      this.sysDate = '—';
-      this.sysCpuModel = '—';
-      this.sysCpuVendor = '—';
+      this.sysDate = '|';
+      this.sysCpuModel = '|';
+      this.sysCpuVendor = '|';
       this.sysCpuCores = 0;
       this.sysCpuUsage = 0;
       this.sysCpuFreqAvg = 0;
@@ -1788,18 +1788,18 @@ document.addEventListener('alpine:init', () => {
       this.sysMemTotalMb = 0;
       this.sysMemUsedMb = 0;
       this.sysMemFreeMb = 0;
-      this.sysNetIface = '—';
-      this.sysNetIp = '—';
+      this.sysNetIface = '|';
+      this.sysNetIp = '|';
       this.sysNetRxBytes = 0;
       this.sysNetTxBytes = 0;
       this.sysNetRxBps = 0;
       this.sysNetTxBps = 0;
       this.hostRoleRole = '';
       this.hostRoleRuntime = '';
-      this.hostRoleLabelStr = '—';
+      this.hostRoleLabelStr = '|';
       this.hostRoleVerified = false;
       this.vms = [];
-      this.uptime = '—';
+      this.uptime = '|';
       this.uptimeSecs = 0;
       if (this._uptimeTimer) { clearInterval(this._uptimeTimer); this._uptimeTimer = null; }
       this.cpuPct = 0;

@@ -1,5 +1,5 @@
 /* ============================================================
-   tokens.css — TRINITY · Design tokens
+   tokens.css | TRINITY · Design tokens
    Palette, dark mode, role colors, font-face
    ============================================================ */
 
@@ -12,12 +12,12 @@
 }
 
 /* ============================================================
-   TRINITY — TOKENS
+   TRINITY | TOKENS
    Palette resserrée autour de #3e3aab (brand)
    Esprit : plat, aéré, lisible, contrasté.
    ============================================================ */
 :root {
-  /* Brand — TRINITY indigo */
+  /* Brand | TRINITY indigo */
   --brand:          #3e3aab;
   --brand-700:      #322f8c;
   --brand-600:      #4a46c4;
@@ -74,7 +74,7 @@
   --err-soft:       #fbeaea;
   --err-line:       #f1bdbd;
 
-  /* Shadow — minimal, presque plat */
+  /* Shadow | minimal, presque plat */
   --shadow:         0 1px 2px rgba(20,22,40,.04);
 
   /* Radius */
@@ -94,9 +94,9 @@
 }
 
 /* ============================================================
-   DARK MODE — [data-theme="dark"]
+   DARK MODE | [data-theme="dark"]
    Philosophie : fond profond, surfaces étagées, contraste doux.
-   Les tokens brand/role/accents sont retenus — juste désaturés.
+   Les tokens brand/role/accents sont retenus | juste désaturés.
    ============================================================ */
 [data-theme="dark"] {
   color-scheme: dark;
@@ -127,7 +127,7 @@
   --side-text-on:   var(--brand-500);
   --side-border:    var(--border);
 
-  /* States — légèrement plus lumineux sur fond sombre */
+  /* States | légèrement plus lumineux sur fond sombre */
   --ok:             #22c55e;
   --ok-soft:        #052e16;
   --ok-line:        #14532d;
@@ -150,7 +150,7 @@
   --tile-yellow:    #fbbf24;
 }
 
-/* Dark — surcharges brand par rôle */
+/* Dark | surcharges brand par rôle */
 [data-theme="dark"][data-role="dom0"] {
   --brand:        #6864d4;
   --brand-700:    #4a46c4;
@@ -199,7 +199,7 @@
   --side-text-on: #88bbd4;
 }
 
-/* Dark — composants spécifiques qui ont des couleurs hardcodées */
+/* Dark | composants spécifiques qui ont des couleurs hardcodées */
 [data-theme="dark"] .stat-blue    { background: #f0f8fd; color: #9bd9ff; }
 [data-theme="dark"] .stat-green   { background: rgba(34,197,94,.1);  color: #4ade80; }
 [data-theme="dark"] .stat-orange  { background: rgba(249,115,22,.1); color: #fb923c; }
@@ -297,18 +297,18 @@ body, .sidebar, .topbar, .panel, .res-card, .chart-card, .stat-block,
 }
 
 /* ============================================================
-   ROLE COLORS — 4 familles chromatiques orthogonales
+   ROLE COLORS | 4 familles chromatiques orthogonales
    Reconnaissables en un coup d'œil, aucune confusion possible.
 
-   DOM0      #3e3aab  violet indigo   — hyperviseur souverain
-   DOMU      #b05a1a  ambre brûlé     — VM Xen guest, chaleur
-   CONTAINER #a0284a  framboise       — couche éphémère, applicatif
-   ALPINE    #28587c  bleu acier      — baremetal natif, DDM
+   DOM0      #3e3aab  violet indigo   | hyperviseur souverain
+   DOMU      #b05a1a  ambre brûlé     | VM Xen guest, chaleur
+   CONTAINER #a0284a  framboise       | couche éphémère, applicatif
+   ALPINE    #28587c  bleu acier      | baremetal natif, DDM
 
    Appliqué via data-role="dom0|domu|container|alpine" sur <html>.
    ============================================================ */
 
-/* DOM0 — violet indigo TRINITY, référence imposée */
+/* DOM0 | violet indigo TRINITY, référence imposée */
 [data-role="dom0"] {
   --brand:        #3e3aab;
   --brand-700:    #322f8c;
@@ -321,7 +321,7 @@ body, .sidebar, .topbar, .panel, .res-card, .chart-card, .stat-block,
   --side-text-on: #3e3aab;
 }
 
-/* DOMU — ambre brûlé, VM Xen guest, chaleur organique */
+/* DOMU | ambre brûlé, VM Xen guest, chaleur organique */
 [data-role="domu"] {
   --brand:        #a0284a;
   --brand-700:    #7e1e3a;
@@ -334,7 +334,7 @@ body, .sidebar, .topbar, .panel, .res-card, .chart-card, .stat-block,
   --side-text-on: #a0284a;
 }
 
-/* CONTAINER — framboise, couche applicative éphémère */
+/* CONTAINER | framboise, couche applicative éphémère */
 [data-role="container"] {
   --brand:        #b05a1a;
   --brand-700:    #8c4614;
@@ -347,7 +347,7 @@ body, .sidebar, .topbar, .panel, .res-card, .chart-card, .stat-block,
   --side-text-on: #b05a1a;
 }
 
-/* ALPINE — bleu acier, baremetal natif, DDM */
+/* ALPINE | bleu acier, baremetal natif, DDM */
 [data-role="alpine"] {
   --brand:        #28587c;
   --brand-700:    #1e4560;

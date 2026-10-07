@@ -10,15 +10,15 @@ import (
 
 const xenCommandTimeout = 900 * time.Millisecond
 
-// XenDomain — un domaine Xen vu depuis le Dom0 (`xl list`, CPU% façon xentop).
+// XenDomain | un domaine Xen vu depuis le Dom0 (`xl list`, CPU% façon xentop).
 type XenDomain struct {
 	DomID  int     `json:"domid"`
 	Name   string  `json:"name"`
 	State  string  `json:"state"` // r/b/p/s/c/d (running/blocked/paused/shutdown/crashed/dying)
 	VCPUs  int     `json:"vcpus"`
 	MemMB  uint64  `json:"mem_mb"`
-	CPUSec float64 `json:"cpu_sec"` // temps CPU cumulé (s) — base du calcul de %
-	CPUPct float64 `json:"cpu_pct"` // % CPU — calculé par delta dans le broker
+	CPUSec float64 `json:"cpu_sec"` // temps CPU cumulé (s) | base du calcul de %
+	CPUPct float64 `json:"cpu_pct"` // % CPU | calculé par delta dans le broker
 }
 
 // XenInfo résume l'état de l'hyperviseur Xen vu depuis Dom0.

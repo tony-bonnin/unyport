@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// BrandingColors — couleurs des rôles Xen / Alpine.
+// BrandingColors | couleurs des rôles Xen / Alpine.
 // Chaque valeur est un code hex CSS (#rrggbb).
 // Valeurs par défaut alignées sur style.css [data-role].
 type BrandingColors struct {
@@ -21,7 +21,7 @@ type BrandingColors struct {
 	Alpine    string `yaml:"alpine"`    // défaut : #28587c
 }
 
-// Branding — identité visuelle de l'instance TRINITY.
+// Branding | identité visuelle de l'instance TRINITY.
 // Stocké dans branding.yaml, persisté par LBU.
 //
 // Logo : priorité LogoBase64 > LogoURL > logo embarqué.
@@ -34,7 +34,7 @@ type Branding struct {
 }
 
 // EffectiveLogoSrc retourne la source du logo à injecter dans src="…".
-// Retourne "" si aucun logo personnalisé — le frontend utilise le logo par défaut.
+// Retourne "" si aucun logo personnalisé | le frontend utilise le logo par défaut.
 func (b *Branding) EffectiveLogoSrc() string {
 	if b.LogoBase64 != "" {
 		return b.LogoBase64
@@ -169,7 +169,7 @@ func validateBranding(b *Branding) error {
 		}
 	}
 
-	// Couleurs — format hex basique
+	// Couleurs | format hex basique
 	for name, color := range map[string]string{
 		"dom0": b.Colors.Dom0, "domu": b.Colors.DomU,
 		"container": b.Colors.Container, "alpine": b.Colors.Alpine,

@@ -17,12 +17,12 @@ import (
 type HostRole struct {
 	Role     string `json:"role"`     // Dom0 | DomU | Container | Alpine | Unknown
 	Runtime  string `json:"runtime"`  // xen | podman | docker | lxc | containerd | native
-	Label    string `json:"label"`    // Label lisible — affiché dans l'UI
+	Label    string `json:"label"`    // Label lisible | affiché dans l'UI
 	Verified bool   `json:"verified"` // true = détection par preuve directe (pas heuristique)
 }
 
 // Snapshot représente un relevé instantané des métriques système.
-// Toutes les valeurs dérivées sont calculées ici en Go —
+// Toutes les valeurs dérivées sont calculées ici en Go |
 // le frontend se contente de les afficher.
 type Snapshot struct {
 	Timestamp time.Time `json:"ts"`
@@ -33,7 +33,7 @@ type Snapshot struct {
 	CPUFreqAvg  int       `json:"cpu_freq_avg_mhz"` // fréquence moyenne
 	CPUFreqMax  int       `json:"cpu_freq_max_mhz"` // fréquence max théorique
 	CPUFreqCore []int     `json:"cpu_freq_core"`    // fréquence courante par core
-	// Échelles oscilloscope — calculées sur la fenêtre visible (ring buffer)
+	// Échelles oscilloscope | calculées sur la fenêtre visible (ring buffer)
 	CPUYMin     float64 `json:"cpu_y_min"`      // plancher axe CPU (données réelles -10%)
 	CPUYMax     float64 `json:"cpu_y_max"`      // plafond axe CPU (données réelles +10%)
 	CPUFreqYMin int     `json:"cpu_freq_y_min"` // plancher axe fréquence
@@ -48,7 +48,7 @@ type Snapshot struct {
 	MemUsed   uint64 `json:"mem_used_mb"`   // utilisée (hors cache)
 	MemCached uint64 `json:"mem_cached_mb"` // cache + buffers
 	MemFree   uint64 `json:"mem_free_mb"`   // libre
-	// Valeurs cumulées pour empilement Chart.js (fill:origin) — calculées en Go
+	// Valeurs cumulées pour empilement Chart.js (fill:origin) | calculées en Go
 	MemStackUsed   uint64 `json:"mem_stack_used"`   // = mem_used_mb
 	MemStackCached uint64 `json:"mem_stack_cached"` // = used + cached
 	MemStackFree   uint64 `json:"mem_stack_free"`   // = total
@@ -99,7 +99,7 @@ type Snapshot struct {
 //	"dirty"   → protected-paths.d plus récent que l'archive LBU (ou archive absente) :
 //	            des changements ne sont pas encore commités.
 //
-// Détection purement par stat(2) — zéro binaire externe, zéro exec.
+// Détection purement par stat(2) | zéro binaire externe, zéro exec.
 // Référence : /etc/apk/protected-paths.d (présence = LBU installé)
 //
 //	/var/cache/lbu/          (contient *.tar.gz horodatés)
@@ -119,7 +119,7 @@ func collect() Snapshot {
 	cpuUsage, perCore := cpuPercentAll(t1, t2)
 	_, freqMax, freqCore := readFreqsPerCore()
 	// Fréquence effective depuis les jiffies /proc/stat × freq_max.
-	// Même source que cpuUsage — cohérent, pas de relecture /proc/cpuinfo.
+	// Même source que cpuUsage | cohérent, pas de relecture /proc/cpuinfo.
 	// freq_eff_core[i] = (dActive[i]/dTotal[i]) × freqMax
 	freqAvg := computeEffectiveFreq(t1, t2, freqMax)
 	memTotal, memFree, memCached, memUsed := readMemFull()
@@ -203,7 +203,7 @@ func collect() Snapshot {
 }
 
 // ============================================================
-// LBU — Alpine Linux Backup
+// LBU | Alpine Linux Backup
 // ============================================================
 
 // collectLBU détecte l'état LBU via stat(2) uniquement.
@@ -215,7 +215,7 @@ func collect() Snapshot {
 //     • Archive plus récente que protected-paths.d → state:"clean"
 //     • Protected-paths.d plus récent que archive → state:"dirty"
 //
-// Zéro binaire externe, zéro exec — uniquement os.Stat + os.ReadDir.
+// Zéro binaire externe, zéro exec | uniquement os.Stat + os.ReadDir.
 func collectLBU() LBUStatus {
 	const protectedPathsDir = "/etc/apk/protected-paths.d"
 	const lbuCacheDir = "/var/cache/lbu"
@@ -278,9 +278,9 @@ func mathAbs(x float64) float64 {
 }
 
 // ============================================================
-// DÉTECTION DE RÔLE HOST — TRINITY
+// DÉTECTION DE RÔLE HOST | TRINITY
 // Compatible BusyBox/Alpine, zéro binaire externe, zéro exec.
-// Uniquement /proc et /sys — disponibles sur tout kernel Linux.
+// Uniquement /proc et /sys | disponibles sur tout kernel Linux.
 //
 // ORDRE DE PRIORITÉ (invariant) :
 //   Container > Dom0 > DomU > Alpine baremetal
@@ -303,9 +303,9 @@ func mathAbs(x float64) float64 {
 // ============================================================
 
 // DetectHostRole identifie le rôle de l'hôte.
-// Résultat mis en cache au démarrage du broker — appelé une seule fois.
+// Résultat mis en cache au démarrage du broker | appelé une seule fois.
 func DetectHostRole() HostRole {
-	// ── 1. Container ? (avant Xen — un container dans une DomU
+	// ── 1. Container ? (avant Xen | un container dans une DomU
 	//       voit /proc/xen mais son rôle réel est container)
 	if r, ok := probeContainer(); ok {
 		return r
@@ -331,7 +331,7 @@ func DetectHostRole() HostRole {
 // Premier match positif → retour immédiat.
 
 func probeContainer() (HostRole, bool) {
-	// Niveau A — Preuve absolue : /proc/1/sched
+	// Niveau A | Preuve absolue : /proc/1/sched
 	//
 	// Le kernel écrit dans ce fichier le PID du process dans le
 	// namespace racine (PID initial = namespace du kernel, pas du container).
@@ -353,7 +353,7 @@ func probeContainer() (HostRole, bool) {
 		}, true
 	}
 
-	// Niveau B — Preuve forte : chemin cgroup de PID 1
+	// Niveau B | Preuve forte : chemin cgroup de PID 1
 	//
 	// Sur baremetal/VM sans container : cgroup memory path = "/"
 	// Dans un container : path = "/docker/<id>", "libpod-<id>", "/lxc/<id>", etc.
@@ -369,7 +369,7 @@ func probeContainer() (HostRole, bool) {
 		}, true
 	}
 
-	// Niveau C — Preuve forte : marqueurs fichiers runtime
+	// Niveau C | Preuve forte : marqueurs fichiers runtime
 	//
 	// Docker crée /.dockerenv dans chaque container au démarrage.
 	// Podman crée /run/.containerenv (fichier INI avec métadonnées).
@@ -701,7 +701,7 @@ func cpuPercentAll(t1, t2 map[string]cpuTimes) (float64, []float64) {
 }
 
 // computeEffectiveFreq calcule la fréquence CPU effective depuis les jiffies /proc/stat.
-// freq_eff = (dActive / dTotal) × freqMax — varie avec la charge réelle.
+// freq_eff = (dActive / dTotal) × freqMax | varie avec la charge réelle.
 // Cohérent avec cpuPercentAll : même t1/t2, pas de relecture /proc.
 func computeEffectiveFreq(t1, t2 map[string]cpuTimes, freqMax int) int {
 	if freqMax <= 0 {
@@ -828,7 +828,7 @@ func readMemFull() (total, free, cached, used uint64) {
 		case strings.HasPrefix(line, "Buffers:"):
 			buffers = parseKB(line)
 		case strings.HasPrefix(line, "Cached:"):
-			// "Cached:" uniquement — évite "SwapCached:"
+			// "Cached:" uniquement | évite "SwapCached:"
 			if line[6] == ':' || line[6] == ' ' {
 				cachedRaw = parseKB(line)
 			}
@@ -1008,11 +1008,11 @@ func readFirstFileTrim(paths ...string) string {
 }
 
 // ============================================================
-// NETWORK MAP — topologie + voisins ARP
+// NETWORK MAP | topologie + voisins ARP
 // ============================================================
 
 // NetIfaceInfo décrit une interface réseau avec ses métriques temps réel.
-// Lecture de /proc/net/dev — zéro binaire externe.
+// Lecture de /proc/net/dev | zéro binaire externe.
 type NetIfaceInfo struct {
 	Name    string `json:"name"`
 	IP      string `json:"ip"`
@@ -1024,7 +1024,7 @@ type NetIfaceInfo struct {
 }
 
 // ARPEntry décrit un voisin réseau connu via la table ARP.
-// Lecture de /proc/net/arp — zéro binaire externe.
+// Lecture de /proc/net/arp | zéro binaire externe.
 type ARPEntry struct {
 	IP    string `json:"ip"`
 	MAC   string `json:"mac"`
@@ -1039,7 +1039,7 @@ type NetworkMap struct {
 }
 
 // collectNetworkMap lit /proc/net/dev et /proc/net/arp.
-// Les débits (bps) nécessitent deux relevés — on passe l'ancien snapshot
+// Les débits (bps) nécessitent deux relevés | on passe l'ancien snapshot
 // pour calculer le delta. Si prev est nil, bps = 0.
 func collectNetworkMap(prevIfaces map[string]NetIfaceInfo, interval float64) (NetworkMap, map[string]NetIfaceInfo) {
 	ifaces := readAllIfaces()
@@ -1159,11 +1159,11 @@ func readARPTable() []ARPEntry {
 }
 
 // ============================================================
-// DISK — espaces disque via /proc/mounts + syscall.Statfs
+// DISK | espaces disque via /proc/mounts + syscall.Statfs
 // ============================================================
 
 // DiskMount décrit un point de montage avec son espace disque.
-// Zéro binaire externe — syscall.Statfs uniquement.
+// Zéro binaire externe | syscall.Statfs uniquement.
 type DiskMount struct {
 	Device  string `json:"device"`
 	Mount   string `json:"mount"`
@@ -1305,7 +1305,7 @@ func isDigit(b byte) bool {
 }
 
 // ============================================================
-// LOAD AVERAGE — /proc/loadavg
+// LOAD AVERAGE | /proc/loadavg
 // ============================================================
 
 // LoadAverage contient les moyennes de charge système (1, 5, 15 minutes).
@@ -1337,7 +1337,7 @@ func collectLoadAvg() LoadAverage {
 }
 
 // ============================================================
-// CPU TEMPERATURES — /sys/class/thermal
+// CPU TEMPERATURES | /sys/class/thermal
 // ============================================================
 
 // CPUTemp décrit une zone thermique.
@@ -1348,7 +1348,7 @@ type CPUTemp struct {
 }
 
 // collectCPUTemps lit toutes les zones thermiques disponibles.
-// Zéro binaire externe — lecture directe de /sys/class/thermal.
+// Zéro binaire externe | lecture directe de /sys/class/thermal.
 func collectCPUTemps() []CPUTemp {
 	entries, err := os.ReadDir("/sys/class/thermal")
 	if err != nil {
@@ -1391,7 +1391,7 @@ func collectCPUTemps() []CPUTemp {
 }
 
 // ============================================================
-// TOP PROCESSES — /proc/*/status + /proc/*/stat
+// TOP PROCESSES | /proc/*/status + /proc/*/stat
 // ============================================================
 
 // ProcInfo décrit un processus.

@@ -16,7 +16,7 @@
 
 # UnyPort (Beta)
 
-**Unified sysadmin portal in Go — for Alpine Linux & Xen**
+**Unified sysadmin portal in Go | for Alpine Linux & Xen**
 
 `Go` `Single Binary` `Single Port` `Xen-aware` `Data Disk Mode` `OAuth`
 
@@ -45,7 +45,7 @@ UnyPort is a real-time system administration portal built in Go.
 Single binary. Single port. Zero runtime dependency.
 
 Designed specifically for Alpine Linux running in Data Disk Mode on Xen Type-1 hypervisors.
-Every metric is read directly from the kernel — no agent, no daemon, no bloat.
+Every metric is read directly from the kernel | no agent, no daemon, no bloat.
 
 Built in pure Go for deterministic deployment and low operational overhead on constrained hosts.
 The roadmap is intentionally split:
@@ -68,11 +68,11 @@ That project is archived on Codeberg: [codeberg.org/trinity-labs/official](https
 
 | Module | Description |
 |---|---|
-| **System** | OS, kernel, uptime, board info — live |
+| **System** | OS, kernel, uptime, board info | live |
 | **CPU** | Per-core frequency, load, model |
 | **Memory** | Used / total, real-time graph |
 | **Network** | Interface, IP, RX/TX rates, totals |
-| **Storage** | Disk I/O — sda, nvme read/write |
+| **Storage** | Disk I/O | sda, nvme read/write |
 | **Processes** | Top processes by resource usage |
 | **Security** | CSRF, JWT, CSP, TLS, 2FA, OAuth status |
 | **Logs** | Recent system logs with severity |
@@ -87,13 +87,13 @@ That project is archived on Codeberg: [codeberg.org/trinity-labs/official](https
 
 | Layer | Detail |
 |---|---|
-| **Runtime** | Single Go binary — musl compatible |
-| **Transport** | Single port — HTTP/2 + WebSocket |
+| **Runtime** | Single Go binary | musl compatible |
+| **Transport** | Single port | HTTP/2 + WebSocket |
 | **Auth** | OAuth GitHub · OAuth GitLab · JWT HS256 |
 | **Security** | CSRF · CSP strict · TLS · 2FA ready |
-| **Metrics** | Direct kernel reads — /proc · /sys |
-| **State** | Stateless — compatible Data Disk Mode |
-| **Hypervisor** | Xen Type-1 aware — Dom0 detection |
+| **Metrics** | Direct kernel reads | /proc · /sys |
+| **State** | Stateless | compatible Data Disk Mode |
+| **Hypervisor** | Xen Type-1 aware | Dom0 detection |
 
 ---
 
@@ -238,7 +238,7 @@ Role     : admin
 ⬛ **Live Demo**
 
 ```
-Running on TRINITY infrastructure — Alpine Linux v3.23.4 · Xen Type-1 · Data Disk Mode
+Running on TRINITY infrastructure | Alpine Linux v3.23.4 · Xen Type-1 · Data Disk Mode
 Host    :  TRINITY Dom0
 Kernel  :  6.18.33-0-lts
 Memory  :  103M / 210M

@@ -1,4 +1,4 @@
-// metrics.js — TRINITY · DOM updates impératifs pour les pages métriques
+// metrics.js | TRINITY · DOM updates impératifs pour les pages métriques
 // Toutes les fonctions ici manipulent le DOM directement (CSP-safe, zéro :style inline).
 // Appelées depuis _onSnapshot() dans app.js à chaque tick SSE.
 
@@ -46,9 +46,9 @@ function _updateNetIfacesGrid(netMap) {
         <div class="res-net-block"><span>↑ TX</span><strong class="tx-network-val">${tx}</strong></div>
       </div>
       <dl class="res-kv">
-        <dt>IP</dt><dd>${iface.ip || '—'}</dd>
-        <dt>RX total</dt><dd>${iface.rx_bytes ? _fmtBytes(iface.rx_bytes) : '—'}</dd>
-        <dt>TX total</dt><dd>${iface.tx_bytes ? _fmtBytes(iface.tx_bytes) : '—'}</dd>
+        <dt>IP</dt><dd>${iface.ip || '|'}</dd>
+        <dt>RX total</dt><dd>${iface.rx_bytes ? _fmtBytes(iface.rx_bytes) : '|'}</dd>
+        <dt>TX total</dt><dd>${iface.tx_bytes ? _fmtBytes(iface.tx_bytes) : '|'}</dd>
       </dl>
     </div>`;
   }).join('');
@@ -119,7 +119,7 @@ function _updateHtop(snap) {
   }
 }
 
-// ── Top processes — barres MEM% ───────────────────────────────────────────────
+// ── Top processes | barres MEM% ───────────────────────────────────────────────
 function _updateTopProcBars() {
   requestAnimationFrame(() => {
     document.querySelectorAll('.tp-mem-bar').forEach(bar => {

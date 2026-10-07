@@ -1,6 +1,6 @@
 package sse
 
-// sysinfo.go — TRINITY · portage ACF Lua health-model.lua
+// sysinfo.go | TRINITY · portage ACF Lua health-model.lua
 //
 // Fonctionnalités portées depuis Lua (health-model.lua) :
 //   • BIOS : vendor, version, date         → /sys/devices/virtual/dmi/id/bios_*
@@ -9,7 +9,7 @@ package sse
 //   • GPU info                               → /sys/class/drm/ + /sys/bus/pci/devices/*/class
 //
 // Paradigme TRINITY : zéro binaire externe, zéro exec, /proc+/sys uniquement.
-// Lua utilisait cat/fdisk/lspci via io.popen — tout remplacé par lecture directe.
+// Lua utilisait cat/fdisk/lspci via io.popen | tout remplacé par lecture directe.
 //
 // Endpoints HTTP exposés (tous protégés operator+ en amont dans routes.go) :
 //
@@ -33,18 +33,18 @@ import (
 var ansiEscapePattern = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`)
 
 // ============================================================
-// BIOS / Firmware Info — /sys/devices/virtual/dmi/id/
+// BIOS / Firmware Info | /sys/devices/virtual/dmi/id/
 // ============================================================
 
 // BIOSInfo contient les informations firmware de la carte.
 // Absent sur machines virtuelles (champs vides) ou containers.
-// Source : DMI table exposée via sysfs — lisible sans root.
+// Source : DMI table exposée via sysfs | lisible sans root.
 type BIOSInfo struct {
 	Vendor  string `json:"bios_vendor"`  // ex. "American Megatrends Inc."
 	Version string `json:"bios_version"` // ex. "F.70"
 	Date    string `json:"bios_date"`    // ex. "08/25/2023"
 	// Champ additionnel : année extraite de bios_date (utile pour l'UI)
-	Year string `json:"bios_year"` // ex. "2023" — extrait depuis bios_date
+	Year string `json:"bios_year"` // ex. "2023" | extrait depuis bios_date
 }
 
 // BoardInfoExtra complète les données déjà présentes dans SystemInfo.
@@ -57,7 +57,7 @@ type BoardInfoExtra struct {
 
 // CollectBIOSInfo lit les infos BIOS depuis le sysfs DMI.
 // Retourne une struct vide (champs "") si les fichiers sont absents
-// (cas DomU, container) — l'UI masque la section dans ce cas.
+// (cas DomU, container) | l'UI masque la section dans ce cas.
 func CollectBIOSInfo() BIOSInfo {
 	b := BIOSInfo{
 		Vendor:  trim(readFirstFile("/sys/devices/virtual/dmi/id/bios_vendor")),
@@ -137,7 +137,7 @@ func (b *Broker) BIOSHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// KERNEL MODULES — /proc/modules
+// KERNEL MODULES | /proc/modules
 // ============================================================
 
 // KernelModule décrit un module chargé.
@@ -156,7 +156,7 @@ type KernelModule struct {
 //	<name> <size> <use_count> <used_by> <state> <offset>
 //	ex. xen_blkfront 45056 0 - Live 0xffffffffc0a00000
 //
-// Zéro exec — pas de lsmod, pas de modinfo.
+// Zéro exec | pas de lsmod, pas de modinfo.
 // Paradigme ACF original (modules-model.lua) utilisait lsmod (binaire).
 func CollectKernelModules() []KernelModule {
 	data, err := os.ReadFile("/proc/modules")
@@ -221,8 +221,8 @@ func CollectModulesSummary() ModulesSummary {
 // ── /api/modules ─────────────────────────────────────────────────────────────
 
 // ModulesHandler retourne la liste complète des kernel modules chargés.
-// Portage de : modules-model.lua (utilisait lsmod — binaire)
-// Source : /proc/modules — zéro exec.
+// Portage de : modules-model.lua (utilisait lsmod | binaire)
+// Source : /proc/modules | zéro exec.
 //
 // Query params :
 //
@@ -256,7 +256,7 @@ func (b *Broker) ModulesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// GPU INFO — /sys/class/drm/ + /sys/bus/pci/devices/*/class
+// GPU INFO | /sys/class/drm/ + /sys/bus/pci/devices/*/class
 // ============================================================
 
 // GPUInfo décrit un GPU détecté.
@@ -264,7 +264,7 @@ func (b *Broker) ModulesHandler(w http.ResponseWriter, r *http.Request) {
 // Ici : /sys/class/drm/ pour les GPUs actifs + /sys/bus/pci/devices/
 // pour identifier les classes PCI 0x03xx (display controller).
 //
-// Lisible sans root — sysfs expose ces infos à tous les utilisateurs.
+// Lisible sans root | sysfs expose ces infos à tous les utilisateurs.
 type GPUInfo struct {
 	Name    string `json:"name"`     // ex. "Intel UHD Graphics 620"
 	Driver  string `json:"driver"`   // ex. "i915" | "amdgpu" | "nouveau"
@@ -362,11 +362,11 @@ func (b *Broker) GPUsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// APK DATABASE — /lib/apk/db/installed
+// APK DATABASE | /lib/apk/db/installed
 // ============================================================
 
 // APKPackage décrit un paquet Alpine installé.
-// Lua utilisait `apk` (binaire) — ici on parse directement la DB.
+// Lua utilisait `apk` (binaire) | ici on parse directement la DB.
 // Format : sections séparées par ligne vide, champs "K:value\n".
 type APKPackage struct {
 	Name    string `json:"name"`    // ex. "musl"
@@ -387,7 +387,7 @@ type APKPackage struct {
 //	T:Short description
 //	(ligne vide = séparateur de paquet)
 //
-// Zéro exec — pas de `apk info`, pas de `apk list`.
+// Zéro exec | pas de `apk info`, pas de `apk list`.
 func CollectAPKPackages() []APKPackage {
 	data, err := os.ReadFile("/lib/apk/db/installed")
 	if err != nil {
@@ -495,7 +495,7 @@ func (b *Broker) PackagesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// OPENRC SERVICES — /etc/runlevels/ + /run/openrc/
+// OPENRC SERVICES | /etc/runlevels/ + /run/openrc/
 // ============================================================
 
 // ServiceState représente l'état d'un service OpenRC.
@@ -619,7 +619,7 @@ func CollectOpenRCServices() []OpenRCService {
 // ── /api/services ────────────────────────────────────────────────────────────
 
 // ServicesHandler retourne l'état des services OpenRC.
-// Portage de : rc-model.lua (utilisait /sbin/rc-status + daemoncontrol — binaires)
+// Portage de : rc-model.lua (utilisait /sbin/rc-status + daemoncontrol | binaires)
 //
 // Query params :
 //
@@ -685,7 +685,7 @@ func (b *Broker) ServicesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ============================================================
-// LOG FILE READER — /var/log/
+// LOG FILE READER | /var/log/
 // ============================================================
 
 // LogFileInfo décrit un fichier de log disponible.
@@ -779,7 +779,7 @@ func isAllowedLogPath(p string) bool {
 
 // LogsListHandler retourne la liste des fichiers de log disponibles.
 // Portage de : logfiles-model.lua (utilisait posix.files sur /var/log)
-// Sécurité : liste blanche explicite — pas de traversal arbitraire.
+// Sécurité : liste blanche explicite | pas de traversal arbitraire.
 func (b *Broker) LogsListHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -798,12 +798,12 @@ func (b *Broker) LogsListHandler(w http.ResponseWriter, r *http.Request) {
 // LogsTailHandler retourne les N dernières lignes d'un fichier de log.
 // Portage de : logfiles-model.lua tail + logfiles-tail-html.lsp
 //
-// Candidat naturel pour le SSE streaming (tail -f live) — prévu comme
+// Candidat naturel pour le SSE streaming (tail -f live) | prévu comme
 // extension : /sse/log?file=messages
 //
 // Query params :
 //
-//	?file=<basename>   → nom du fichier (ex. "messages") — OBLIGATOIRE
+//	?file=<basename>   → nom du fichier (ex. "messages") | OBLIGATOIRE
 //	?n=<count>         → nombre de lignes (défaut 100, max 1000)
 //
 // Sécurité : seuls les fichiers de la whitelist sont accessibles.

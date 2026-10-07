@@ -15,7 +15,7 @@ func Secure(next http.Handler, https bool) http.Handler {
 		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		h.Set("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
-		// Chaque directive séparée par "; " — pas de concaténation partielle.
+		// Chaque directive séparée par "; " | pas de concaténation partielle.
 		// img-src : 'self' + data: pour les logos base64 éventuels.
 		h.Set("Content-Security-Policy", strings.Join([]string{
 			"default-src 'self'",

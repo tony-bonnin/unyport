@@ -1,5 +1,5 @@
 /* ============================================================
-   mobile.css — TRINITY · Hamburger, mobile menu, breakpoints
+   mobile.css | TRINITY · Hamburger, mobile menu, breakpoints
    ============================================================ */
 :root {
   --role-dom0:      #3e3aab;
@@ -15,7 +15,7 @@
 [data-role="alpine"]    { --current-role-color: var(--role-alpine); }
 
 /* ============================================================
-   PAGE SETTINGS — layout sections
+   PAGE SETTINGS | layout sections
    ============================================================ */
 .settings-section {
   margin-bottom: 40px;
@@ -129,7 +129,7 @@
 }
 
 /* ============================================================
-   COLOR GRID — éditeur couleurs de rôle
+   COLOR GRID | éditeur couleurs de rôle
    ============================================================ */
 .color-grid {
   display: flex;
@@ -170,7 +170,7 @@
   color: var(--text-muted);
 }
 
-/* input[type=color] — native color picker, stylisé */
+/* input[type=color] | native color picker, stylisé */
 .color-picker {
   width: 32px;
   height: 32px;
@@ -202,7 +202,7 @@
   border-color: var(--brand);
 }
 /* ============================================================
-   HAMBURGER — visible mobile uniquement
+   HAMBURGER | visible mobile uniquement
    ============================================================ */
 .hamburger {
   display: none;
@@ -230,7 +230,7 @@
 }
 
 /* ============================================================
-   MOBILE MENU — overlay + panneau
+   MOBILE MENU | overlay + panneau
    ============================================================ */
 .mobile-menu-overlay {
   position: fixed;
@@ -265,7 +265,7 @@
   transform: translateX(0);
 }
 
-/* Alpine x-show remet display:block — on force flex quand visible */
+/* Alpine x-show remet display:block | on force flex quand visible */
 .mobile-menu[style="display: none;"] { display: none !important; }
 .mobile-menu:not([style*="display: none"]) { display: flex !important; }
 
@@ -450,7 +450,7 @@
   .main-inner   { padding: 0 12px 24px; }
 }
 
-/* Transitions x-show sur mobile menu — Alpine CSP compatible
+/* Transitions x-show sur mobile menu | Alpine CSP compatible
    Alpine pose display:none/block, on anime via opacity + transform */
 .mobile-menu-overlay {
   transition: opacity .2s ease;

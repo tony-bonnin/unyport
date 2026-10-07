@@ -27,9 +27,9 @@ var publicVersionCache struct {
 	latest  string
 }
 
-// mimeTypes — table explicite pour les environnements sans /etc/mime.types
+// mimeTypes | table explicite pour les environnements sans /etc/mime.types
 // (Alpine minimal, BusyBox). http.FileServerFS utilise mime.TypeByExtension
-// qui dépend du système — on enregistre les types essentiels au démarrage.
+// qui dépend du système | on enregistre les types essentiels au démarrage.
 var mimeTypes = map[string]string{
 	".css":         "text/css; charset=utf-8",
 	".js":          "text/javascript; charset=utf-8",
@@ -169,7 +169,7 @@ func setupRoutes(
 	mux.HandleFunc("/api/logout", authHandler.Logout)
 	mux.HandleFunc("/api/session", authHandler.Session)
 
-	// Branding — GET public, PATCH/DELETE admin
+	// Branding | GET public, PATCH/DELETE admin
 	mux.HandleFunc("/api/branding", brandingHandler.GetBranding)
 	mux.HandleFunc("/api/oauth/providers", oauthSvc.ProvidersHandler)
 	mux.HandleFunc("/api/oauth/login", oauthSvc.LoginHandler)
@@ -180,7 +180,7 @@ func setupRoutes(
 	// Prod : embed compilé dans le binaire → fs.Sub(staticFS, "assets")
 	assetsDir := os.Getenv("UNYPORT_ASSETS")
 	if assetsDir != "" {
-		// Mode dev — servir chaque sous-répertoire depuis le disque
+		// Mode dev | servir chaque sous-répertoire depuis le disque
 		for _, dir := range []string{"css", "app", "media", "assets", "static", "vendor", "webfonts", "fonts"} {
 			prefix := "/" + dir + "/"
 			dirPath := assetsDir + "/" + dir
@@ -193,18 +193,18 @@ func setupRoutes(
 		mux.Handle("/sw.js", mimeFixFS(http.FileServer(http.Dir(assetsDir))))
 		mux.Handle("/", spaFallbackDir(assetsDir))
 	} else {
-		// Mode prod — embed
+		// Mode prod | embed
 		pub, err := fs.Sub(staticFS, "assets")
 		if err != nil {
 			// Ne devrait jamais arriver si le build est correct,
 			// mais on évite un panic silencieux.
-			panic("embed: assets subtree missing — rebuild with cp frontend/public server/assets")
+			panic("embed: assets subtree missing | rebuild with cp frontend/public server/assets")
 		}
 		for _, dir := range []string{"css", "app", "media", "assets", "static", "vendor", "webfonts", "fonts"} {
 			prefix := "/" + dir + "/"
 			sub, err := fs.Sub(pub, dir)
 			if err != nil {
-				// Sous-dossier absent de frontend/public — on l'ignore proprement.
+				// Sous-dossier absent de frontend/public | on l'ignore proprement.
 				logger.Debug("embed: static subdir not found, skipping", "dir", dir)
 				continue
 			}
@@ -218,17 +218,17 @@ func setupRoutes(
 		mux.Handle("/", spaFallback(pub, "index.html"))
 	}
 
-	// ---- SSE métriques (protégé — tous rôles) ----
+	// ---- SSE métriques (protégé | tous rôles) ----
 	mux.Handle("/sse/system", authMW(http.HandlerFunc(broker.Handler)))
 
-	// ---- /api/system : infos statiques HW/OS (protégé — tous rôles) ----
+	// ---- /api/system : infos statiques HW/OS (protégé | tous rôles) ----
 	mux.Handle("/api/system", authMW(http.HandlerFunc(broker.SystemInfoHandler)))
 
-	// ---- /api/versions : versions latest TRINITY (protégé — tous rôles) ----
+	// ---- /api/versions : versions latest TRINITY (protégé | tous rôles) ----
 	mux.Handle("/api/versions", authMW(http.HandlerFunc(broker.VersionsHandler)))
 	mux.Handle("/api/reboots", authMW(http.HandlerFunc(broker.RebootsHandler)))
 
-	// ---- API sysinfo étendue — portage ACF Lua (protégé — tous rôles) ----
+	// ---- API sysinfo étendue | portage ACF Lua (protégé | tous rôles) ----
 	mux.Handle("/api/bios", authMW(http.HandlerFunc(broker.BIOSHandler)))
 	mux.Handle("/api/modules", authMW(http.HandlerFunc(broker.ModulesHandler)))
 	mux.Handle("/api/gpus", authMW(http.HandlerFunc(broker.GPUsHandler)))
@@ -238,14 +238,14 @@ func setupRoutes(
 	mux.Handle("/api/logs", authMW(http.HandlerFunc(broker.LogsListHandler)))
 	mux.Handle("/api/logs/tail", authMW(http.HandlerFunc(broker.LogsTailHandler)))
 
-	// ---- API Xen native xl — lecture tous rôles, actions operator/admin ----
+	// ---- API Xen native xl | lecture tous rôles, actions operator/admin ----
 	xenHandler := xenctl.NewHandler(xenctl.NewClient(), logger)
 	mux.Handle("/api/xen/info", authMW(http.HandlerFunc(xenHandler.Info)))
 	mux.Handle("/api/xen/domains", authMW(http.HandlerFunc(xenHandler.Domains)))
 	mux.Handle("/api/xen/domains/create", adminMW(http.HandlerFunc(xenHandler.Create)))
 	mux.Handle("/api/xen/domains/", writeMW(http.HandlerFunc(xenHandler.DomainAction)))
 
-	// ---- Profil utilisateur (protégé — tous rôles) ----
+	// ---- Profil utilisateur (protégé | tous rôles) ----
 	mux.Handle("/api/profile", authMW(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
@@ -273,7 +273,7 @@ func setupRoutes(
 	return mux
 }
 
-// spaFallback — mode prod (embed FS)
+// spaFallback | mode prod (embed FS)
 func spaFallback(fsys fs.FS, index string) http.Handler {
 	deny := []string{"/api/", "/sse/", "/css/", "/app/", "/media/", "/assets/", "/static/", "/vendor/"}
 
@@ -307,7 +307,7 @@ func spaFallback(fsys fs.FS, index string) http.Handler {
 	})
 }
 
-// spaFallbackDir — mode dev (http.Dir)
+// spaFallbackDir | mode dev (http.Dir)
 func spaFallbackDir(assetsDir string) http.Handler {
 	deny := []string{"/api/", "/sse/", "/css/", "/app/", "/media/", "/assets/", "/static/", "/vendor/"}
 

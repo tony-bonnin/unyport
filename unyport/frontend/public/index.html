@@ -551,9 +551,9 @@
                   </dd></div>
                   <div class="hyp-row has-ver-badge"><dt>Kernel</dt><dd>
                     <span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span>
-                    <span x-text="kernelLts || kernelShort || sysKernel || '—'"></span>
+                    <span x-text="kernelLts || kernelShort || sysKernel || '|'"></span>
                   </dd></div>
-                  <div class="hyp-row"><dt>Xen role</dt><dd x-text="xenLabel || '—'"></dd></div>
+                  <div class="hyp-row"><dt>Xen role</dt><dd x-text="xenLabel || '|'"></dd></div>
                   <div class="hyp-row"><dt>IP address</dt><dd x-text="netIpDisplay"></dd></div>
                   <div class="hyp-row"><dt>Interface</dt><dd x-text="netIfaceDisplay"></dd></div>
                 </dl>
@@ -574,7 +574,7 @@
 
             <div class="section-head">
               <h2>Host resources</h2>
-              <p>Current system state — Alpine Linux.</p>
+              <p>Current system state | Alpine Linux.</p>
             </div>
 
             <div class="resources-grid resources-grid-compact">
@@ -586,8 +586,8 @@
                 <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(uptime)"></span><span x-text="_primaryRest(uptime)"></span></div>
                 <dl class="res-kv">
                   <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
-                  <div class="res-kv-row"><dt>Date</dt><dd x-text="sysDate || '—'"></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
+                  <div class="res-kv-row"><dt>Date</dt><dd x-text="sysDate || '|'"></dd></div>
                 </dl>
               </div>
               <div class="res-card">
@@ -657,7 +657,7 @@
 
             <div class="section-head">
               <h2>Network topology</h2>
-              <p>Host interfaces and ARP neighbors — updated live.</p>
+              <p>Host interfaces and ARP neighbors | updated live.</p>
             </div>
             <div class="netmap-card">
               <div id="netmap-container-dash" class="netmap-container"></div>
@@ -714,7 +714,7 @@
                 </div>
                 <dl class="res-kv">
                   <div class="res-kv-row has-ver-badge"><dt>Distribution</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
                 </dl>
               </div>
               <div class="hyp-info-card">
@@ -724,9 +724,9 @@
                 </div>
                 <dl class="res-kv">
                   <dt>Model</dt><dd x-text="cpuModelClean"></dd>
-                  <dt>Vendor</dt><dd x-text="sysCpuVendor || '—'"></dd>
+                  <dt>Vendor</dt><dd x-text="sysCpuVendor || '|'"></dd>
                   <dt>Cores</dt><dd x-text="cpuCoresDisplay"></dd>
-                  <dt>Max frequency</dt><dd x-text="sysCpuFreqMax ? _fmtFreq(sysCpuFreqMax) : '—'"></dd>
+                  <dt>Max frequency</dt><dd x-text="sysCpuFreqMax ? _fmtFreq(sysCpuFreqMax) : '|'"></dd>
                 </dl>
               </div>
               <div class="hyp-info-card">
@@ -735,10 +735,10 @@
                   <h3>Xen / Virtualization</h3>
                 </div>
 	                <dl class="res-kv">
-	                  <dt>Role</dt><dd x-text="xenLabel || '—'"></dd>
+	                  <dt>Role</dt><dd x-text="xenLabel || '|'"></dd>
 	                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
-	                  <dt x-show="showXenInfo">Xen</dt><dd x-show="showXenInfo" x-text="xenInfo.xen_version || '—'"></dd>
-	                  <dt x-show="showXenInfo">Scheduler</dt><dd x-show="showXenInfo" x-text="xenInfo.scheduler || '—'"></dd>
+	                  <dt x-show="showXenInfo">Xen</dt><dd x-show="showXenInfo" x-text="xenInfo.xen_version || '|'"></dd>
+	                  <dt x-show="showXenInfo">Scheduler</dt><dd x-show="showXenInfo" x-text="xenInfo.scheduler || '|'"></dd>
 	                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
 	                  <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
 	                </dl>
@@ -750,7 +750,7 @@
 	                </div>
 	                <dl class="res-kv">
 		                  <dt>Domains</dt><dd x-text="xenInfo.domain_count || 0"></dd>
-		                  <dt>Host CPUs</dt><dd x-text="xenCPUCount || '—'"></dd>
+		                  <dt>Host CPUs</dt><dd x-text="xenCPUCount || '|'"></dd>
 		                  <dt>vCPUs</dt><dd x-text="xenInfo.total_vcpus || 0"></dd>
 		                  <dt>Total memory</dt><dd x-text="_fmtMB((xenInfo.total_memory_mb || 0) * 1024)"></dd>
 		                  <dt>Memory</dt><dd><span x-text="_fmtMB(xenMemoryUsedMB * 1024)"></span> / <span x-text="_fmtMB((xenInfo.total_memory_mb || 0) * 1024)"></span></dd>
@@ -762,11 +762,11 @@
                   <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
                     <i class="fa-solid fa-floppy-disk"></i>
                   </div>
-                  <h3>LBU — Persistence</h3>
+                  <h3>LBU | Persistence</h3>
                 </div>
                 <dl class="res-kv">
                   <dt>State</dt><dd x-text="lbuText"></dd>
-                  <dt>Archive</dt><dd x-text="lbuArchive || '—'"></dd>
+                  <dt>Archive</dt><dd x-text="lbuArchive || '|'"></dd>
                   <dt>Mode</dt><dd>Data Disk (semi-persistent)</dd>
                   <dt>Protected paths</dt><dd>/etc/apk/protected-paths.d</dd>
                 </dl>
@@ -792,7 +792,7 @@
 	                    <tr>
 	                      <td class="proc-pid" x-text="dom.domid"></td>
 	                      <td x-text="dom.name"></td>
-	                      <td><span class="badge" x-text="dom.state || '—'"></span></td>
+	                      <td><span class="badge" x-text="dom.state || '|'"></span></td>
 		                      <td x-text="dom.vcpus"></td>
 		                      <td x-text="_fmtMB((dom.mem_mb || 0) * 1024)"></td>
 		                      <td x-text="pct1(dom.cpu_pct)"></td>
@@ -826,7 +826,7 @@
           <div x-show="currentPage === 'resources'">
             <div class="page-header">
               <h1><i class="fa-solid fa-server"></i> Host resources</h1>
-              <p>CPU, memory, load and process metrics — live.</p>
+              <p>CPU, memory, load and process metrics | live.</p>
             </div>
 
             <div class="stats-strip stats-strip-wide">
@@ -933,7 +933,7 @@
           <div x-show="currentPage === 'network'">
             <div class="page-header">
               <h1><i class="fa-solid fa-network-wired"></i> Network</h1>
-              <p>Interfaces, throughput and ARP neighbors — live.</p>
+              <p>Interfaces, throughput and ARP neighbors | live.</p>
             </div>
 
             <div class="stats-strip stats-strip-wide">
@@ -967,7 +967,7 @@
               </div>
             </div>
 
-            <div class="section-head"><h2>Network topology</h2><p>Host interfaces and ARP neighbors — updated live.</p></div>
+            <div class="section-head"><h2>Network topology</h2><p>Host interfaces and ARP neighbors | updated live.</p></div>
             <div class="netmap-card">
               <div id="netmap-container" class="netmap-container"></div>
             </div>
@@ -1030,7 +1030,7 @@
               <div class="stat-block">
                 <div class="stat-icon stat-orange"><i class="fa-solid fa-file-zipper"></i></div>
                 <div class="stat-body">
-                  <div class="stat-value" x-text="lbuArchive || '—'"></div>
+                  <div class="stat-value" x-text="lbuArchive || '|'"></div>
                   <div class="stat-label">LBU archive</div>
                 </div>
               </div>
@@ -1069,7 +1069,7 @@
               <p>Waiting for filesystem data from the host.</p>
             </div>
 
-            <div class="section-head" x-show="showLbu"><h2>LBU — Data Disk Mode</h2><p>Alpine Linux Backup persistence state.</p></div>
+            <div class="section-head" x-show="showLbu"><h2>LBU | Data Disk Mode</h2><p>Alpine Linux Backup persistence state.</p></div>
             <div class="resources-grid" x-show="showLbu">
               <div class="res-card">
                 <div class="res-card-head">
@@ -1088,7 +1088,7 @@
                 </div>
                 <dl class="res-kv res-kv-mt">
                   <dt>State</dt><dd x-text="lbuState"></dd>
-                  <dt>Archive</dt><dd x-text="lbuArchive || '—'"></dd>
+                  <dt>Archive</dt><dd x-text="lbuArchive || '|'"></dd>
                   <dt>Paths</dt><dd>/etc/apk/protected-paths.d</dd>
                 </dl>
               </div>
@@ -1101,7 +1101,7 @@
                 <dl class="res-kv">
                   <dt>Mode</dt><dd>Data Disk (LBU)</dd>
                   <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
                   <dt>Uptime</dt><dd x-text="uptime"></dd>
                 </dl>
               </div>
@@ -1192,7 +1192,7 @@
                       <td x-text="svc.name"></td>
                       <td x-text="svc.state"></td>
                       <td><span class="badge" :class="securityStatusClass(svc.status)" x-text="svc.status"></span></td>
-                      <td x-text="(svc.runlevels || []).join(', ') || '—'"></td>
+                      <td x-text="(svc.runlevels || []).join(', ') || '|'"></td>
                       <td x-text="svc.detail"></td>
                     </tr>
                   </template>
@@ -1239,7 +1239,7 @@
           <div x-show="currentPage === 'settings'">
             <div class="page-header">
               <h1><i class="fa-solid fa-gear"></i> Settings</h1>
-              <p>Instance configuration — branding, colors and advanced options.</p>
+              <p>Instance configuration | branding, colors and advanced options.</p>
             </div>
 
             <div class="settings-section">
@@ -1594,21 +1594,21 @@
 
   <div id="reboot-hover-card" class="reboot-hover-card" aria-hidden="true">
     <div class="reboot-hover-head">
-      <strong class="reboot-hover-date-wrap"><i class="fa-solid fa-calendar-day"></i><span id="reboot-hover-date">—</span></strong>
+      <strong class="reboot-hover-date-wrap"><i class="fa-solid fa-calendar-day"></i><span id="reboot-hover-date">|</span></strong>
       <span id="reboot-hover-count" class="reboot-hover-badge">0 restart</span>
     </div>
     <hr class="reboot-hover-divider">
     <div class="reboot-hover-meta">
       <span class="reboot-hover-label">Day</span>
-      <span id="reboot-hover-day">—</span>
+      <span id="reboot-hover-day">|</span>
     </div>
     <div class="reboot-hover-meta">
       <span class="reboot-hover-label">Level</span>
-      <span id="reboot-hover-level">—</span>
+      <span id="reboot-hover-level">|</span>
     </div>
     <div class="reboot-hover-meta">
       <span class="reboot-hover-label">Status</span>
-      <span id="reboot-hover-status">—</span>
+      <span id="reboot-hover-status">|</span>
     </div>
   </div>
 

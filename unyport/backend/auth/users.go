@@ -156,7 +156,7 @@ func (s *UserStore) load() error {
 	return nil
 }
 
-// seedAdmin crée le compte admin par défaut — appelé sous mutex.
+// seedAdmin crée le compte admin par défaut | appelé sous mutex.
 func (s *UserStore) seedAdmin() error {
 	password := os.Getenv("UNYPORT_ADMIN_PASSWORD")
 	if password == "" {

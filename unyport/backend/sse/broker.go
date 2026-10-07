@@ -76,7 +76,7 @@ func (b *Broker) loop() {
 			}
 		}
 
-		// Network map — collecte avec débits par interface
+		// Network map | collecte avec débits par interface
 		dt := 0.0
 		if !prevSnap.Timestamp.IsZero() {
 			dt = snap.Timestamp.Sub(prevSnap.Timestamp).Seconds()
@@ -85,7 +85,7 @@ func (b *Broker) loop() {
 		snap.NetMap = netMap
 		prevIfaces = currentIfaces
 
-		// Xen Dom0 — utiliser la toolstack Xen pour les domaines/hyperviseur.
+		// Xen Dom0 | utiliser la toolstack Xen pour les domaines/hyperviseur.
 		// Les métriques Linux /proc restent présentes, mais ces champs donnent
 		// la vue correcte de l'hyperviseur au lieu du seul noyau Alpine Dom0.
 		if b.hostRole.Role == "Dom0" {
@@ -100,7 +100,7 @@ func (b *Broker) loop() {
 
 		// ── Échelles oscilloscope ─────────────────────────────────────────
 		// Calcul sur la fenêtre visible (15 snapshots = ~30s à 2s/tick).
-		// Go lit le ring courant et calcule min/max réels des données —
+		// Go lit le ring courant et calcule min/max réels des données |
 		// le frontend applique sans calcul (calibrage automatique).
 		const windowSnaps = 15
 		snap = b.computeOscilloScales(snap, windowSnaps)
@@ -136,7 +136,7 @@ func (b *Broker) unsubscribe(ch chan Snapshot) {
 	b.mu.Unlock()
 }
 
-// Handler est le endpoint SSE — protégé par AuthMiddleware en amont.
+// Handler est le endpoint SSE | protégé par AuthMiddleware en amont.
 func (b *Broker) Handler(w http.ResponseWriter, r *http.Request) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -303,7 +303,7 @@ func writeSSE(w http.ResponseWriter, f http.Flusher, snap Snapshot) {
 }
 
 // ============================================================
-// SystemInfo — réponse de /api/system
+// SystemInfo | réponse de /api/system
 // ============================================================
 
 // SystemInfo contient les infos statiques HW/OS + le rôle de l'hôte.
@@ -340,7 +340,7 @@ type SystemInfo struct {
 	// Kernel modules summary (count)
 	Modules ModulesSummary `json:"modules"`
 
-	// Rôle hôte — clé unique pour toute la logique UI
+	// Rôle hôte | clé unique pour toute la logique UI
 	HostRole HostRole `json:"host_role"`
 
 	// Réseau
@@ -370,13 +370,13 @@ type SystemInfo struct {
 	MemUsedPct     uint8     `json:"mem_used_pct"`
 	MemCachedPct   uint8     `json:"mem_cached_pct"`
 
-	// Compat legacy — certains appels utilisaient xen_role directement
+	// Compat legacy | certains appels utilisaient xen_role directement
 	XenRole string `json:"xen_role"`
 
-	// LBU — Alpine Linux Backup (absent si LBU non installé)
+	// LBU | Alpine Linux Backup (absent si LBU non installé)
 	LBU LBUStatus `json:"lbu"`
 
-	// Xen Dom0 — hyperviseur et domaines vus via xl.
+	// Xen Dom0 | hyperviseur et domaines vus via xl.
 	XenInfo    XenInfo     `json:"xen_info"`
 	XenDomains []XenDomain `json:"xen_domains"`
 }
@@ -396,7 +396,7 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 	board := readFirstFile("/sys/devices/virtual/dmi/id/board_name")
 	bvendor := readFirstFile("/sys/devices/virtual/dmi/id/board_vendor")
 
-	// Nouveaux champs — portage ACF Lua
+	// Nouveaux champs | portage ACF Lua
 	boardVersion := CollectBoardVersion()
 	bios := CollectBIOSInfo()
 	gpus := CollectGPUs()
@@ -469,7 +469,7 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(info)
 }
 
-// VersionsHandler — GET /api/versions
+// VersionsHandler | GET /api/versions
 // Fetch la page publique https://github.com/trinity-labs/trinity-boot/releases
 // côté serveur (pas de CSP côté client), parse les tags via regex,
 // retourne les versions latest kernel + alpine filtrées par rôle hôte.
@@ -498,7 +498,7 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		Role      string `json:"role"`
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	// Cache 1h — les releases ne changent pas toutes les minutes
+	// Cache 1h | les releases ne changent pas toutes les minutes
 	w.Header().Set("Cache-Control", "public, max-age=3600")
 	_ = json.NewEncoder(w).Encode(versionsResp{
 		KernelLts: strings.TrimSpace(kernelVer),

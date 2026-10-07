@@ -1,4 +1,4 @@
-# docker-compose.yml — TRINITY / unyport
+# docker-compose.yml | TRINITY / unyport
 #
 # DEV  : docker compose up -d
 #        → compile au démarrage (cache Go actif = rapide dès le 2e lancement)

@@ -35,14 +35,14 @@ func NewLoginRateLimiter(maxAttempts int, logger *slog.Logger) func(http.Handler
 		window:      time.Minute,
 		logger:      logger,
 	}
-	// Nettoyage périodique — RAM précieuse en Alpine DDM
+	// Nettoyage périodique | RAM précieuse en Alpine DDM
 	go rl.janitor()
 	return rl.middleware
 }
 
 func (rl *LoginRateLimiter) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Uniquement sur POST — GET renverrait 405 de toute façon
+		// Uniquement sur POST | GET renverrait 405 de toute façon
 		if r.Method != http.MethodPost {
 			next.ServeHTTP(w, r)
 			return

@@ -1,19 +1,19 @@
 /* ============================================================
-   main.css — TRINITY · Point d'entrée CSS unique
+   main.css | TRINITY · Point d'entrée CSS unique
    Paradigme : un @import par responsabilité, ordre strict.
 
    Ordre de chargement :
-     1. tokens      — variables CSS, dark mode, couleurs de rôle
-     2. base        — reset, typographie, loading, login
-     3. layout      — dashboard root, sidebar, topbar, workspace
-     4. components  — stats strip, grilles, charts, cards
-     5. ui          — modals, badges, dropdown, avatar, settings
-     6. mobile      — hamburger, menu mobile, breakpoints
-     7. networkmap  — topologie réseau DOM/CSS (zéro SVG)
-     8. animations  — keyframes, transitions globales
-     9. metrics     — pages métriques, htop, disques, températures
+     1. tokens      | variables CSS, dark mode, couleurs de rôle
+     2. base        | reset, typographie, loading, login
+     3. layout      | dashboard root, sidebar, topbar, workspace
+     4. components  | stats strip, grilles, charts, cards
+     5. ui          | modals, badges, dropdown, avatar, settings
+     6. mobile      | hamburger, menu mobile, breakpoints
+     7. networkmap  | topologie réseau DOM/CSS (zéro SVG)
+     8. animations  | keyframes, transitions globales
+     9. metrics     | pages métriques, htop, disques, températures
 
-   Vendors chargés ici — une seule fois, avant tout le reste.
+   Vendors chargés ici | une seule fois, avant tout le reste.
    ============================================================ */
 
 /* ── Vendors ─────────────────────────────────────────────── */
@@ -30,11 +30,11 @@
 @import url('./networkmap.css');
 @import url('./animations.css');
 @import url('./metrics.css');/* ============================================================
-   metrics.css — TRINITY · Pages métriques, htop panel,
+   metrics.css | TRINITY · Pages métriques, htop panel,
                  top processes, disques, températures, per-core
    ============================================================ */
 /* ============================================================
-   PAGES MÉTRIQUES — composants additionnels
+   PAGES MÉTRIQUES | composants additionnels
    ============================================================ */
 
 .res-card-full {
@@ -157,7 +157,7 @@
 .mem-dot-free { background: #16a34a; }
 
 /* ============================================================
-   PAGES MÉTRIQUES — composants
+   PAGES MÉTRIQUES | composants
    ============================================================ */
 
 .hyp-detail-grid {
@@ -897,7 +897,7 @@
 .disk-used-val { color: var(--text-muted); }
 .disk-free-val { color: var(--text-dim); }
 
-/* Disk icon palette — neutre discret */
+/* Disk icon palette | neutre discret */
 .res-cyan,
 .res-amber,
 .res-steel,
@@ -923,7 +923,7 @@
              white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 340px; }
 
 /* ════════════════════════════════════════════════════════════
-   PORTAGE ACF LUA — Services · Modules · APK · Logs · BIOS
+   PORTAGE ACF LUA | Services · Modules · APK · Logs · BIOS
    ════════════════════════════════════════════════════════════ */
 
 .btn-sm {

@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Settings — TRINITY · Xen / Alpine Linux / Data Disk Mode
+// Settings | TRINITY · Xen / Alpine Linux / Data Disk Mode
 // Paradigme minimaliste : sécurité, prévisibilité, efficacité énergétique
 type Settings struct {
 	Theme string `yaml:"theme"`
@@ -45,7 +45,7 @@ type Settings struct {
 		AutoCreate     bool     `yaml:"auto_create_users"`
 	} `yaml:"oauth"`
 
-	// Security2 : hardening runtime — piloté par settings.yaml, pas par le code
+	// Security2 : hardening runtime | piloté par settings.yaml, pas par le code
 	Security2 struct {
 		RateLimitLogin     int      `yaml:"rate_limit_login"`
 		RateLimitAPI       int      `yaml:"rate_limit_api"`
@@ -64,7 +64,7 @@ type Settings struct {
 		SendmailPath string `yaml:"sendmail_path"`
 	} `yaml:"mail"`
 
-	// HTTP3 : support QUIC/HTTP3 — requiert TLS (cert + key obligatoires)
+	// HTTP3 : support QUIC/HTTP3 | requiert TLS (cert + key obligatoires)
 	HTTP3 struct {
 		// Enabled : active le listener QUIC sur le même port que HTTPS.
 		// HTTP/1.1 + HTTP/2 restent actifs en parallèle (TCP).

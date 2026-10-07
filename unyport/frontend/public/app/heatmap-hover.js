@@ -70,7 +70,7 @@
   function showCard(target) {
     const card = document.getElementById('reboot-hover-card');
     if (!card || !target) return;
-    const date = target.dataset.rebootDate || '—';
+    const date = target.dataset.rebootDate || '|';
     const label = target.dataset.rebootLabel || date;
     const count = target.dataset.rebootCount || '0';
     const level = target.dataset.rebootLevel || '0';

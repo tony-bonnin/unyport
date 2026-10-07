@@ -1,4 +1,4 @@
-// sse.js — SSE /sse/system
+// sse.js | SSE /sse/system
 
 class SystemSSE {
   constructor(onSnapshot, onStatus) {
