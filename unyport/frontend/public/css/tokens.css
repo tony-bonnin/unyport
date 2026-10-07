@@ -207,7 +207,6 @@
 [data-theme="dark"] .stat-indigo  { background: rgba(62,58,171,.15); color: var(--brand-500); }
 
 [data-theme="dark"] .action-blue   { color: #60a5fa; }
-[data-theme="dark"] .action-indigo { color: #a78bfa; }
 [data-theme="dark"] .action-orange { color: #fb923c; }
 [data-theme="dark"] .action-purple { color: #c4b5fd; }
 
