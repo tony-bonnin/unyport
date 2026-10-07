@@ -442,7 +442,7 @@
 
 
 @media (max-width: 480px) {
-  .stats-strip  { grid-template-columns: 1fr; }
+  .stats-strip  { grid-template-columns: repeat(4, minmax(120px, 1fr)); overflow-x: auto; }
   .action-grid  { grid-template-columns: 1fr; }
   .modal        { width: calc(100vw - 16px); }
   .modal-admin  { width: calc(100vw - 16px); }

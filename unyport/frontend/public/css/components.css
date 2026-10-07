@@ -7,7 +7,7 @@
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   overflow: hidden;
   box-shadow: rgba(62, 58, 171, 0.12) 0px 8px 32px;
 }
@@ -828,8 +828,11 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 }
 
 @media (max-width: 640px) {
-  .stats-strip { grid-template-columns: 1fr; }
-  .stat-block + .stat-block::before { display: none; }
+  .stats-strip {
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    overflow-x: auto;
+  }
+  .stat-block + .stat-block::before { display: block; }
 }
 
 @media (max-width: 700px) {
