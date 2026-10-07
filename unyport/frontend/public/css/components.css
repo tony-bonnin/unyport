@@ -1015,82 +1015,73 @@ label.remember-me span {
   align-items: center;
   gap: 0.45rem;
   flex-wrap: wrap;
+  cursor: help;
+  outline: none;
+  position: relative;
 }
+
 .reboot-heatmap-legend span {
     font-size: 0.66rem;
     opacity: 0.33;
 }
 
-.reboot-heatmap-info {
-  align-items: center;
-  background: var(--surface-sunk);
+.reboot-heatmap-legend::after {
+  background: #ffffff;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--text-dim);
-  cursor: help;
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-size: 0.5rem;
-  height: 0.92rem;
-  justify-content: center;
-  opacity: 0.78;
-  padding: 0;
-  position: relative;
-  width: 0.92rem;
-}
-
-.reboot-heatmap-info:hover,
-.reboot-heatmap-info:focus-visible {
-  color: var(--brand);
-  opacity: 1;
-}
-
-.reboot-heatmap-info::after {
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 4px;
-  bottom: calc(100% + 0.44rem);
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
-  color: #fff;
+  color: var(--text-1);
   content: attr(data-tooltip);
-  font-size: 0.64rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.25;
-  max-width: 9.5rem;
+  max-width: 13rem;
+  min-width: 11rem;
   opacity: 0;
-  padding: 0.36rem 0.48rem;
+  padding: 0.66rem 0.8rem;
   pointer-events: none;
   position: absolute;
   right: 0;
-  text-align: center;
+  text-align: left;
+  top: calc(100% + 0.58rem);
   transform: translateY(0.22rem);
   transition: opacity 140ms ease, transform 140ms ease;
   white-space: normal;
-  width: max-content;
   z-index: 3600;
 }
 
-.reboot-heatmap-info::before {
+.reboot-heatmap-legend::before {
   border-left: 0.28rem solid transparent;
   border-right: 0.28rem solid transparent;
-  border-top: 0.28rem solid rgba(15, 23, 42, 0.96);
-  bottom: calc(100% + 0.18rem);
+  border-bottom: 0.28rem solid #ffffff;
   content: "";
   opacity: 0;
   pointer-events: none;
   position: absolute;
   right: 0.18rem;
+  top: calc(100% + 0.31rem);
   transform: translateY(0.22rem);
   transition: opacity 140ms ease, transform 140ms ease;
   z-index: 3601;
 }
 
-.reboot-heatmap-info:hover::after,
-.reboot-heatmap-info:focus-visible::after,
-.reboot-heatmap-info:hover::before,
-.reboot-heatmap-info:focus-visible::before {
+.reboot-heatmap-legend:hover::after,
+.reboot-heatmap-legend:focus-visible::after,
+.reboot-heatmap-legend:hover::before,
+.reboot-heatmap-legend:focus-visible::before {
   opacity: 1;
   transform: translateY(0);
+}
+
+[data-theme="dark"] .reboot-heatmap-legend::after {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: var(--line);
+  box-shadow: 0 22px 48px rgba(15, 23, 42, 0.32);
+  color: #fff;
+}
+
+[data-theme="dark"] .reboot-heatmap-legend::before {
+  border-bottom-color: rgba(15, 23, 42, 0.96);
 }
 
 .reboot-heatmap-swatch,
