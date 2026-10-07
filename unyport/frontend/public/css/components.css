@@ -756,6 +756,16 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
   color: #ff5555;
 }
 
+.stat-icon.rx-network-icon {
+  background: rgba(84, 84, 255, 0.12);
+  color: #5454ff;
+}
+
+.stat-icon.tx-network-icon {
+  background: rgba(255, 85, 85, 0.12);
+  color: #ff5555;
+}
+
 /* ============================================================
    CHARTS
    ============================================================ */
