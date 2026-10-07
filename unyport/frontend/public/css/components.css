@@ -92,12 +92,12 @@
   background-color: transparent;
 }
 
-/* Alpine Linux — logo officiel PNG (/media/img/logos/logo-alpine-linux-simple-white-purple.png) */
+/* Alpine Linux — logo officiel PNG */
 .icon-alpine {
   -webkit-mask-image: none;
   mask-image: none;
   background-color: transparent !important;
-  background-image: url('/media/img/logos/logo-alpine-linux-simple-white-purple.png');
+  background-image: url('/media/img/logos/alpinelinux_logo_icon.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -516,7 +516,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 .res-primary {
   font-size: 26px;
   font-weight: 750;
-  color: var(--text);
+  color: var(--brand);
   letter-spacing: -.025em;
   line-height: 1.1;
   margin-bottom: 12px;

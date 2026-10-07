@@ -220,7 +220,7 @@ document.addEventListener('alpine:init', () => {
         'Dom0': 'fa-solid fa-cubes',
         'DomU': 'fa-solid fa-cube',
         'Container': 'fa-solid fa-box',
-        'Alpine': 'fa-solid fa-server',
+        'Alpine': 'icon-alpine',
         'Unknown': 'fa-solid fa-circle-question',
       };
       return icons[role] || 'fa-solid fa-server';
