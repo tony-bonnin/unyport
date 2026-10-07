@@ -13,12 +13,36 @@ import (
 )
 
 // HostRole décrit le rôle de l'hôte dans l'écosystème TRINITY.
-// Valeurs possibles : "Dom0", "DomU", "Container", "Alpine", "Unknown".
+// Les champs historiques Role/Runtime/Label restent stables pour l'UI.
+// Les champs de stack décrivent le contexte réel quand UnyPort tourne dans
+// une VM ou un container lui-même posé sur une VM ou un Dom0.
 type HostRole struct {
-	Role     string `json:"role"`     // Dom0 | DomU | Container | Alpine | Unknown
-	Runtime  string `json:"runtime"`  // xen | podman | docker | lxc | containerd | native
-	Label    string `json:"label"`    // Label lisible | affiché dans l'UI
-	Verified bool   `json:"verified"` // true = détection par preuve directe (pas heuristique)
+	Role               string           `json:"role"`                // Dom0 | DomU | Container | Alpine | Unknown
+	Runtime            string           `json:"runtime"`             // xen | qemu-kvm | podman | docker | lxc | containerd | native
+	Label              string           `json:"label"`               // Label lisible | affiché dans l'UI
+	Verified           bool             `json:"verified"`            // true = détection par preuve directe
+	Environment        string           `json:"environment"`         // host | hypervisor | vm | container | unknown
+	Virtualization     string           `json:"virtualization"`      // xen | qemu-kvm | vmware | virtualbox | hyper-v | none
+	VirtualizationRole string           `json:"virtualization_role"` // dom0 | domu | guest | host | none
+	ContainerRuntime   string           `json:"container_runtime"`   // docker | podman | lxc | containerd | none
+	ParentRuntime      string           `json:"parent_runtime"`      // runtime sous-jacent si container
+	Capabilities       HostCapabilities `json:"capabilities"`
+	Layers             []HostLayer      `json:"layers,omitempty"`
+}
+
+type HostCapabilities struct {
+	XenControl    bool `json:"xen_control"`
+	DockerControl bool `json:"docker_control"`
+	PodmanControl bool `json:"podman_control"`
+	QEMUControl   bool `json:"qemu_control"`
+}
+
+type HostLayer struct {
+	Kind     string `json:"kind"` // host | hypervisor | vm | container
+	Runtime  string `json:"runtime"`
+	Role     string `json:"role"`
+	Label    string `json:"label"`
+	Verified bool   `json:"verified"`
 }
 
 // Snapshot représente un relevé instantané des métriques système.
@@ -305,23 +329,72 @@ func mathAbs(x float64) float64 {
 // DetectHostRole identifie le rôle de l'hôte.
 // Résultat mis en cache au démarrage du broker | appelé une seule fois.
 func DetectHostRole() HostRole {
-	// ── 1. Container ? (avant Xen | un container dans une DomU
-	//       voit /proc/xen mais son rôle réel est container)
-	if r, ok := probeContainer(); ok {
-		return r
+	container, hasContainer := probeContainer()
+	virtualization, hasVirtualization := probeVirtualization()
+	return composeHostRole(container, hasContainer, virtualization, hasVirtualization)
+}
+
+func composeHostRole(container HostRole, hasContainer bool, virtualization HostRole, hasVirtualization bool) HostRole {
+	base := alpineBaremetalRole()
+	if hasVirtualization {
+		base = virtualization
+	}
+	base.Layers = []HostLayer{hostLayer(base)}
+
+	if !hasContainer {
+		base.Capabilities = detectHostCapabilities(base)
+		return base
 	}
 
-	// ── 2. Xen Dom0 ou DomU ? (seulement si pas container)
-	if r, ok := probeXen(); ok {
-		return r
+	parentRuntime := base.Runtime
+	if parentRuntime == "" {
+		parentRuntime = "native"
 	}
+	role := container
+	role.Environment = "container"
+	role.ContainerRuntime = container.Runtime
+	role.ParentRuntime = parentRuntime
+	role.Virtualization = base.Virtualization
+	role.VirtualizationRole = base.VirtualizationRole
+	role.Layers = []HostLayer{hostLayer(container), hostLayer(base)}
+	if hasVirtualization {
+		role.Label = container.Label + " on " + base.Label
+	}
+	role.Capabilities = detectHostCapabilities(role)
+	return role
+}
 
-	// ── 3. Alpine baremetal
+func alpineBaremetalRole() HostRole {
 	return HostRole{
-		Role:     "Alpine",
-		Runtime:  "native",
-		Label:    "Alpine Linux · Baremetal",
-		Verified: true,
+		Role:               "Alpine",
+		Runtime:            "native",
+		Label:              "Alpine Linux · Baremetal",
+		Verified:           true,
+		Environment:        "host",
+		Virtualization:     "none",
+		VirtualizationRole: "host",
+		ContainerRuntime:   "none",
+		ParentRuntime:      "native",
+	}
+}
+
+func hostLayer(role HostRole) HostLayer {
+	return HostLayer{
+		Kind:     role.Environment,
+		Runtime:  role.Runtime,
+		Role:     role.Role,
+		Label:    role.Label,
+		Verified: role.Verified,
+	}
+}
+
+func detectHostCapabilities(role HostRole) HostCapabilities {
+	inContainer := role.Environment == "container"
+	return HostCapabilities{
+		XenControl:    !inContainer && role.Virtualization == "xen" && role.VirtualizationRole == "dom0",
+		DockerControl: dockerControlAvailable(),
+		PodmanControl: podmanControlAvailable(),
+		QEMUControl:   !inContainer && qemuControlAvailable(),
 	}
 }
 
@@ -346,10 +419,14 @@ func probeContainer() (HostRole, bool) {
 	if schedPID, ok := readSchedPID("/proc/1/sched"); ok && schedPID != 1 {
 		rt := identifyContainerRuntime()
 		return HostRole{
-			Role:     "Container",
-			Runtime:  rt,
-			Label:    containerLabel(rt),
-			Verified: true,
+			Role:               "Container",
+			Runtime:            rt,
+			Label:              containerLabel(rt),
+			Verified:           true,
+			Environment:        "container",
+			ContainerRuntime:   rt,
+			Virtualization:     "none",
+			VirtualizationRole: "none",
 		}, true
 	}
 
@@ -362,10 +439,14 @@ func probeContainer() (HostRole, bool) {
 	// cgroup de l'init du container, pas du process Go lui-même.
 	if rt, ok := cgroupPath(); ok {
 		return HostRole{
-			Role:     "Container",
-			Runtime:  rt,
-			Label:    containerLabel(rt),
-			Verified: true,
+			Role:               "Container",
+			Runtime:            rt,
+			Label:              containerLabel(rt),
+			Verified:           true,
+			Environment:        "container",
+			ContainerRuntime:   rt,
+			Virtualization:     "none",
+			VirtualizationRole: "none",
 		}, true
 	}
 
@@ -377,14 +458,14 @@ func probeContainer() (HostRole, bool) {
 	// présents dans 99% des déploiements standards.
 	if fileExists("/run/.containerenv") {
 		return HostRole{
-			Role: "Container", Runtime: "podman",
-			Label: "Container · Podman", Verified: true,
+			Role: "Container", Runtime: "podman", Label: "Container · Podman", Verified: true,
+			Environment: "container", ContainerRuntime: "podman", Virtualization: "none", VirtualizationRole: "none",
 		}, true
 	}
 	if fileExists("/.dockerenv") {
 		return HostRole{
-			Role: "Container", Runtime: "docker",
-			Label: "Container · Docker", Verified: true,
+			Role: "Container", Runtime: "docker", Label: "Container · Docker", Verified: true,
+			Environment: "container", ContainerRuntime: "docker", Virtualization: "none", VirtualizationRole: "none",
 		}, true
 	}
 
@@ -393,19 +474,31 @@ func probeContainer() (HostRole, bool) {
 
 // ── probeXen ───────────────────────────────────────────────
 
+func probeVirtualization() (HostRole, bool) {
+	if r, ok := probeXen(); ok {
+		return r, true
+	}
+	if r, ok := probeDMIHypervisor(); ok {
+		return r, true
+	}
+	return HostRole{}, false
+}
+
 func probeXen() (HostRole, bool) {
 	// Dom0 : /proc/xen/capabilities contient "control_d"
 	// DomU : /proc/xen/capabilities existe mais sans "control_d"
 	if data, err := os.ReadFile("/proc/xen/capabilities"); err == nil {
 		if strings.Contains(string(data), "control_d") {
 			return HostRole{
-				Role: "Dom0", Runtime: "xen",
-				Label: "Xen Dom0 · Hyperviseur", Verified: true,
+				Role: "Dom0", Runtime: "xen", Label: "Xen Dom0 · Hyperviseur", Verified: true,
+				Environment: "hypervisor", Virtualization: "xen", VirtualizationRole: "dom0",
+				ContainerRuntime: "none", ParentRuntime: "native",
 			}, true
 		}
 		return HostRole{
-			Role: "DomU", Runtime: "xen",
-			Label: "Xen DomU · VM Alpine", Verified: true,
+			Role: "DomU", Runtime: "xen", Label: "Xen DomU · VM Alpine", Verified: true,
+			Environment: "vm", Virtualization: "xen", VirtualizationRole: "domu",
+			ContainerRuntime: "none", ParentRuntime: "xen",
 		}, true
 	}
 
@@ -413,12 +506,50 @@ func probeXen() (HostRole, bool) {
 	if data, err := os.ReadFile("/sys/hypervisor/type"); err == nil {
 		if strings.EqualFold(strings.TrimSpace(string(data)), "xen") {
 			return HostRole{
-				Role: "DomU", Runtime: "xen",
-				Label: "Xen DomU · VM Alpine", Verified: true,
+				Role: "DomU", Runtime: "xen", Label: "Xen DomU · VM Alpine", Verified: true,
+				Environment: "vm", Virtualization: "xen", VirtualizationRole: "domu",
+				ContainerRuntime: "none", ParentRuntime: "xen",
 			}, true
 		}
 	}
 
+	return HostRole{}, false
+}
+
+func probeDMIHypervisor() (HostRole, bool) {
+	dmi := strings.ToLower(strings.Join([]string{
+		readFirstFile("/sys/class/dmi/id/product_name"),
+		readFirstFile("/sys/class/dmi/id/sys_vendor"),
+		readFirstFile("/sys/class/dmi/id/board_vendor"),
+		readFirstFile("/sys/class/dmi/id/bios_vendor"),
+	}, " "))
+	return virtualMachineFromDMI(dmi)
+}
+
+func virtualMachineFromDMI(dmi string) (HostRole, bool) {
+	dmi = strings.ToLower(dmi)
+	matches := []struct {
+		needle  string
+		runtime string
+		label   string
+	}{
+		{"qemu", "qemu-kvm", "QEMU/KVM VM"},
+		{"kvm", "qemu-kvm", "QEMU/KVM VM"},
+		{"bochs", "qemu-kvm", "QEMU/KVM VM"},
+		{"vmware", "vmware", "VMware VM"},
+		{"virtualbox", "virtualbox", "VirtualBox VM"},
+		{"microsoft corporation", "hyper-v", "Hyper-V VM"},
+		{"hyper-v", "hyper-v", "Hyper-V VM"},
+	}
+	for _, m := range matches {
+		if strings.Contains(dmi, m.needle) {
+			return HostRole{
+				Role: "DomU", Runtime: m.runtime, Label: m.label, Verified: true,
+				Environment: "vm", Virtualization: m.runtime, VirtualizationRole: "guest",
+				ContainerRuntime: "none", ParentRuntime: m.runtime,
+			}, true
+		}
+	}
 	return HostRole{}, false
 }
 
@@ -553,6 +684,39 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
+func commandExists(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
+}
+
+func dockerControlAvailable() bool {
+	return fileExists("/var/run/docker.sock") || fileExists("/run/docker.sock")
+}
+
+func podmanControlAvailable() bool {
+	return fileExists("/run/podman/podman.sock") ||
+		fileExists("/var/run/podman/podman.sock") ||
+		commandExists("podman")
+}
+
+func qemuControlAvailable() bool {
+	if !fileExists("/dev/kvm") {
+		return false
+	}
+	return fileExists("/run/libvirt/libvirt-sock") ||
+		fileExists("/var/run/libvirt/libvirt-sock") ||
+		commandExists("virsh") ||
+		commandExists("qemu-system-x86_64")
+}
+
+func localXenControlAvailable() bool {
+	if _, ok := probeContainer(); ok {
+		return false
+	}
+	data, err := os.ReadFile("/proc/xen/capabilities")
+	return err == nil && strings.Contains(string(data), "control_d")
+}
+
 // containerLabel retourne le label UI pour un runtime.
 func containerLabel(runtime string) string {
 	switch runtime {
@@ -585,13 +749,16 @@ type cpuTimes struct{ idle, total uint64 }
 // Formule : freq_max = (highest_perf / nominal_perf) × nominal_freq_MHz
 // nominal_freq est en MHz dans /sys/devices/system/cpu/cpu0/acpi_cppc/nominal_freq
 
-// readXenFreqMax lit la fréquence max turbo depuis xl dmesg.
+// readXenFreqMax lit la fréquence max turbo depuis Xen Dom0.
 // Xen expose "CPU0: bus: X MHz base: X MHz max: X MHz" sur les CPUs HWP.
 // Si "max:" absent → CPU bridé, on retourne 0 (fallback /proc/cpuinfo).
 func readXenFreqMax() int {
+	if !localXenControlAvailable() {
+		return 0
+	}
 	out, err := os.ReadFile("/var/run/xen/xen-dmesg")
 	if err != nil {
-		// Essayer via commande xl dmesg
+		// `xl dmesg` est strictement réservé au Dom0 local.
 		cmd := exec.Command("xl", "dmesg")
 		b, err2 := cmd.Output()
 		if err2 != nil {

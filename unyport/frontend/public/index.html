@@ -735,8 +735,9 @@
                   <h3 x-text="hostProfileTitle"></h3>
                 </div>
                 <dl class="res-kv">
-                  <dt x-text="hostRoleRowLabel"></dt><dd x-text="xenLabel || '|'"></dd>
-                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
+	                  <dt x-text="hostRoleRowLabel"></dt><dd x-text="xenLabel || '|'"></dd>
+	                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
+	                  <dt x-show="showParentRuntime">Parent</dt><dd x-show="showParentRuntime" x-text="parentRuntimeDisplay"></dd>
 	                  <dt x-show="showXenInfo">Xen</dt><dd x-show="showXenInfo" x-text="xenInfo.xen_version || '|'"></dd>
 	                  <dt x-show="showXenInfo">Scheduler</dt><dd x-show="showXenInfo" x-text="xenInfo.scheduler || '|'"></dd>
 	                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>

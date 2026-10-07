@@ -201,10 +201,17 @@ document.addEventListener('alpine:init', () => {
     rebootHeatmapHoverDetail: null,
     _rebootHoverRule: null,
 
-    hostRoleRole: '',
-    hostRoleRuntime: '',
-    hostRoleLabelStr: '|',
-    hostRoleVerified: false,
+	    hostRoleRole: '',
+	    hostRoleRuntime: '',
+	    hostRoleLabelStr: '|',
+	    hostRoleVerified: false,
+	    hostRoleEnvironment: '',
+	    hostRoleVirtualization: '',
+	    hostRoleVirtualizationRole: '',
+	    hostRoleContainerRuntime: '',
+	    hostRoleParentRuntime: '',
+	    hostRoleCapabilities: { xen_control: false, docker_control: false, podman_control: false, qemu_control: false },
+	    hostRoleLayers: [],
 
     // ── Fonctions utilitaires ─────────────────────────────────
     // Optimisation: Liaison directe des fonctions externes au lieu de wrappers fléchés
@@ -237,9 +244,9 @@ document.addEventListener('alpine:init', () => {
     get netIfaceDisplay() { return this.sysNetIface || '|'; },
     get netIpDisplay() { return this.sysNetIp || '|'; },
 
-    get roleWithRuntime() {
-      const role = this.hostRoleRole || '|';
-      const rt = this.hostRoleRuntime;
+	    get roleWithRuntime() {
+	      const role = this.hostRoleRole || '|';
+	      const rt = this.hostRoleRuntime;
       if (!rt || rt === 'native' || rt === '') return role;
       return `${role} · ${rt}`;
     },
@@ -287,19 +294,29 @@ document.addEventListener('alpine:init', () => {
       return this.kernelLatestVer ? `${this.kernelLatestVer} available` : lvl;
     },
 
-    get roleLabel() { return this.hostRoleLabelStr || '|'; },
-    get roleIcon() { return this._hostRoleIcon(this.hostRoleRole); },
-    get roleVerified() { return this.hostRoleVerified; },
-    get runtimeName() { return this.hostRoleRuntime || '|'; },
+	    get roleLabel() { return this.hostRoleLabelStr || '|'; },
+	    get roleIcon() { return this._hostRoleIcon(this.hostRoleRole); },
+	    get roleVerified() { return this.hostRoleVerified; },
+	    get runtimeName() { return this.hostRoleRuntime || '|'; },
+	    get parentRuntimeDisplay() {
+	      if (!this.hostRoleParentRuntime || this.hostRoleParentRuntime === 'native') return 'native';
+	      if (this.hostRoleVirtualization && this.hostRoleVirtualization !== 'none') {
+	        const suffix = this.hostRoleVirtualizationRole && this.hostRoleVirtualizationRole !== 'none' ? ` · ${this.hostRoleVirtualizationRole}` : '';
+	        return `${this.hostRoleVirtualization}${suffix}`;
+	      }
+	      return this.hostRoleParentRuntime;
+	    },
+	    get showParentRuntime() { return this.isInContainer && this.parentRuntimeDisplay !== 'native'; },
 
     get statHostIcon() {
       const rt = this.hostRoleRuntime;
       const role = this.hostRoleRole;
-      if (rt === 'docker') return 'fa-brands fa-docker';
-      if (rt === 'podman') return 'fa-solid fa-box';
-      if (rt === 'lxc' || rt === 'lxd') return 'fa-solid fa-cube';
-      if (rt === 'xen' && role === 'Dom0') return 'icon-xen';
-      if (rt === 'xen' && role === 'DomU') return 'icon-alpine';
+	      if (rt === 'docker') return 'fa-brands fa-docker';
+	      if (rt === 'podman') return 'fa-solid fa-box';
+	      if (rt === 'lxc' || rt === 'lxd') return 'fa-solid fa-cube';
+	      if (rt === 'qemu-kvm' || rt === 'kvm' || rt === 'qemu') return 'fa-solid fa-display';
+	      if (rt === 'xen' && role === 'Dom0') return 'icon-xen';
+	      if (rt === 'xen' && role === 'DomU') return 'icon-alpine';
       if (role === 'Dom0') return 'icon-xen';
       if (role === 'DomU') return 'icon-alpine';
       if (role === 'Container') return 'fa-solid fa-box';
@@ -313,12 +330,15 @@ document.addEventListener('alpine:init', () => {
     },
 
     get xenLabel() { return this.hostRoleLabelStr || '|'; },
-    get isXenDom0() { return this.hostRoleRole === 'Dom0'; },
-    get isXenDomU() { return this.hostRoleRole === 'DomU'; },
-    get isInContainer() { return this.hostRoleRole === 'Container'; },
-    get isBaremetal() { return this.hostRoleRole === 'Alpine'; },
-    get isXen() { return this.isXenDom0 || this.isXenDomU; },
-    get showVirtualMachinesSection() { return this.isXenDom0; },
+	    get isXenDom0() { return this.hostRoleCapabilities?.xen_control === true; },
+	    get isXenDomU() { return this.hostRoleVirtualization === 'xen' && this.hostRoleVirtualizationRole === 'domu'; },
+	    get isInContainer() { return this.hostRoleEnvironment === 'container' || this.hostRoleRole === 'Container'; },
+	    get isVirtualMachine() { return this.hostRoleEnvironment === 'vm' || this.hostRoleRole === 'DomU'; },
+	    get isBaremetal() { return this.hostRoleEnvironment === 'host' || this.hostRoleRole === 'Alpine'; },
+	    get isXen() { return this.hostRoleVirtualization === 'xen' || this.isXenDom0 || this.isXenDomU; },
+	    get canControlContainers() { return this.hostRoleCapabilities?.docker_control === true || this.hostRoleCapabilities?.podman_control === true; },
+	    get canControlQEMU() { return this.hostRoleCapabilities?.qemu_control === true; },
+	    get showVirtualMachinesSection() { return this.hostRoleCapabilities?.xen_control === true; },
     get showXenDomains() { return this.isXenDom0 && this.xenDomains?.length > 0; },
     get showXenInfo() { return this.isXenDom0 && this.xenInfo?.available === true; },
     get hostPanelSubtitle() {
@@ -326,16 +346,17 @@ document.addEventListener('alpine:init', () => {
       return `Management panel | ${label}`;
     },
     get hostRoleRowLabel() {
-      if (this.isXen) return 'Xen role';
-      if (this.isInContainer) return 'Container';
-      return 'Host role';
-    },
-    get hostProfileTitle() {
-      if (this.isXenDom0) return 'Xen / Virtualization';
-      if (this.isXenDomU) return 'Virtualization';
-      if (this.isInContainer) return 'Container runtime';
-      return 'Host profile';
-    },
+	      if (this.isInContainer) return 'Execution';
+	      if (this.isXen) return 'Xen role';
+	      if (this.isVirtualMachine) return 'VM role';
+	      return 'Host role';
+	    },
+	    get hostProfileTitle() {
+	      if (this.isXenDom0) return 'Xen / Virtualization';
+	      if (this.isInContainer) return 'Container runtime';
+	      if (this.isVirtualMachine) return 'Virtualization';
+	      return 'Host profile';
+	    },
     get hostProfileIcon() {
       if (this.isXenDom0) return 'fa-solid fa-cubes';
       if (this.isXenDomU) return 'fa-solid fa-cube';
@@ -355,39 +376,36 @@ document.addEventListener('alpine:init', () => {
       return Math.round((this.xenMemoryUsedMB / total) * 100);
     },
 
-    get panelHostTitle() {
-      const r = this.hostRoleRole;
-      if (r === 'Dom0') return 'Xen Hypervisor';
-      if (r === 'DomU') return 'Virtual machine';
-      if (r === 'Container') return 'Environment';
-      return 'Alpine host';
-    },
+	    get panelHostTitle() {
+	      if (this.isXenDom0) return 'Xen Hypervisor';
+	      if (this.isInContainer) return 'Container environment';
+	      if (this.isVirtualMachine) return 'Virtual machine';
+	      return 'Alpine host';
+	    },
 
-    get hostPageTitle() {
-      const r = this.hostRoleRole;
-      if (r === 'Dom0') return 'Hypervisor';
-      if (r === 'DomU') return 'Virtual machine';
-      if (r === 'Container') return 'Container';
-      return 'Alpine host';
-    },
+	    get hostPageTitle() {
+	      if (this.isXenDom0) return 'Hypervisor';
+	      if (this.isInContainer) return 'Container';
+	      if (this.isVirtualMachine) return 'Virtual machine';
+	      return 'Alpine host';
+	    },
 
-    get hostPageSubtitle() {
-      const r = this.hostRoleRole;
-      if (r === 'Dom0') return 'Xen Dom0 hypervisor overview and domain status.';
-      if (r === 'DomU') return 'Xen DomU virtual machine overview.';
-      if (r === 'Container') return 'Container runtime overview.';
-      return 'Alpine Linux host overview.';
-    },
+	    get hostPageSubtitle() {
+	      if (this.isXenDom0) return 'Xen Dom0 hypervisor overview and domain status.';
+	      if (this.isInContainer && this.showParentRuntime) return `Container runtime overview on ${this.parentRuntimeDisplay}.`;
+	      if (this.isInContainer) return 'Container runtime overview.';
+	      if (this.isVirtualMachine) return `${this.runtimeName} virtual machine overview.`;
+	      return 'Alpine Linux host overview.';
+	    },
 
     get hostMenuTitle() { return 'Open ' + this.hostPageTitle.toLowerCase() + ' overview'; },
 
-    get hostPageIcon() {
-      const r = this.hostRoleRole;
-      if (r === 'Dom0') return 'fa-solid fa-cubes';
-      if (r === 'DomU') return 'fa-solid fa-cube';
-      if (r === 'Container') return 'fa-solid fa-box';
-      return 'fa-solid fa-server';
-    },
+	    get hostPageIcon() {
+	      if (this.isXenDom0) return 'fa-solid fa-cubes';
+	      if (this.isInContainer) return 'fa-solid fa-box';
+	      if (this.isVirtualMachine) return 'fa-solid fa-display';
+	      return 'fa-solid fa-server';
+	    },
 
     get cpuBarClass() {
       if (this.cpuPct > 80) return 'crit';
@@ -1661,32 +1679,75 @@ document.addEventListener('alpine:init', () => {
       if (Object.prototype.hasOwnProperty.call(d, 'xen_domains')) this.xenDomains = Array.isArray(d.xen_domains) ? d.xen_domains : [];
     },
 
-    _applyHostRole(hostRole, xenRoleLegacy) {
-      if (hostRole && typeof hostRole === 'object') {
-        const { role = '', runtime = '', label = role || '|', verified = false } = hostRole;
-        if (role) {
-          this.hostRoleRole = role;
-          this.hostRoleRuntime = runtime;
-          this.hostRoleLabelStr = label;
-          this.hostRoleVerified = verified;
-          this._applyRoleColor(role);
-          return;
-        }
-      }
-      if (xenRoleLegacy) {
-        this.hostRoleRole = xenRoleLegacy;
-        this.hostRoleRuntime = 'xen';
-        this.hostRoleLabelStr = this._xenRoleLabel(xenRoleLegacy);
-        this.hostRoleVerified = true;
-        this._applyRoleColor(xenRoleLegacy);
-        return;
-      }
-      this.hostRoleRole = 'Alpine';
-      this.hostRoleRuntime = 'native';
-      this.hostRoleLabelStr = 'Alpine Linux';
-      this.hostRoleVerified = false;
-      this._applyRoleColor('Alpine');
-    },
+	    _applyHostRole(hostRole, xenRoleLegacy) {
+	      if (hostRole && typeof hostRole === 'object') {
+	        const {
+	          role = '',
+	          runtime = '',
+	          label = role || '|',
+	          verified = false,
+	          environment = '',
+	          virtualization = '',
+	          virtualization_role = '',
+	          container_runtime = '',
+	          parent_runtime = '',
+	          capabilities = {},
+	          layers = [],
+	        } = hostRole;
+	        if (role) {
+	          this.hostRoleRole = role;
+	          this.hostRoleRuntime = runtime;
+	          this.hostRoleLabelStr = label;
+	          this.hostRoleVerified = verified;
+	          this.hostRoleEnvironment = environment;
+	          this.hostRoleVirtualization = virtualization;
+	          this.hostRoleVirtualizationRole = virtualization_role;
+	          this.hostRoleContainerRuntime = container_runtime;
+	          this.hostRoleParentRuntime = parent_runtime;
+	          this.hostRoleCapabilities = {
+	            xen_control: capabilities?.xen_control === true,
+	            docker_control: capabilities?.docker_control === true,
+	            podman_control: capabilities?.podman_control === true,
+	            qemu_control: capabilities?.qemu_control === true,
+	          };
+	          this.hostRoleLayers = Array.isArray(layers) ? layers : [];
+	          this._applyRoleColor(role);
+	          return;
+	        }
+	      }
+	      if (xenRoleLegacy) {
+	        this.hostRoleRole = xenRoleLegacy;
+	        this.hostRoleRuntime = 'xen';
+	        this.hostRoleLabelStr = this._xenRoleLabel(xenRoleLegacy);
+	        this.hostRoleVerified = true;
+	        this.hostRoleEnvironment = xenRoleLegacy === 'Dom0' ? 'hypervisor' : 'vm';
+	        this.hostRoleVirtualization = 'xen';
+	        this.hostRoleVirtualizationRole = xenRoleLegacy === 'Dom0' ? 'dom0' : 'domu';
+	        this.hostRoleContainerRuntime = 'none';
+	        this.hostRoleParentRuntime = 'xen';
+	        this.hostRoleCapabilities = {
+	          xen_control: xenRoleLegacy === 'Dom0',
+	          docker_control: false,
+	          podman_control: false,
+	          qemu_control: false,
+	        };
+	        this.hostRoleLayers = [];
+	        this._applyRoleColor(xenRoleLegacy);
+	        return;
+	      }
+	      this.hostRoleRole = 'Alpine';
+	      this.hostRoleRuntime = 'native';
+	      this.hostRoleLabelStr = 'Alpine Linux';
+	      this.hostRoleVerified = false;
+	      this.hostRoleEnvironment = 'host';
+	      this.hostRoleVirtualization = 'none';
+	      this.hostRoleVirtualizationRole = 'host';
+	      this.hostRoleContainerRuntime = 'none';
+	      this.hostRoleParentRuntime = 'native';
+	      this.hostRoleCapabilities = { xen_control: false, docker_control: false, podman_control: false, qemu_control: false };
+	      this.hostRoleLayers = [];
+	      this._applyRoleColor('Alpine');
+	    },
 
     _applyRoleColor(role) {
       const roleKey = (String(role || '').trim().toLowerCase()) || 'alpine';
@@ -1828,11 +1889,18 @@ document.addEventListener('alpine:init', () => {
       this.sysNetTxBytes = 0;
       this.sysNetRxBps = 0;
       this.sysNetTxBps = 0;
-      this.hostRoleRole = '';
-      this.hostRoleRuntime = '';
-      this.hostRoleLabelStr = '|';
-      this.hostRoleVerified = false;
-      this.vms = [];
+	      this.hostRoleRole = '';
+	      this.hostRoleRuntime = '';
+	      this.hostRoleLabelStr = '|';
+	      this.hostRoleVerified = false;
+	      this.hostRoleEnvironment = '';
+	      this.hostRoleVirtualization = '';
+	      this.hostRoleVirtualizationRole = '';
+	      this.hostRoleContainerRuntime = '';
+	      this.hostRoleParentRuntime = '';
+	      this.hostRoleCapabilities = { xen_control: false, docker_control: false, podman_control: false, qemu_control: false };
+	      this.hostRoleLayers = [];
+	      this.vms = [];
       this.uptime = '|';
       this.uptimeSecs = 0;
       if (this._uptimeTimer) { clearInterval(this._uptimeTimer); this._uptimeTimer = null; }

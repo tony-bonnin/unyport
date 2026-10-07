@@ -39,6 +39,15 @@ func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath str
 		"role", role.Role,
 		"runtime", role.Runtime,
 		"label", role.Label,
+		"environment", role.Environment,
+		"virtualization", role.Virtualization,
+		"virtualization_role", role.VirtualizationRole,
+		"container_runtime", role.ContainerRuntime,
+		"parent_runtime", role.ParentRuntime,
+		"xen_control", role.Capabilities.XenControl,
+		"docker_control", role.Capabilities.DockerControl,
+		"podman_control", role.Capabilities.PodmanControl,
+		"qemu_control", role.Capabilities.QEMUControl,
 		"verified", role.Verified,
 	)
 
@@ -54,7 +63,7 @@ func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath str
 }
 
 func (b *Broker) IsXenDom0() bool {
-	return b.hostRole.Role == "Dom0"
+	return b.hostRole.Capabilities.XenControl
 }
 
 func (b *Broker) loop() {
@@ -92,7 +101,7 @@ func (b *Broker) loop() {
 		// Xen Dom0 | utiliser la toolstack Xen pour les domaines/hyperviseur.
 		// Les métriques Linux /proc restent présentes, mais ces champs donnent
 		// la vue correcte de l'hyperviseur au lieu du seul noyau Alpine Dom0.
-		if b.hostRole.Role == "Dom0" {
+		if b.hostRole.Capabilities.XenControl {
 			var xenInfo XenInfo
 			snap.XenDomains, xenInfo, prevXenCPU = collectXenSnapshot(prevXenCPU, dt)
 			snap.XenInfo = xenInfo
@@ -390,6 +399,9 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 	b.logger.Debug("system info requested",
 		"host_role", b.hostRole.Role,
 		"runtime", b.hostRole.Runtime,
+		"environment", b.hostRole.Environment,
+		"virtualization", b.hostRole.Virtualization,
+		"virtualization_role", b.hostRole.VirtualizationRole,
 		"verified", b.hostRole.Verified,
 	)
 	model, vendor, cores := getCPUInfo()
@@ -416,9 +428,13 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Compat legacy : xen_role déduit de HostRole
 	xenRole := ""
-	switch b.hostRole.Role {
-	case "Dom0", "DomU":
-		xenRole = b.hostRole.Role
+	if b.hostRole.Virtualization == "xen" {
+		switch b.hostRole.VirtualizationRole {
+		case "dom0":
+			xenRole = "Dom0"
+		case "domu":
+			xenRole = "DomU"
+		}
 	}
 
 	info := SystemInfo{
@@ -484,8 +500,10 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 	// Rôle hôte → slug pour filtrer les tags TRINITY
 	roleSlug := "dom0"
-	switch b.hostRole.Role {
-	case "DomU":
+	switch {
+	case b.hostRole.Virtualization == "xen" && b.hostRole.VirtualizationRole == "domu":
+		roleSlug = "domU"
+	case b.hostRole.Environment == "vm":
 		roleSlug = "domU"
 	}
 

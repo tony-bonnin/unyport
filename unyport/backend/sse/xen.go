@@ -47,8 +47,8 @@ type XenInfo struct {
 // Le CPU% est calculé par delta de CPU seconds, comme xentop/xl top, mais sans
 // bloquer la boucle SSE avec un sampler externe.
 //
-// IMPORTANT : à n'appeler QUE si HostRole == "Dom0". Sur DomU/Container/baremetal
-// la commande `xl` est soit absente, soit sans privilège toolstack → renvoie nil.
+// IMPORTANT : à n'appeler QUE si HostRole.Capabilities.XenControl == true.
+// Sur DomU, container ou baremetal, `xl` est soit absent, soit sans privilège.
 func collectXenSnapshot(prev map[int]float64, dt float64) ([]XenDomain, XenInfo, map[int]float64) {
 	doms := collectXenDomains()
 	cur := computeXenCPUPct(doms, prev, dt)
