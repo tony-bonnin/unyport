@@ -233,6 +233,7 @@ document.addEventListener('alpine:init', () => {
     get memUsedFmt() { return this._fmtMB(this.sysMemUsedMb); },
     get memTotalFmt() { return this._fmtMB(this.sysMemTotalMb); },
     get memFreeFmt() { return this._fmtMB(this.sysMemFreeMb); },
+    get memCachedFmt() { return this._fmtMB(this.sysMemCachedMb); },
     get netIfaceDisplay() { return this.sysNetIface || '—'; },
     get netIpDisplay() { return this.sysNetIp || '—'; },
 
@@ -1739,6 +1740,19 @@ document.addEventListener('alpine:init', () => {
       if (m) parts.push(`${m}m`);
       if (s || !parts.length) parts.push(`${s}s`);
       return parts.join(' ');
+    },
+
+    _primaryFirst(value) {
+      const text = String(value ?? '—').trim();
+      if (!text) return '—';
+      return text.split(/\s+/)[0] || '—';
+    },
+
+    _primaryRest(value) {
+      const text = String(value ?? '').trim();
+      if (!text) return '';
+      const first = text.split(/\s+/)[0] || '';
+      return text.slice(first.length);
     },
 
     _startUptimeTicker(rawUptime) {

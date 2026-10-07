@@ -516,10 +516,15 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 .res-primary {
   font-size: 26px;
   font-weight: 750;
-  color: var(--brand);
+  color: var(--text);
   letter-spacing: -.025em;
   line-height: 1.1;
   margin-bottom: 12px;
+}
+
+.res-primary > :first-child,
+.res-primary-first {
+  color: var(--brand);
 }
 
 .res-primary small {
@@ -824,6 +829,42 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 .stats-strip.activity-resource-strip {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 14px;
+}
+
+.activity-resource-strip .stat-block {
+  align-items: flex-start;
+}
+
+.activity-resource-strip .stat-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.stat-detail-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 18px;
+  margin: 8px 0 0;
+}
+
+.stat-detail-grid dt {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.stat-detail-grid dd {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ============================================================

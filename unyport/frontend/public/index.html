@@ -583,7 +583,7 @@
                   <div class="res-icon res-blue"><i class="fa-solid fa-server"></i></div>
                   <h3>System</h3>
                 </div>
-                <div class="res-primary" x-text="uptime"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(uptime)"></span><span x-text="_primaryRest(uptime)"></span></div>
                 <dl class="res-kv">
                   <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
                   <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '—'"></span></dd></div>
@@ -633,14 +633,24 @@
                 <div class="stat-icon stat-orange"><i class="fa-solid fa-microchip"></i></div>
                 <div class="stat-body">
                   <div class="stat-value"><span x-text="cpuPct"></span>%</div>
-                  <div class="stat-label"><span x-text="cpuFreqFmt"></span> · <span x-text="cpuCoresDisplay"></span></div>
+                  <div class="stat-label">CPU load</div>
+                  <dl class="stat-detail-grid">
+                    <dt>Model</dt><dd x-text="cpuModelClean"></dd>
+                    <dt>Cores</dt><dd x-text="cpuCoresDisplay"></dd>
+                    <dt>Frequency</dt><dd x-text="cpuFreqFmt"></dd>
+                  </dl>
                 </div>
               </div>
               <div class="stat-block">
                 <div class="stat-icon stat-purple"><i class="fa-solid fa-memory"></i></div>
                 <div class="stat-body">
                   <div class="stat-value" x-text="memUsedFmt"></div>
-                  <div class="stat-label"><span x-text="memPct"></span>% used · <span x-text="memFreeFmt"></span> free</div>
+                  <div class="stat-label"><span x-text="memPct"></span>% used</div>
+                  <dl class="stat-detail-grid">
+                    <dt>Total</dt><dd x-text="memTotalFmt"></dd>
+                    <dt>Free</dt><dd x-text="memFreeFmt"></dd>
+                    <dt>Cache</dt><dd x-text="memCachedFmt"></dd>
+                  </dl>
                 </div>
               </div>
             </div>
@@ -887,7 +897,7 @@
                   <div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div>
                   <h3>RAM</h3>
                 </div>
-                <div class="res-primary" x-text="memUsedFmt + ' / ' + memTotalFmt"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(memUsedFmt + ' / ' + memTotalFmt)"></span><span x-text="_primaryRest(memUsedFmt + ' / ' + memTotalFmt)"></span></div>
                 <div class="res-bar-wrap"><div class="res-bar mem-bar"></div></div>
                 <dl class="res-kv">
                   <dt>Used</dt><dd><span x-text="memUsedFmt"></span> (<span x-text="memPct"></span>%)</dd>
@@ -1068,7 +1078,7 @@
                   </div>
                   <h3>LBU state</h3>
                 </div>
-                <div class="res-primary" x-text="lbuText"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(lbuText)"></span><span x-text="_primaryRest(lbuText)"></span></div>
                 <div class="lbu-status" :class="lbuState">
                   <div class="lbu-dot"></div>
                   <div class="lbu-text">
@@ -1087,7 +1097,7 @@
                   <div class="res-icon res-blue"><i class="fa-solid fa-circle-info"></i></div>
                   <h3>Data Disk Mode</h3>
                 </div>
-                <div class="res-primary">Semi-persistent</div>
+                <div class="res-primary"><span class="res-primary-first">Semi-persistent</span></div>
                 <dl class="res-kv">
                   <dt>Mode</dt><dd>Data Disk (LBU)</dd>
                   <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
@@ -1124,7 +1134,7 @@
                   <div class="res-icon res-ok"><i class="fa-solid fa-circle-check"></i></div>
                   <h3>Passed</h3>
                 </div>
-                <div class="res-primary" x-text="securitySummary.ok || 0"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="securitySummary.ok || 0"></span></div>
                 <dl class="res-kv"><dt>Status</dt><dd>OK checks</dd></dl>
               </div>
               <div class="res-card">
@@ -1132,7 +1142,7 @@
                   <div class="res-icon res-warn"><i class="fa-solid fa-triangle-exclamation"></i></div>
                   <h3>Warnings</h3>
                 </div>
-                <div class="res-primary" x-text="securitySummary.warn || 0"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="securitySummary.warn || 0"></span></div>
                 <dl class="res-kv"><dt>Status</dt><dd>Review needed</dd></dl>
               </div>
               <div class="res-card">
@@ -1140,7 +1150,7 @@
                   <div class="res-icon res-err"><i class="fa-solid fa-circle-xmark"></i></div>
                   <h3>Critical</h3>
                 </div>
-                <div class="res-primary" x-text="securitySummary.critical || 0"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="securitySummary.critical || 0"></span></div>
                 <dl class="res-kv"><dt>Status</dt><dd>Immediate attention</dd></dl>
               </div>
               <div class="res-card">
@@ -1148,7 +1158,7 @@
                   <div class="res-icon res-blue"><i class="fa-solid fa-user-lock"></i></div>
                   <h3>Auth</h3>
                 </div>
-                <div class="res-primary" x-text="userDefaultCredentials ? 'Default' : 'Custom'"></div>
+                <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(userDefaultCredentials ? 'Default' : 'Custom')"></span><span x-text="_primaryRest(userDefaultCredentials ? 'Default' : 'Custom')"></span></div>
                 <dl class="res-kv"><dt>Credentials</dt><dd x-text="userDefaultCredentials ? 'Change password' : 'Hardened'"></dd></dl>
               </div>
             </div>
@@ -1163,7 +1173,7 @@
                     </div>
                     <h3 x-text="check.label"></h3>
                   </div>
-                  <div class="res-primary security-primary" x-text="check.status"></div>
+                  <div class="res-primary security-primary"><span class="res-primary-first" x-text="_primaryFirst(check.status)"></span><span x-text="_primaryRest(check.status)"></span></div>
                   <dl class="res-kv">
                     <dt>Category</dt><dd x-text="check.category"></dd>
                     <dt>Detail</dt><dd :title="check.detail" x-text="check.detail"></dd>
