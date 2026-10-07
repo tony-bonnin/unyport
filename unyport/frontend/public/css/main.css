@@ -30,3 +30,19 @@
 @import url('./networkmap.css');
 @import url('./animations.css');
 @import url('./metrics.css');
+
+/* Hard rule: summary strips must stay as the long Docker-style row. */
+.main-inner .stats-strip.stats-strip-wide {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch;
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .main-inner .stats-strip.stats-strip-wide {
+    grid-template-columns: repeat(4, minmax(120px, 1fr)) !important;
+    overflow-x: auto;
+  }
+}
