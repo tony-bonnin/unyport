@@ -72,7 +72,7 @@ async function logout() {
   localStorage.setItem('_logged_out', '1');
   _csrf = null;
   // Rafraîchir le CSRF | peut être périmé après longue session (MaxAge 3600s).
-  // Sans token valide gorilla/csrf renvoie 403 et le Set-Cookie n'est jamais émis.
+  // Sans token valide, le middleware CSRF renvoie 403 et le Set-Cookie n'est jamais émis.
   await fetchCSRF();
   try {
     await apiFetch('/api/logout', { method: 'POST' });
