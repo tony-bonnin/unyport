@@ -81,7 +81,10 @@
     const dayEl = document.getElementById('reboot-hover-day');
     const levelEl = document.getElementById('reboot-hover-level');
     const statusEl = document.getElementById('reboot-hover-status');
-    if (dateEl) dateEl.textContent = date;
+    if (dateEl) {
+      dateEl.textContent = today ? 'Today' : date;
+      dateEl.classList.toggle('is-today', today);
+    }
     if (countEl) countEl.textContent = countLabel(count);
     if (dayEl) dayEl.textContent = label;
     if (levelEl) levelEl.textContent = levelLabel(level);
