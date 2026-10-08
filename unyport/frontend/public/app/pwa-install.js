@@ -1,6 +1,5 @@
 (() => {
   let promptDisplayed = false;
-  const nativeDismissCookie = "unyport_pwa_install_dismissed_v2=true";
   const iosDismissCookie = "unyport_ios_pwa_install_dismissed_v2=true";
   const iosPromptId = "unyport-ios-install-prompt";
 
@@ -80,22 +79,6 @@
     overlay.append(dialog);
     document.body.append(overlay);
   }
-
-  window.addEventListener("beforeinstallprompt", (event) => {
-    event.preventDefault();
-
-    if (promptDisplayed || hasCookie(nativeDismissCookie)) return;
-    promptDisplayed = true;
-
-    setTimeout(() => {
-      event.prompt();
-      event.userChoice
-        .then(({ outcome }) => {
-          if (outcome === "dismissed") setCookie(nativeDismissCookie);
-        })
-        .catch(() => {});
-    }, 5000);
-  });
 
   window.addEventListener("appinstalled", () => {
     promptDisplayed = true;

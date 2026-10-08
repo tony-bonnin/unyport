@@ -1447,6 +1447,7 @@
         </div>
 
         <form x-show="profilePage === 'password'" @submit.prevent="savePassword()">
+          <input type="text" name="username" autocomplete="username" :value="userEmail || ''" hidden readonly>
           <div class="form-row">
             <label>Current password</label>
             <input type="password" x-model="pwdOld" autocomplete="current-password" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Current password'">
@@ -1541,8 +1542,8 @@
         <form class="admin-create-form" @submit.prevent="adminCreateUser()">
           <h3>Add a user</h3>
           <div class="admin-create-row">
-            <input type="email" x-model="adminNewEmail" placeholder="email@domain.com" class="input-sm" title="New user email address">
-            <input type="password" x-model="adminNewPassword" placeholder="Password" class="input-sm" title="New user password">
+            <input type="email" x-model="adminNewEmail" autocomplete="username" placeholder="email@domain.com" class="input-sm" title="New user email address">
+            <input type="password" x-model="adminNewPassword" autocomplete="new-password" placeholder="Password" class="input-sm" title="New user password">
             <select x-model="adminNewRole" class="select-role" title="Role for the new user">
               <option value="admin">Admin</option>
               <option value="operator">Operator</option>
