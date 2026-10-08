@@ -31,7 +31,7 @@
 @import url('./animations.css');
 @import url('./metrics.css');
 
-/* Hard rule: summary strips must stay as the long Docker-style row. */
+/* Hard rule: summary strips stay as the long Docker-style row on desktop. */
 .main-inner .stats-strip.stats-strip-wide {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -41,8 +41,18 @@
 }
 
 @media (max-width: 640px) {
+  .main-inner .stats-strip,
   .main-inner .stats-strip.stats-strip-wide {
-    grid-template-columns: repeat(4, minmax(120px, 1fr)) !important;
-    overflow-x: auto;
+    grid-template-columns: 1fr !important;
+    overflow: visible;
+  }
+
+  .main-inner .stats-strip .stat-block + .stat-block::before {
+    left: 22px;
+    right: 22px;
+    top: 0;
+    bottom: auto;
+    width: auto;
+    height: 1px;
   }
 }
