@@ -55,4 +55,8 @@
     width: auto;
     height: 1px;
   }
+
+  .live-badge.live {
+    display: none;
+  }
 }
