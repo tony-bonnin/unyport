@@ -26,3 +26,6 @@
 {"timestamp":"2026-10-02T21:59:19.419700059Z","event":"startup","theme":"lights","boot_id":"e6bd1406-33dc-4292-b614-9c66773b177c","rebooted_at":"2026-10-02T21:58:57.619700059Z"}
 {"timestamp":"2026-10-02T23:49:55.097407531Z","event":"startup","theme":"lights","boot_id":"8657f4b9-ca16-4b86-a698-a8a0450fc788","rebooted_at":"2026-10-02T23:49:32.287407531Z"}
 {"timestamp":"2026-10-06T20:40:02.70304296Z","event":"startup","theme":"lights","boot_id":"69426d0a-91a3-4847-834a-44e85e9308b4","rebooted_at":"2026-10-06T11:48:27.91304296Z"}
+{"timestamp":"2026-10-09T15:22:13.82144892Z","event":"startup","theme":"lights","boot_id":"81a325b7-f223-4cba-8f39-f68c915cc472","rebooted_at":"2026-10-09T15:21:47.31144892Z"}
+{"timestamp":"2026-10-09T15:34:55.690863903Z","event":"startup","theme":"lights","boot_id":"11d7326b-adfa-4145-a20f-f5933cef6ef9","rebooted_at":"2026-10-09T15:34:27.590863903Z"}
+{"timestamp":"2026-10-09T17:23:25.523571972Z","event":"startup","theme":"lights","boot_id":"43140459-24a3-4b51-8da2-20be96736914","rebooted_at":"2026-10-09T17:22:59.683571972Z"}
