@@ -5,12 +5,13 @@
 #        → frontend live via volume bind mount + UNYPORT_ASSETS (refresh navigateur)
 #        → .go modifié → docker compose restart unyport
 #
-# PROD : commenter UNYPORT_ASSETS → assets embed + strip + UPX LZMA
+# PROD : utiliser scripts/build-unyport.sh puis une image runtime dédiée.
 
 services:
   unyport:
-    image: golang:alpine
+    image: golang:1.27.3-alpine
     container_name: unyport
+    init: true
     working_dir: /app/unyport/backend
     environment:
       # DEV  : assets servis depuis le disque (live, refresh navigateur)
@@ -20,24 +21,20 @@ services:
       - sh
       - -c
       - |
-        go mod tidy &&
-        echo ">>> PROD build : embedding assets..." &&
-        rm -rf ./tmp/unyport &&
-        cp -r ../frontend/public ./server/assets &&
-        CGO_ENABLED=0 go build -tags prod -trimpath -ldflags "-s -w" \
-          -o ./tmp/unyport ./cmd/unyport &&
-        rm -rf ./server/assets &&
-        apk add --no-cache upx &&
-        upx --lzma ./tmp/unyport &&
-        echo ">>> PROD done." && ls -lh ./tmp/unyport &&
         echo ">>> DEV build : assets served from disk..." &&
         CGO_ENABLED=0 go build -o ./tmp/main ./cmd/unyport &&
         echo ">>> DEV done." && ls -lh ./tmp/main &&
         ./tmp/main
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8800/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     volumes:
       - ./unyport:/app/unyport
-      - go-cache:/root/go/pkg/mod
+      - go-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     ports:
       - "8800:8800"

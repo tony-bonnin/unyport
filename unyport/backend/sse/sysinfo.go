@@ -23,6 +23,7 @@ package sse
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
 	"regexp"
@@ -739,9 +740,38 @@ func TailLogFile(path string, n int) ([]string, error) {
 	if n <= 0 || n > 1000 {
 		n = 100
 	}
-	data, err := os.ReadFile(path)
+	return tailLogFile(path, n)
+}
+
+// tailLogFile limite la mémoire utilisée, même si le journal est très volumineux.
+func tailLogFile(path string, n int) ([]string, error) {
+	const maxTailBytes int64 = 1024 * 1024
+	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
+	}
+	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	start := info.Size() - maxTailBytes
+	if start < 0 {
+		start = 0
+	}
+	if _, err = f.Seek(start, 0); err != nil {
+		return nil, err
+	}
+	data := make([]byte, info.Size()-start)
+	read, err := io.ReadFull(f, data)
+	if err != nil && err != io.ErrUnexpectedEOF {
+		return nil, err
+	}
+	data = data[:read]
+	if start > 0 {
+		if newline := strings.IndexByte(string(data), '\n'); newline >= 0 {
+			data = data[newline+1:]
+		}
 	}
 	lines := strings.Split(strings.TrimRight(string(data), "\n"), "\n")
 	if len(lines) > n {

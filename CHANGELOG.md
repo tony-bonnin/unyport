@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.0] - 2026-10-29
+
+### Changed
+- Made watcher retries idempotent; versions now change only during an explicit release.
+- Updated the Go 1.27.3 toolchain and module dependencies.
+- Bounded log-tail memory usage and added regression tests.
+- Simplified and hardened the development Compose service.
+- Removed stale hard-coded version text from the frontend title.
+
 ## [0.1.0] - 2026-06-07
 
 ### Added

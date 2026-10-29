@@ -97,11 +97,6 @@ sync_git() {
   UNYPORT_GIT_PREPARED_VERSION=1 UNYPORT_GIT_BUILD_VERIFIED=1 "$GIT_SYNC_SCRIPT" sync
 }
 
-prepare_git_version() {
-  [ -x "$GIT_SYNC_SCRIPT" ] || { echo "[unyport] git sync script absent: $GIT_SYNC_SCRIPT"; return 0; }
-  "$GIT_SYNC_SCRIPT" prepare-version
-}
-
 build_and_sync() {
   if ! acquire_build_lock; then
     echo "[unyport] build deja en cours"
@@ -109,7 +104,9 @@ build_and_sync() {
   fi
   rc=0
   load_env
-  if prepare_git_version && "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT" && sync_git; then
+  # Watcher retries must be idempotent. Only an explicit release may change
+  # the application version.
+  if "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT" && sync_git; then
     mark_clean
   else
     rc=$?

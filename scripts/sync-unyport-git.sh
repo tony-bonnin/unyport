@@ -11,7 +11,7 @@ UNYPORT_GIT_SYNC_PUSH=${UNYPORT_GIT_SYNC_PUSH:-1}
 UNYPORT_GIT_BRANCH=${UNYPORT_GIT_BRANCH:-master}
 UNYPORT_GIT_RELEASE_KIND=${UNYPORT_GIT_RELEASE_KIND:-auto}
 UNYPORT_GIT_RELEASE_VERSION=${UNYPORT_GIT_RELEASE_VERSION:-}
-UNYPORT_GIT_AUTO_BUMP=${UNYPORT_GIT_AUTO_BUMP:-1}
+UNYPORT_GIT_AUTO_BUMP=${UNYPORT_GIT_AUTO_BUMP:-0}
 UNYPORT_GIT_PREPARED_VERSION=${UNYPORT_GIT_PREPARED_VERSION:-0}
 UNYPORT_GIT_RELEASE_PUSH_TAGS=${UNYPORT_GIT_RELEASE_PUSH_TAGS:-1}
 UNYPORT_GIT_AUTO_RELEASE=${UNYPORT_GIT_AUTO_RELEASE:-1}
@@ -150,17 +150,7 @@ commit_and_push() {
 }
 
 prepare_version_for_build() {
-  git -C "$ROOT_DIR" add -A
-  if git -C "$ROOT_DIR" diff --cached --quiet; then
-    log "aucune modification pour preparer la version"
-    return 0
-  fi
-  if [ -z "$UNYPORT_GIT_RELEASE_VERSION" ] && [ "$UNYPORT_GIT_AUTO_BUMP" = "1" ]; then
-    kind=$(detect_release_kind)
-    "$VERSION_SCRIPT" bump "$kind" >/dev/null
-    git -C "$ROOT_DIR" add -A
-    log "version preparee avant build: v$(release_version)"
-  fi
+  log "prepare-version ne modifie plus la version; utiliser release <version>"
 }
 
 create_release_tag() {

@@ -2,7 +2,7 @@
 
 set -eu
 
-export GOTOOLCHAIN="${GOTOOLCHAIN:-go1.27.0}"
+export GOTOOLCHAIN="${GOTOOLCHAIN:-go1.27.3}"
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BACKEND_DIR="$ROOT_DIR/unyport/backend"
@@ -22,4 +22,3 @@ else
   echo "go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
   exit 1
 fi
-
