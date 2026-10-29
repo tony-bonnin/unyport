@@ -32,8 +32,15 @@
     key = aliases[key] || key.replace(/_/g, '');
     return catalog[key] ? key : 'unknown';
   }
-  function draw(parent, cx, cy, type) {
+  function resolveNetwork(type) {
     var key = resolve(type);
+    return catalog[key] && catalog[key].asset.indexOf('storage/') !== 0 && key !== 'storage' ? key : 'unknown';
+  }
+  function resolveStorage(type) {
+    var key = resolve(type);
+    return catalog[key] && (catalog[key].asset.indexOf('storage/') === 0 || key === 'storage') ? key : 'storage';
+  }
+  function drawKey(parent, cx, cy, key) {
     var icon = document.createElementNS(NS, 'image');
     icon.setAttribute('x', String(cx - 32));
     icon.setAttribute('y', String(cy - 32));
@@ -44,5 +51,7 @@
     parent.appendChild(icon);
     return key;
   }
-  window.UnyPortDeviceIcons = { catalog: catalog, resolve: resolve, draw: draw };
+  function draw(parent, cx, cy, type) { return drawKey(parent, cx, cy, resolve(type)); }
+  function drawNetwork(parent, cx, cy, type) { return drawKey(parent, cx, cy, resolveNetwork(type)); }
+  window.UnyPortDeviceIcons = { catalog: catalog, resolve: resolve, resolveNetwork: resolveNetwork, resolveStorage: resolveStorage, draw: draw, drawNetwork: drawNetwork };
 }());

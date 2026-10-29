@@ -50,10 +50,10 @@ function _decorateCard(card, payload) {
 }
 function _nbCard(nb) {
   var ip = nb.ip || '?', mac = nb.mac || '|', state = nb.state || '|', iface = nb.iface || '|';
-  var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolve(requestedType) : '';
+  var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveNetwork(requestedType) : '';
   var iconEntry = deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType] : null;
   var iconName = iconEntry && iconEntry.asset ? iconEntry.asset.split('/').pop() : '|';
-  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.draw(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, ip, nb.mac ? mac.substring(0, 17) : state);
+  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, ip, nb.mac ? mac.substring(0, 17) : state);
   var typeMeta = _div('nm-card-device-type'); typeMeta.textContent = 'device_type: ' + (requestedType || '|'); card.appendChild(typeMeta);
   var iconMeta = _div('nm-card-icon-name'); iconMeta.textContent = 'icon: ' + iconName; card.appendChild(iconMeta);
   return _decorateCard(card, {
@@ -177,7 +177,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
       var ifaceIconEntry = window.UnyPortDeviceIcons && window.UnyPortDeviceIcons.catalog[ifaceIconType];
       var col = pos + 1;
       var ifaceAddress = _ifaceAddress(iface);
-      var card = _mkCard(function (s, cx, cy) { if (window.UnyPortDeviceIcons) window.UnyPortDeviceIcons.draw(s, cx, cy, ifaceIconType); else if (up) _icoIfaceUp(s, cx, cy); else _icoIfaceDn(s, cx, cy); }, iface.name, ifaceAddress);
+      var card = _mkCard(function (s, cx, cy) { if (window.UnyPortDeviceIcons) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, ifaceIconType); else if (up) _icoIfaceUp(s, cx, cy); else _icoIfaceDn(s, cx, cy); }, iface.name, ifaceAddress);
       _decorateCard(card, {
         kind: 'interface',
         title: iface.name,

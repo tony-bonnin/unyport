@@ -219,7 +219,7 @@ document.addEventListener('alpine:init', () => {
     _fmtMB: fmtMB,
     _diskIconType(disk) {
       const requested = disk?.icon || disk?.disk_type || 'storage';
-      return window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolve(requested) : 'storage';
+      return window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveStorage(requested) : 'storage';
     },
     _diskIconAsset(disk) {
       const key = this._diskIconType(disk);
