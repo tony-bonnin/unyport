@@ -1051,11 +1051,6 @@
                   </div>
                   <strong class="storage-device-name" x-text="d.device"></strong>
                   <span class="storage-device-model" x-text="d.model || d.mount"></span>
-                  <div class="storage-device-tags">
-                    <span x-text="d.disk_type || 'storage'"></span>
-                    <span x-show="d.transport" x-text="d.transport"></span>
-                    <span x-text="d.fstype"></span>
-                  </div>
                   <div class="storage-volume-meter">
                     <div class="storage-volume-bar">
                       <div class="storage-volume-fill" :class="d.bar_cls"></div>
@@ -1065,10 +1060,6 @@
                   <div class="storage-volume-meta">
                     <span><b x-text="d.used_pct + '%'"></b> used</span>
                     <span><b x-text="_fmtMB(d.free_mb)"></b> free</span>
-                  </div>
-                  <div class="storage-device-details">
-                    <span x-text="d.mount"></span>
-                    <span x-text="'icon: ' + _diskIconName(d)"></span>
                   </div>
                 </article>
               </template>
