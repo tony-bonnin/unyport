@@ -1211,10 +1211,11 @@ type NetIfaceInfo struct {
 // ARPEntry décrit un voisin réseau connu via la table ARP.
 // Lecture de /proc/net/arp | zéro binaire externe.
 type ARPEntry struct {
-	IP    string `json:"ip"`
-	MAC   string `json:"mac"`
-	Iface string `json:"iface"`
-	State string `json:"state"` // "reachable" | "stale" | "unknown"
+	IP         string `json:"ip"`
+	MAC        string `json:"mac"`
+	Iface      string `json:"iface"`
+	State      string `json:"state"`       // "reachable" | "stale" | "unknown"
+	DeviceType string `json:"device_type"` // always set; explicit inventory, safe heuristic, or "unknown"
 }
 
 // NetworkMap regroupe les interfaces et les voisins pour la topologie.
@@ -1350,13 +1351,51 @@ func readARPTable() []ARPEntry {
 		}
 
 		result = append(result, ARPEntry{
-			IP:    ip,
-			MAC:   mac,
-			Iface: iface,
-			State: state,
+			IP:         ip,
+			MAC:        mac,
+			Iface:      iface,
+			State:      state,
+			DeviceType: deviceTypeForNeighbor(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES")),
 		})
 	}
 	return result
+}
+
+var validDeviceTypes = map[string]bool{
+	"desktop": true, "laptop": true, "server": true, "nas": true,
+	"printer": true, "phone": true, "tablet": true, "router": true,
+	"switch": true, "accesspoint": true, "camera": true, "tv": true,
+	"iot": true, "unknown": true,
+}
+
+// deviceTypeForNeighbor garantit un type stable pour chaque voisin. L'inventaire
+// explicite utilise "IP=type" séparé par virgule, point-virgule ou espace.
+// Les heuristiques restent volontairement conservatrices : une VM reconnue est
+// un serveur ; tout équipement non prouvé reste "unknown".
+func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
+	for _, entry := range strings.FieldsFunc(inventory, func(r rune) bool {
+		return r == ',' || r == ';' || r == ' ' || r == '\n' || r == '\t'
+	}) {
+		parts := strings.SplitN(entry, "=", 2)
+		if len(parts) != 2 || strings.TrimSpace(parts[0]) != ip {
+			continue
+		}
+		deviceType := strings.ToLower(strings.TrimSpace(parts[1]))
+		if validDeviceTypes[deviceType] {
+			return deviceType
+		}
+	}
+
+	mac = strings.ToLower(strings.TrimSpace(mac))
+	for _, prefix := range []string{"00:16:3e:", "00:05:69:", "00:0c:29:", "00:1c:14:", "00:50:56:", "08:00:27:", "52:54:00:"} {
+		if strings.HasPrefix(mac, prefix) {
+			return "server"
+		}
+	}
+	if strings.HasPrefix(iface, "vif") || strings.HasPrefix(iface, "tap") {
+		return "server"
+	}
+	return "unknown"
 }
 
 // ============================================================

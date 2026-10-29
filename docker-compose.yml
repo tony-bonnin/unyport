@@ -17,6 +17,7 @@ services:
       # DEV  : assets servis depuis le disque (live, refresh navigateur)
       # PROD : commenter cette ligne → assets embed + compression maximale
       UNYPORT_ASSETS: /app/unyport/frontend/public
+      UNYPORT_DEVICE_TYPES: ${UNYPORT_DEVICE_TYPES:-}
     command:
       - sh
       - -c

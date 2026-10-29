@@ -40,6 +40,25 @@ func TestApplyInterfaceMastersExposesBridgeAndItsIP(t *testing.T) {
 	}
 }
 
+func TestDeviceTypeForNeighborAlwaysReturnsAType(t *testing.T) {
+	tests := []struct {
+		name, ip, mac, iface, inventory, want string
+	}{
+		{"explicit host", "192.168.4.1", "14:84:30:0f:be:99", "br-wan", "192.168.4.1=server", "server"},
+		{"explicit printer", "192.168.4.20", "aa:bb:cc:dd:ee:ff", "br-wan", "192.168.4.20=printer", "printer"},
+		{"xen guest", "192.168.4.3", "00:16:3e:61:75:64", "br-wan", "", "server"},
+		{"unidentified", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "", "unknown"},
+		{"invalid explicit type", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "192.168.4.99=spaceship", "unknown"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := deviceTypeForNeighbor(tt.ip, tt.mac, tt.iface, tt.inventory); got != tt.want {
+				t.Fatalf("deviceTypeForNeighbor() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNaturalLessOrdersDiskDevices(t *testing.T) {
 	devices := []string{"/dev/sdb1", "/dev/sda10", "/dev/sda2", "/dev/sda1", "/dev/nvme0n1p10", "/dev/nvme0n1p2"}
 	want := []string{"/dev/nvme0n1p2", "/dev/nvme0n1p10", "/dev/sda1", "/dev/sda2", "/dev/sda10", "/dev/sdb1"}
