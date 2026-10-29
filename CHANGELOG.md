@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.5] - 2026-10-29
+
+### Changed
+- Restore bridge details only for member interfaces and VIFs, while giving `br-wan` a distinct bridge color and icon.
+
 ## [0.60.4] - 2026-10-29
 
 ### Changed
