@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.1] - 2026-10-29
+
+### Fixed
+- Removed generated runtime logs and binaries from version control so service restarts cannot retrigger release automation.
+
 ## [0.60.0] - 2026-10-29
 
 ### Changed

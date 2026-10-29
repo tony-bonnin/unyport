@@ -1,6 +1,8 @@
 unyport/backend/server/assets/*
 !unyport/backend/server/assets/.gitkeep
 dist/
+unyport/backend/logs/*
+unyport/backend/tmp/*
 unyport-git-sync.env
 docker-compose.yml
 .gitignore
