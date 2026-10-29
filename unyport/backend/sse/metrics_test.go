@@ -49,6 +49,8 @@ func TestDeviceTypeForNeighborAlwaysReturnsAType(t *testing.T) {
 		{"explicit BLE device", "192.168.4.21", "aa:bb:cc:dd:ee:01", "br-wan", "192.168.4.21=ble", "ble"},
 		{"explicit 3D printer", "192.168.4.22", "aa:bb:cc:dd:ee:02", "br-wan", "192.168.4.22=3d_printer", "3d_printer"},
 		{"storage type rejected on network", "192.168.4.23", "aa:bb:cc:dd:ee:03", "br-wan", "192.168.4.23=hdd_35", "unknown"},
+		{"NAS accepted on network", "192.168.4.25", "aa:bb:cc:dd:ee:05", "br-wan", "192.168.4.25=nas", "nas"},
+		{"SAN accepted on network", "192.168.4.26", "aa:bb:cc:dd:ee:06", "br-wan", "192.168.4.26=san", "san"},
 		{"explicit network NAS", "192.168.4.24", "aa:bb:cc:dd:ee:04", "br-wan", "192.168.4.24=network_nas", "network_nas"},
 		{"xen guest", "192.168.4.3", "00:16:3e:61:75:64", "br-wan", "", "server"},
 		{"unidentified", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "", "unknown"},

@@ -1381,7 +1381,8 @@ func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
 			continue
 		}
 		deviceType := strings.ToLower(strings.TrimSpace(parts[1]))
-		if (validDeviceTypes[deviceType] && deviceType != "storage") || (validExtendedDeviceTypes[deviceType] && !validStorageDeviceTypes[deviceType]) {
+		networkStorage := deviceType == "nas" || deviceType == "san"
+		if (validDeviceTypes[deviceType] && deviceType != "storage") || (validExtendedDeviceTypes[deviceType] && (!validStorageDeviceTypes[deviceType] || networkStorage)) {
 			return deviceType
 		}
 	}

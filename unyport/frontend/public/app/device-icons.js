@@ -34,7 +34,8 @@
   }
   function resolveNetwork(type) {
     var key = resolve(type);
-    return catalog[key] && catalog[key].asset.indexOf('storage/') !== 0 && key !== 'storage' ? key : 'unknown';
+    var networkStorage = key === 'nas' || key === 'san';
+    return catalog[key] && ((catalog[key].asset.indexOf('storage/') !== 0 && key !== 'storage') || networkStorage) ? key : 'unknown';
   }
   function resolveStorage(type) {
     var key = resolve(type);
