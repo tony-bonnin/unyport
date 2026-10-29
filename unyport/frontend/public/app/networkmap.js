@@ -12,6 +12,11 @@ function _el(t, a) { var e = document.createElementNS(_NS, t); if (a) Object.key
 function _div(c) { var d = document.createElement('div'); d.className = c; return d; }
 function _mkSvg(fn) { var s = document.createElementNS(_NS, 'svg'); s.setAttribute('width', '64'); s.setAttribute('height', '64'); s.setAttribute('viewBox', '0 0 64 64'); fn(s, 32, 32); return s; }
 function _truncate(v, max) { v = v == null ? '' : String(v); return v.length > max ? v.slice(0, max - 1) + '…' : v; }
+function _ifaceAddress(iface) {
+  if (iface.ip) return iface.ip;
+  if (iface.master) return 'via ' + iface.master + (iface.master_ip ? ' · ' + iface.master_ip : ' · L2');
+  return 'L2 · no host IP';
+}
 
 // Icônes (identiques)
 function _icoHost(p, cx, cy, role) { var R = 32; if (role === 'DomU') { p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: '#e53935' })); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'rgba(0,0,0,.08)', 'stroke-width': 2 })); _icoServerInner(p, cx, cy, '#fff', 'rgba(255,255,255,0.3)'); } else if (role === 'Container') { p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: '#ff7043' })); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'rgba(0,0,0,.08)', 'stroke-width': 2 })); _icoCubeInner(p, cx, cy, '#fff'); } else { p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: '#26c6c6' })); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'rgba(0,0,0,.08)', 'stroke-width': 2 })); var cg = _el('g', { transform: 'translate(' + (cx - 18) + ',' + (cy - 12) + ')' }); cg.appendChild(_el('ellipse', { cx: 18, cy: 18, rx: 14, ry: 10, fill: '#fff' })); cg.appendChild(_el('circle', { cx: 10, cy: 16, r: 8, fill: '#fff' })); cg.appendChild(_el('circle', { cx: 22, cy: 13, r: 10, fill: '#fff' })); cg.appendChild(_el('circle', { cx: 30, cy: 17, r: 7, fill: '#fff' })); cg.appendChild(_el('line', { x1: 12, y1: 26, x2: 10, y2: 32, stroke: '#26c6c6', 'stroke-width': 2, 'stroke-linecap': 'round' })); cg.appendChild(_el('line', { x1: 18, y1: 28, x2: 16, y2: 34, stroke: '#26c6c6', 'stroke-width': 2, 'stroke-linecap': 'round' })); cg.appendChild(_el('line', { x1: 24, y1: 26, x2: 22, y2: 32, stroke: '#26c6c6', 'stroke-width': 2, 'stroke-linecap': 'round' })); p.appendChild(cg); } }
@@ -151,12 +156,13 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
       var idx = start + pos;
       var iface = ifaces[idx], up = iface.up !== false;
       var col = pos + 1;
-      var card = _mkCard(function (s, cx, cy) { up ? _icoIfaceUp(s, cx, cy) : _icoIfaceDn(s, cx, cy); }, iface.name, iface.ip || '|');
+      var ifaceAddress = _ifaceAddress(iface);
+      var card = _mkCard(function (s, cx, cy) { up ? _icoIfaceUp(s, cx, cy) : _icoIfaceDn(s, cx, cy); }, iface.name, ifaceAddress);
       _decorateCard(card, {
         kind: 'interface',
         title: iface.name,
         label: iface.name,
-        subtitle: iface.ip || '|',
+        subtitle: ifaceAddress,
         badge: up ? 'UP' : 'DOWN',
         badgeTone: up ? 'ok' : 'warn',
         summary: 'Live interface throughput',
@@ -164,7 +170,9 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         rows: [
           { key: 'Type', value: 'Interface' },
           { key: 'Status', value: up ? 'UP' : 'DOWN' },
-          { key: 'IP address', value: iface.ip || '|' },
+          { key: 'IP address', value: iface.ip || 'No host IP (layer 2)' },
+          { key: 'Bridge', value: iface.master || '|' },
+          { key: 'Bridge IP', value: iface.master_ip || '|' },
           { key: 'RX rate', value: _fmtBpsMap(iface.rx_bps || 0) },
           { key: 'TX rate', value: _fmtBpsMap(iface.tx_bps || 0) },
           { key: 'Neighbors', value: String((nbPerIface[iface.name] || []).length) }

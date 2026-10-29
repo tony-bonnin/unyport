@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -1031,7 +1032,19 @@ func readNetBytes() (rx, tx uint64) {
 
 func readMainIface() (iface, ip string) {
 	data, _ := os.ReadFile("/proc/net/dev")
-	var bestRx uint64
+	ifaces, _ := net.Interfaces()
+	ipByIface := make(map[string]string, len(ifaces))
+	for _, itf := range ifaces {
+		addrs, _ := itf.Addrs()
+		for _, addr := range addrs {
+			if ipnet, ok := addr.(*net.IPNet); ok && ipnet.IP.To4() != nil && !ipnet.IP.IsLoopback() {
+				ipByIface[itf.Name] = ipnet.IP.String()
+				break
+			}
+		}
+	}
+
+	rxByIface := make(map[string]uint64)
 	for _, line := range strings.Split(string(data), "\n")[2:] {
 		fields := strings.Fields(line)
 		if len(fields) < 10 {
@@ -1041,29 +1054,32 @@ func readMainIface() (iface, ip string) {
 		if name == "lo" {
 			continue
 		}
-		rx := parseU64(fields[1])
-		if iface == "" || rx > bestRx {
-			bestRx = rx
-			iface = name
-		}
+		rxByIface[name] = parseU64(fields[1])
 	}
-	if iface == "" {
-		return
-	}
-	ifaces, _ := net.Interfaces()
-	for _, itf := range ifaces {
-		if itf.Name != iface {
+	iface = selectMainIface(rxByIface, ipByIface)
+	return iface, ipByIface[iface]
+}
+
+func selectMainIface(rxByIface map[string]uint64, ipByIface map[string]string) string {
+	var selected string
+	var bestRx uint64
+	for name, rx := range rxByIface {
+		if ipByIface[name] == "" {
 			continue
 		}
-		addrs, _ := itf.Addrs()
-		for _, a := range addrs {
-			if ipnet, ok := a.(*net.IPNet); ok && ipnet.IP.To4() != nil {
-				ip = ipnet.IP.String()
-				return
-			}
+		if selected == "" || rx > bestRx {
+			selected, bestRx = name, rx
 		}
 	}
-	return
+	if selected != "" {
+		return selected
+	}
+	for name, rx := range rxByIface {
+		if selected == "" || rx > bestRx {
+			selected, bestRx = name, rx
+		}
+	}
+	return selected
 }
 
 // ============================================================
@@ -1181,13 +1197,15 @@ func readFirstFileTrim(paths ...string) string {
 // NetIfaceInfo décrit une interface réseau avec ses métriques temps réel.
 // Lecture de /proc/net/dev | zéro binaire externe.
 type NetIfaceInfo struct {
-	Name    string `json:"name"`
-	IP      string `json:"ip"`
-	RXBytes uint64 `json:"rx_bytes"`
-	TXBytes uint64 `json:"tx_bytes"`
-	RXBps   uint64 `json:"rx_bps"`
-	TXBps   uint64 `json:"tx_bps"`
-	Up      bool   `json:"up"`
+	Name     string `json:"name"`
+	IP       string `json:"ip"`
+	Master   string `json:"master,omitempty"`
+	MasterIP string `json:"master_ip,omitempty"`
+	RXBytes  uint64 `json:"rx_bytes"`
+	TXBytes  uint64 `json:"tx_bytes"`
+	RXBps    uint64 `json:"rx_bps"`
+	TXBps    uint64 `json:"tx_bps"`
+	Up       bool   `json:"up"`
 }
 
 // ARPEntry décrit un voisin réseau connu via la table ARP.
@@ -1276,7 +1294,23 @@ func readAllIfaces() []NetIfaceInfo {
 			Up:      upMap[name],
 		})
 	}
+	masters := make(map[string]string, len(result))
+	for _, iface := range result {
+		masterLink, err := os.Readlink(filepath.Join("/sys/class/net", iface.Name, "master"))
+		if err != nil {
+			continue
+		}
+		masters[iface.Name] = filepath.Base(masterLink)
+	}
+	applyInterfaceMasters(result, masters, ipMap)
 	return result
+}
+
+func applyInterfaceMasters(ifaces []NetIfaceInfo, masters, ipByIface map[string]string) {
+	for i := range ifaces {
+		ifaces[i].Master = masters[ifaces[i].Name]
+		ifaces[i].MasterIP = ipByIface[ifaces[i].Master]
+	}
 }
 
 // readARPTable lit /proc/net/arp.

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.3] - 2026-10-29
+
+### Fixed
+- Prefer an IPv4-bearing bridge when selecting the primary interface on Xen hosts.
+- Expose bridge membership and bridge IPs so layer-2 physical and Xen VIF ports are represented accurately in the network topology.
+- Allow native deployments to select their HTTP port with `UNYPORT_PORT`.
+
 ## [0.60.2] - 2026-10-29
 
 ### Fixed

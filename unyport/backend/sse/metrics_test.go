@@ -2,6 +2,44 @@ package sse
 
 import "testing"
 
+func TestSelectMainIfacePrefersBridgeWithIPv4(t *testing.T) {
+	rx := map[string]uint64{
+		"eth0":   9000,
+		"br-wan": 8000,
+		"br-srv": 100,
+	}
+	ips := map[string]string{
+		"br-wan": "192.168.4.2",
+	}
+
+	if got := selectMainIface(rx, ips); got != "br-wan" {
+		t.Fatalf("selectMainIface() = %q, want br-wan", got)
+	}
+}
+
+func TestSelectMainIfaceFallsBackToTrafficWithoutIPv4(t *testing.T) {
+	rx := map[string]uint64{"eth0": 9000, "br-srv": 100}
+
+	if got := selectMainIface(rx, nil); got != "eth0" {
+		t.Fatalf("selectMainIface() = %q, want eth0", got)
+	}
+}
+
+func TestApplyInterfaceMastersExposesBridgeAndItsIP(t *testing.T) {
+	ifaces := []NetIfaceInfo{{Name: "eth0"}, {Name: "vif3.0"}}
+	masters := map[string]string{"eth0": "br-wan", "vif3.0": "br-srv"}
+	ips := map[string]string{"br-wan": "192.168.4.2"}
+
+	applyInterfaceMasters(ifaces, masters, ips)
+
+	if ifaces[0].Master != "br-wan" || ifaces[0].MasterIP != "192.168.4.2" {
+		t.Fatalf("eth0 topology = master %q ip %q", ifaces[0].Master, ifaces[0].MasterIP)
+	}
+	if ifaces[1].Master != "br-srv" || ifaces[1].MasterIP != "" {
+		t.Fatalf("vif topology = master %q ip %q", ifaces[1].Master, ifaces[1].MasterIP)
+	}
+}
+
 func TestNaturalLessOrdersDiskDevices(t *testing.T) {
 	devices := []string{"/dev/sdb1", "/dev/sda10", "/dev/sda2", "/dev/sda1", "/dev/nvme0n1p10", "/dev/nvme0n1p2"}
 	want := []string{"/dev/nvme0n1p2", "/dev/nvme0n1p10", "/dev/sda1", "/dev/sda2", "/dev/sda10", "/dev/sdb1"}

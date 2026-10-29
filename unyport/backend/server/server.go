@@ -8,7 +8,9 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -162,9 +164,19 @@ func New(cfg config.Config, settings *config.Settings, logger *slog.Logger) *Ser
 	loginRL := middleware.NewLoginRateLimiter(maxAttempts, logger)
 
 	// ---- Trusted origins ----
+	httpPort := 8800
+	if value := strings.TrimSpace(os.Getenv("UNYPORT_PORT")); value != "" {
+		port, err := strconv.Atoi(value)
+		if err != nil || port < 1 || port > 65535 {
+			logger.Error("invalid UNYPORT_PORT", "value", value)
+			panic(fmt.Errorf("invalid UNYPORT_PORT %q", value))
+		}
+		httpPort = port
+	}
+
 	trustedOrigins := normalizeTrustedOrigins(settings.Security2.TrustedOrigins)
 	if len(trustedOrigins) == 0 {
-		trustedOrigins = defaultTrustedOrigins("8800")
+		trustedOrigins = defaultTrustedOrigins(strconv.Itoa(httpPort))
 	}
 
 	// ---- Routes ----
@@ -188,7 +200,7 @@ func New(cfg config.Config, settings *config.Settings, logger *slog.Logger) *Ser
 	)
 
 	// ---- Adresse d'écoute ----
-	httpAddr := ":8800"
+	httpAddr := fmt.Sprintf(":%d", httpPort)
 	if settings.HTTP3.Enabled {
 		httpAddr = fmt.Sprintf(":%d", settings.HTTP3.Port)
 	}
