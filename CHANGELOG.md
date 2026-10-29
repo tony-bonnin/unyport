@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.4] - 2026-10-29
+
+### Changed
+- Show effective interface IPs directly in the network topology and remove redundant bridge fields from the interface detail tooltip.
+
 ## [0.60.3] - 2026-10-29
 
 ### Fixed

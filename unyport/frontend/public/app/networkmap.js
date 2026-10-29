@@ -14,8 +14,8 @@ function _mkSvg(fn) { var s = document.createElementNS(_NS, 'svg'); s.setAttribu
 function _truncate(v, max) { v = v == null ? '' : String(v); return v.length > max ? v.slice(0, max - 1) + '…' : v; }
 function _ifaceAddress(iface) {
   if (iface.ip) return iface.ip;
-  if (iface.master) return 'via ' + iface.master + (iface.master_ip ? ' · ' + iface.master_ip : ' · L2');
-  return 'L2 · no host IP';
+  if (iface.master_ip) return iface.master_ip;
+  return '|';
 }
 
 // Icônes (identiques)
@@ -170,9 +170,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         rows: [
           { key: 'Type', value: 'Interface' },
           { key: 'Status', value: up ? 'UP' : 'DOWN' },
-          { key: 'IP address', value: iface.ip || 'No host IP (layer 2)' },
-          { key: 'Bridge', value: iface.master || '|' },
-          { key: 'Bridge IP', value: iface.master_ip || '|' },
+          { key: 'IP address', value: iface.ip || iface.master_ip || '|' },
           { key: 'RX rate', value: _fmtBpsMap(iface.rx_bps || 0) },
           { key: 'TX rate', value: _fmtBpsMap(iface.tx_bps || 0) },
           { key: 'Neighbors', value: String((nbPerIface[iface.name] || []).length) }
