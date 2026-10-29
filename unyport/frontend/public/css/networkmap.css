@@ -8,6 +8,8 @@
 .nm-card-interactive{cursor:pointer;}
 .nm-card-interactive:focus-visible{outline:2px solid color-mix(in srgb,var(--brand) 42%, transparent);outline-offset:3px;}
 .nm-card-icon{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden;}
+.nm-fo-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;}
+.nm-fo-wrap i{font-size:28px;line-height:1;}
 .nm-card-label{font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:600;color:#333;text-align:center;max-width:114px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 [data-theme="dark"] .nm-card-label{color:#e8eaf2;}
 .nm-card-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#777;text-align:center;margin-top:3px;max-width:114px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}

@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.7] - 2026-10-29
+
+### Changed
+- Use the bundled Font Awesome `network-wired` icon for bridge nodes.
+
 ## [0.60.6] - 2026-10-29
 
 ### Changed
