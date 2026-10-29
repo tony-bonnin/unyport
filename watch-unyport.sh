@@ -92,11 +92,6 @@ release_build_lock() {
   [ -d "$BUILD_LOCK_DIR" ] && rm -rf "$BUILD_LOCK_DIR"
 }
 
-sync_git() {
-  [ -x "$GIT_SYNC_SCRIPT" ] || { echo "[unyport] git sync script absent: $GIT_SYNC_SCRIPT"; return 0; }
-  UNYPORT_GIT_PREPARED_VERSION=1 UNYPORT_GIT_BUILD_VERIFIED=1 "$GIT_SYNC_SCRIPT" sync
-}
-
 build_and_sync() {
   if ! acquire_build_lock; then
     echo "[unyport] build deja en cours"
@@ -104,9 +99,9 @@ build_and_sync() {
   fi
   rc=0
   load_env
-  # Watcher retries must be idempotent. Only an explicit release may change
-  # the application version.
-  if "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT" && sync_git; then
+  # The watcher validates and builds only. Commits, versions, tags and
+  # publications are explicit release operations.
+  if "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT"; then
     mark_clean
   else
     rc=$?

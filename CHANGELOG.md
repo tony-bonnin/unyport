@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project follows Semantic Versioning.
 
+## [0.60.2] - 2026-10-29
+
+### Fixed
+- Restricted the file watcher to validation and builds; commits, tags and publications now require an explicit release command.
+
 ## [0.60.1] - 2026-10-29
 
 ### Fixed
