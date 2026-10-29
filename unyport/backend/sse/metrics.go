@@ -1362,7 +1362,7 @@ func readARPTable() []ARPEntry {
 }
 
 var validDeviceTypes = map[string]bool{
-	"desktop": true, "laptop": true, "server": true, "nas": true,
+	"desktop": true, "laptop": true, "server": true, "nas": true, "storage": true,
 	"printer": true, "phone": true, "tablet": true, "router": true,
 	"switch": true, "accesspoint": true, "camera": true, "tv": true,
 	"iot": true, "unknown": true,
@@ -1381,7 +1381,7 @@ func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
 			continue
 		}
 		deviceType := strings.ToLower(strings.TrimSpace(parts[1]))
-		if validDeviceTypes[deviceType] {
+		if validDeviceTypes[deviceType] || validExtendedDeviceTypes[deviceType] {
 			return deviceType
 		}
 	}
@@ -1405,15 +1405,61 @@ func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
 // DiskMount décrit un point de montage avec son espace disque.
 // Zéro binaire externe | syscall.Statfs uniquement.
 type DiskMount struct {
-	Device  string `json:"device"`
-	Mount   string `json:"mount"`
-	FSType  string `json:"fstype"`
-	Total   uint64 `json:"total_mb"`
-	Used    uint64 `json:"used_mb"`
-	Free    uint64 `json:"free_mb"`
-	UsedPct uint8  `json:"used_pct"`
-	Pal     string `json:"pal"`
-	BarCls  string `json:"bar_cls"`
+	Device    string `json:"device"`
+	Mount     string `json:"mount"`
+	FSType    string `json:"fstype"`
+	DiskType  string `json:"disk_type"`
+	Model     string `json:"model"`
+	Transport string `json:"transport"`
+	Icon      string `json:"icon"`
+	Total     uint64 `json:"total_mb"`
+	Used      uint64 `json:"used_mb"`
+	Free      uint64 `json:"free_mb"`
+	UsedPct   uint8  `json:"used_pct"`
+	Pal       string `json:"pal"`
+	BarCls    string `json:"bar_cls"`
+}
+
+func rootBlockDevice(device string) string {
+	name := filepath.Base(device)
+	if strings.HasPrefix(name, "nvme") || strings.HasPrefix(name, "mmcblk") {
+		if p := strings.LastIndex(name, "p"); p > 0 && p+1 < len(name) {
+			if _, err := strconv.Atoi(name[p+1:]); err == nil {
+				return name[:p]
+			}
+		}
+		return name
+	}
+	return strings.TrimRight(name, "0123456789")
+}
+
+func diskMetadata(device string) (diskType, model, transport, icon string) {
+	name := rootBlockDevice(device)
+	base := filepath.Join("/sys/class/block", name)
+	model = readFirstFileTrim(filepath.Join(base, "device/model"), filepath.Join(base, "device/name"))
+	if link, err := os.Readlink(filepath.Join(base, "device/subsystem")); err == nil {
+		transport = strings.ToLower(filepath.Base(link))
+	}
+	rotational := readFirstFileTrim(filepath.Join(base, "queue/rotational")) == "1"
+	lowerModel := strings.ToLower(model)
+	switch {
+	case strings.HasPrefix(name, "nvme"):
+		return "nvme", model, "nvme", "m2_nvme"
+	case strings.HasPrefix(name, "mmcblk"):
+		return "emmc", model, "mmc", "emmc_chip"
+	case strings.HasPrefix(name, "xvd"), strings.HasPrefix(name, "vd"):
+		return "virtual", model, "virtio", "volume"
+	case transport == "usb":
+		return "usb", model, transport, "usb_storage"
+	case rotational && (strings.Contains(lowerModel, "enterprise") || transport == "sas"):
+		return "hdd", model, transport, "hdd_enterprise"
+	case rotational:
+		return "hdd", model, transport, "hdd_35"
+	case strings.HasPrefix(name, "sd"):
+		return "ssd", model, transport, "ssd_sata_25"
+	default:
+		return "storage", model, transport, "storage"
+	}
 }
 
 // collectDisks lit /proc/mounts et retourne un disque par device physique.
@@ -1488,16 +1534,11 @@ func collectDisks() []DiskMount {
 		} else if pct > 50 {
 			barCls = "warn"
 		}
+		diskType, model, transport, icon := diskMetadata(device)
 		result = append(result, DiskMount{
-			Device:  device,
-			Mount:   e.mount,
-			FSType:  e.fstype,
-			Total:   total,
-			Used:    used,
-			Free:    free,
-			UsedPct: pct,
-			Pal:     pal,
-			BarCls:  barCls,
+			Device: device, Mount: e.mount, FSType: e.fstype,
+			DiskType: diskType, Model: model, Transport: transport, Icon: icon,
+			Total: total, Used: used, Free: free, UsedPct: pct, Pal: pal, BarCls: barCls,
 		})
 	}
 	sort.Slice(result, func(i, j int) bool {

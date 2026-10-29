@@ -217,6 +217,18 @@ document.addEventListener('alpine:init', () => {
     // Optimisation: Liaison directe des fonctions externes au lieu de wrappers fléchés
     _fmtFreq: fmtFreq,
     _fmtMB: fmtMB,
+    _diskIconType(disk) {
+      const requested = disk?.icon || disk?.disk_type || 'storage';
+      return window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolve(requested) : 'storage';
+    },
+    _diskIconAsset(disk) {
+      const key = this._diskIconType(disk);
+      const entry = window.UnyPortDeviceIcons?.catalog?.[key];
+      return '/media/icons/' + (entry?.asset || 'devices/storage.svg');
+    },
+    _diskIconName(disk) {
+      return this._diskIconAsset(disk).split('/').pop();
+    },
     _fmtBytes: fmtBytes,
     _cleanCPU: cleanCPU,
     _formatUptime: formatUptime,

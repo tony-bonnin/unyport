@@ -51,7 +51,11 @@ function _decorateCard(card, payload) {
 function _nbCard(nb) {
   var ip = nb.ip || '?', mac = nb.mac || '|', state = nb.state || '|', iface = nb.iface || '|';
   var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolve(requestedType) : '';
+  var iconEntry = deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType] : null;
+  var iconName = iconEntry && iconEntry.asset ? iconEntry.asset.split('/').pop() : '|';
   var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.draw(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, ip, nb.mac ? mac.substring(0, 17) : state);
+  var typeMeta = _div('nm-card-device-type'); typeMeta.textContent = 'device_type: ' + (requestedType || '|'); card.appendChild(typeMeta);
+  var iconMeta = _div('nm-card-icon-name'); iconMeta.textContent = 'icon: ' + iconName; card.appendChild(iconMeta);
   return _decorateCard(card, {
     kind: 'neighbor',
     title: ip,
@@ -62,13 +66,24 @@ function _nbCard(nb) {
     summary: state === 'reachable' ? 'Reachable ARP neighbor' : (state === 'stale' ? 'Stale ARP neighbor' : 'Unknown neighbor state'),
     ariaLabel: 'Neighbor ' + ip,
     rows: [
-      { key: 'Type', value: deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType].label : 'Neighbor' },
+      { key: 'Type', value: iconEntry ? iconEntry.label : 'Neighbor' },
+      { key: 'Device type', value: requestedType || '|' },
+      { key: 'Icon', value: iconName },
       { key: 'State', value: state },
       { key: 'Interface', value: iface },
       { key: 'IP address', value: ip },
       { key: 'MAC address', value: mac }
     ]
   });
+}
+
+function _ifaceIconType(iface) {
+  var name = String(iface && iface.name || '').toLowerCase();
+  if (name.indexOf('br') === 0) return 'bridge';
+  if (name.indexOf('vif') === 0 || name.indexOf('tap') === 0) return 'vif';
+  if (name.indexOf('wlan') === 0 || name.indexOf('wifi') >= 0) return 'access_point';
+  if (name.indexOf('sfp') >= 0 || name.indexOf('fibre') >= 0 || name.indexOf('fiber') >= 0) return 'nic_fibre_sfp';
+  return 'nic_ethernet';
 }
 
 // Position X du centre de la colonne col (1-indexé)
@@ -158,10 +173,11 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
     for (var pos = 0; pos < chunkLen; pos++) {
       var idx = start + pos;
       var iface = ifaces[idx], up = iface.up !== false;
-      var isBridge = iface.name === 'br-wan';
+      var ifaceIconType = _ifaceIconType(iface);
+      var ifaceIconEntry = window.UnyPortDeviceIcons && window.UnyPortDeviceIcons.catalog[ifaceIconType];
       var col = pos + 1;
       var ifaceAddress = _ifaceAddress(iface);
-      var card = _mkCard(function (s, cx, cy) { if (isBridge) _icoBridge(s, cx, cy); else if (up) _icoIfaceUp(s, cx, cy); else _icoIfaceDn(s, cx, cy); }, iface.name, ifaceAddress);
+      var card = _mkCard(function (s, cx, cy) { if (window.UnyPortDeviceIcons) window.UnyPortDeviceIcons.draw(s, cx, cy, ifaceIconType); else if (up) _icoIfaceUp(s, cx, cy); else _icoIfaceDn(s, cx, cy); }, iface.name, ifaceAddress);
       _decorateCard(card, {
         kind: 'interface',
         title: iface.name,
@@ -172,7 +188,9 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         summary: 'Live interface throughput',
         ariaLabel: 'Interface ' + iface.name,
         rows: [
-          { key: 'Type', value: 'Interface' },
+          { key: 'Type', value: ifaceIconEntry ? ifaceIconEntry.label : 'Interface' },
+          { key: 'Device type', value: ifaceIconType },
+          { key: 'Icon', value: ifaceIconEntry ? ifaceIconEntry.asset.split('/').pop() : '|' },
           { key: 'Status', value: up ? 'UP' : 'DOWN' },
           { key: 'IP address', value: iface.ip || iface.master_ip || '|' }
         ].concat(iface.master ? [

@@ -585,6 +585,14 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 /* ============================================================
    STORAGE VOLUMES
    ============================================================ */
+.storage-device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.storage-device-card{display:flex;flex-direction:column;align-items:center;min-width:0;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.storage-device-icon{width:88px;height:88px;margin-bottom:10px}.storage-device-icon img{width:100%;height:100%;display:block}
+.storage-device-name{color:var(--text);font-size:14px;font-weight:750}.storage-device-model{max-width:100%;margin-top:4px;overflow:hidden;color:var(--text-dim);font:10px 'JetBrains Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
+.storage-device-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:10px 0 12px}.storage-device-tags span{padding:3px 7px;border-radius:999px;background:var(--surface-sunk);color:var(--text-muted);font:9px 'JetBrains Mono',monospace}
+.storage-device-card .storage-volume-meter{width:100%}.storage-device-card .storage-volume-meta{width:100%;justify-content:space-between;margin-top:10px}
+.storage-device-details{display:grid;width:100%;gap:3px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);color:var(--text-dim);font:9px 'JetBrains Mono',monospace;text-align:center}
+
 .storage-volume-list {
   display: grid;
   gap: 10px;

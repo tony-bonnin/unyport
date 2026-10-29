@@ -12,6 +12,9 @@
 [data-theme="dark"] .nm-card-label{color:#e8eaf2;}
 .nm-card-sub{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#777;text-align:center;margin-top:3px;max-width:114px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 [data-theme="dark"] .nm-card-sub{color:#7a8099;}
+.nm-card-device-type,.nm-card-icon-name{font-family:'JetBrains Mono',monospace;font-size:8px;color:#8b91a1;text-align:center;margin-top:3px;max-width:114px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nm-card-device-type{margin-top:7px;color:#606778;}
+[data-theme="dark"] .nm-card-device-type,[data-theme="dark"] .nm-card-icon-name{color:#8d94aa;}
 
 /* ── Grille CSS : 6 colonnes max, 130px + 28px gap = 158px/step ── */
 .nm-grid{display:grid;-webkit-column-gap:28px;-moz-column-gap:28px;column-gap:28px;margin:0 auto;}

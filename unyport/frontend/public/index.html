@@ -61,6 +61,7 @@
   <script defer src="/app/utils.js"></script>
   <script defer src="/app/auth.js"></script>
   <script defer src="/app/sse.js"></script>
+  <script defer src="/app/extended-device-types.js"></script>
   <script defer src="/app/device-icons.js"></script>
   <script defer src="/app/chart.js"></script>
   <script defer src="/app/networkmap.js"></script>
@@ -1042,17 +1043,18 @@
             </div>
 
             <div class="section-head"><h2>Volumes</h2><p>Mounted filesystems with usage breakdown.</p></div>
-            <div class="storage-volume-list" x-show="sysDisks.length > 0">
+            <div class="storage-device-grid" x-show="sysDisks.length > 0">
               <template x-for="d in sysDisks" :key="d.mount">
-                <div class="storage-volume-row">
-                  <div class="storage-volume-main">
-                    <div class="storage-volume-icon" :class="d.bar_cls">
-                      <i class="fa-solid fa-hard-drive"></i>
-                    </div>
-                    <div class="storage-volume-title">
-                      <strong x-text="d.device"></strong>
-                      <span x-text="d.mount"></span>
-                    </div>
+                <article class="storage-device-card">
+                  <div class="storage-device-icon">
+                    <img :src="_diskIconAsset(d)" :alt="_diskIconName(d)">
+                  </div>
+                  <strong class="storage-device-name" x-text="d.device"></strong>
+                  <span class="storage-device-model" x-text="d.model || d.mount"></span>
+                  <div class="storage-device-tags">
+                    <span x-text="d.disk_type || 'storage'"></span>
+                    <span x-show="d.transport" x-text="d.transport"></span>
+                    <span x-text="d.fstype"></span>
                   </div>
                   <div class="storage-volume-meter">
                     <div class="storage-volume-bar">
@@ -1063,9 +1065,12 @@
                   <div class="storage-volume-meta">
                     <span><b x-text="d.used_pct + '%'"></b> used</span>
                     <span><b x-text="_fmtMB(d.free_mb)"></b> free</span>
-                    <span x-text="d.fstype"></span>
                   </div>
-                </div>
+                  <div class="storage-device-details">
+                    <span x-text="d.mount"></span>
+                    <span x-text="'icon: ' + _diskIconName(d)"></span>
+                  </div>
+                </article>
               </template>
             </div>
             <div class="placeholder-card" x-show="sysDisks.length === 0">

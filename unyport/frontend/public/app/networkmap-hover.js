@@ -150,11 +150,12 @@
     const rect = target.getBoundingClientRect();
     const vw = window.innerWidth || 0;
     const vh = window.innerHeight || 0;
+    const hoverHeight = state.hoverCard && state.hoverCard.offsetHeight ? state.hoverCard.offsetHeight : HOVER_HEIGHT;
     let left = rect.right + GUTTER;
-    let top = rect.top + (rect.height / 2) - (HOVER_HEIGHT / 2);
+    let top = rect.top + (rect.height / 2) - (hoverHeight / 2);
     if (left + HOVER_WIDTH > vw - 12) left = rect.left - HOVER_WIDTH - GUTTER;
     left = Math.max(12, Math.min(left, vw - HOVER_WIDTH - 12));
-    top = Math.max(12, Math.min(top, vh - HOVER_HEIGHT - 12));
+    top = Math.max(12, Math.min(top, vh - hoverHeight - 12));
     rule.style.left = `${left}px`;
     rule.style.top = `${top}px`;
     rule.style.right = 'auto';

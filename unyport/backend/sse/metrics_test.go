@@ -46,6 +46,10 @@ func TestDeviceTypeForNeighborAlwaysReturnsAType(t *testing.T) {
 	}{
 		{"explicit host", "192.168.4.1", "14:84:30:0f:be:99", "br-wan", "192.168.4.1=server", "server"},
 		{"explicit printer", "192.168.4.20", "aa:bb:cc:dd:ee:ff", "br-wan", "192.168.4.20=printer", "printer"},
+		{"explicit BLE device", "192.168.4.21", "aa:bb:cc:dd:ee:01", "br-wan", "192.168.4.21=ble", "ble"},
+		{"explicit 3D printer", "192.168.4.22", "aa:bb:cc:dd:ee:02", "br-wan", "192.168.4.22=3d_printer", "3d_printer"},
+		{"explicit storage device", "192.168.4.23", "aa:bb:cc:dd:ee:03", "br-wan", "192.168.4.23=hdd_35", "hdd_35"},
+		{"explicit network NAS", "192.168.4.24", "aa:bb:cc:dd:ee:04", "br-wan", "192.168.4.24=network_nas", "network_nas"},
 		{"xen guest", "192.168.4.3", "00:16:3e:61:75:64", "br-wan", "", "server"},
 		{"unidentified", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "", "unknown"},
 		{"invalid explicit type", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "192.168.4.99=spaceship", "unknown"},
@@ -74,6 +78,18 @@ func TestNaturalLessOrdersDiskDevices(t *testing.T) {
 	for i := range want {
 		if devices[i] != want[i] {
 			t.Fatalf("devices[%d] = %q, want %q; got %v", i, devices[i], want[i], devices)
+		}
+	}
+}
+
+func TestRootBlockDevice(t *testing.T) {
+	tests := map[string]string{
+		"/dev/sda1": "sda", "/dev/xvda2": "xvda", "/dev/vda3": "vda",
+		"/dev/nvme0n1p2": "nvme0n1", "/dev/mmcblk0p1": "mmcblk0",
+	}
+	for device, want := range tests {
+		if got := rootBlockDevice(device); got != want {
+			t.Errorf("rootBlockDevice(%q) = %q, want %q", device, got, want)
 		}
 	}
 }
