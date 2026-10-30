@@ -12,6 +12,10 @@ function _el(t, a) { var e = document.createElementNS(_NS, t); if (a) Object.key
 function _div(c) { var d = document.createElement('div'); d.className = c; return d; }
 function _mkSvg(fn) { var s = document.createElementNS(_NS, 'svg'); s.setAttribute('width', '64'); s.setAttribute('height', '64'); s.setAttribute('viewBox', '0 0 64 64'); fn(s, 32, 32); return s; }
 function _truncate(v, max) { v = v == null ? '' : String(v); return v.length > max ? v.slice(0, max - 1) + '…' : v; }
+function _displayHostname(v) {
+  var host = String(v || '').trim().replace(/\.+$/, '').split('.')[0];
+  return host.replace(/-workstation$/i, '').toUpperCase();
+}
 function _ifaceAddress(iface) {
   if (iface.ip) return iface.ip;
   if (iface.master_ip) return iface.master_ip;
@@ -50,17 +54,16 @@ function _decorateCard(card, payload) {
 }
 function _nbCard(nb) {
   var ip = nb.ip || '?', mac = nb.mac || '|', state = nb.state || '|', iface = nb.iface || '|';
+  var hostname = nb.hostname || '|', detection = nb.detection_source || '|';
   var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveNetwork(requestedType) : '';
   var iconEntry = deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType] : null;
-  var iconName = iconEntry && iconEntry.asset ? iconEntry.asset.split('/').pop() : '|';
-  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, ip, nb.mac ? mac.substring(0, 17) : state);
-  var typeMeta = _div('nm-card-device-type'); typeMeta.textContent = 'device_type: ' + (requestedType || '|'); card.appendChild(typeMeta);
-  var iconMeta = _div('nm-card-icon-name'); iconMeta.textContent = 'icon: ' + iconName; card.appendChild(iconMeta);
+  var hasHostname = hostname !== '|', displayHostname = hasHostname ? _displayHostname(hostname) : '', cardLabel = displayHostname || ip;
+  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, '');
   return _decorateCard(card, {
     kind: 'neighbor',
-    title: ip,
-    label: ip,
-    subtitle: mac,
+    title: cardLabel,
+    label: cardLabel,
+    subtitle: '',
     badge: state,
     badgeTone: state === 'reachable' ? 'ok' : (state === 'stale' ? 'warn' : 'muted'),
     summary: state === 'reachable' ? 'Reachable ARP neighbor' : (state === 'stale' ? 'Stale ARP neighbor' : 'Unknown neighbor state'),
@@ -68,7 +71,8 @@ function _nbCard(nb) {
     rows: [
       { key: 'Type', value: iconEntry ? iconEntry.label : 'Neighbor' },
       { key: 'Device type', value: requestedType || '|' },
-      { key: 'Icon', value: iconName },
+      { key: 'Hostname', value: displayHostname || '|' },
+      { key: 'Detection', value: detection },
       { key: 'State', value: state },
       { key: 'Interface', value: iface },
       { key: 'IP address', value: ip },
@@ -190,7 +194,6 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         rows: [
           { key: 'Type', value: ifaceIconEntry ? ifaceIconEntry.label : 'Interface' },
           { key: 'Device type', value: ifaceIconType },
-          { key: 'Icon', value: ifaceIconEntry ? ifaceIconEntry.asset.split('/').pop() : '|' },
           { key: 'Status', value: up ? 'UP' : 'DOWN' },
           { key: 'IP address', value: iface.ip || iface.master_ip || '|' }
         ].concat(iface.master ? [

@@ -1,6 +1,9 @@
 package sse
 
 import (
+	"encoding/csv"
+	"encoding/json"
+	"io"
 	"math"
 	"net"
 	"os"
@@ -1216,6 +1219,8 @@ type ARPEntry struct {
 	Iface      string `json:"iface"`
 	State      string `json:"state"`       // "reachable" | "stale" | "unknown"
 	DeviceType string `json:"device_type"` // always set; explicit inventory, safe heuristic, or "unknown"
+	Hostname   string `json:"hostname,omitempty"`
+	Detection  string `json:"detection_source,omitempty"`
 }
 
 // NetworkMap regroupe les interfaces et les voisins pour la topologie.
@@ -1323,6 +1328,7 @@ func readARPTable() []ARPEntry {
 		return nil
 	}
 
+	metadata := readKeaNeighborMetadata()
 	var result []ARPEntry
 	lines := strings.Split(string(data), "\n")
 	if len(lines) < 2 {
@@ -1350,12 +1356,16 @@ func readARPTable() []ARPEntry {
 			state = "stale"
 		}
 
+		meta := metadataForNeighbor(metadata, ip, mac)
+		deviceType, detection := deviceTypeForNeighborDetected(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES"), meta.Hostname)
 		result = append(result, ARPEntry{
 			IP:         ip,
 			MAC:        mac,
 			Iface:      iface,
 			State:      state,
-			DeviceType: deviceTypeForNeighbor(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES")),
+			DeviceType: deviceType,
+			Hostname:   meta.Hostname,
+			Detection:  detection,
 		})
 	}
 	return result
@@ -1373,6 +1383,11 @@ var validDeviceTypes = map[string]bool{
 // Les heuristiques restent volontairement conservatrices : une VM reconnue est
 // un serveur ; tout équipement non prouvé reste "unknown".
 func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
+	deviceType, _ := deviceTypeForNeighborDetected(ip, mac, iface, inventory, "")
+	return deviceType
+}
+
+func deviceTypeForNeighborDetected(ip, mac, iface, inventory, hostname string) (string, string) {
 	for _, entry := range strings.FieldsFunc(inventory, func(r rune) bool {
 		return r == ',' || r == ';' || r == ' ' || r == '\n' || r == '\t'
 	}) {
@@ -1383,20 +1398,221 @@ func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
 		deviceType := strings.ToLower(strings.TrimSpace(parts[1]))
 		networkStorage := deviceType == "nas" || deviceType == "san"
 		if (validDeviceTypes[deviceType] && deviceType != "storage") || (validExtendedDeviceTypes[deviceType] && (!validStorageDeviceTypes[deviceType] || networkStorage)) {
-			return deviceType
+			return deviceType, "manual"
 		}
+	}
+
+	if deviceType := deviceTypeForHostname(hostname); deviceType != "unknown" {
+		return deviceType, "dhcp"
+	}
+	if isPublicNeighborIP(ip) {
+		return "router_wan", "public-ip"
 	}
 
 	mac = strings.ToLower(strings.TrimSpace(mac))
 	for _, prefix := range []string{"00:16:3e:", "00:05:69:", "00:0c:29:", "00:1c:14:", "00:50:56:", "08:00:27:", "52:54:00:"} {
 		if strings.HasPrefix(mac, prefix) {
-			return "server"
+			return "server", "mac"
 		}
 	}
 	if strings.HasPrefix(iface, "vif") || strings.HasPrefix(iface, "tap") {
-		return "server"
+		return "server", "interface"
+	}
+	return "unknown", "arp"
+}
+
+func isPublicNeighborIP(value string) bool {
+	ip := net.ParseIP(strings.TrimSpace(value))
+	if ip == nil || ip.To4() == nil || !ip.IsGlobalUnicast() || ip.IsPrivate() {
+		return false
+	}
+	// RFC 6598 shared address space is not publicly routable.
+	cgnat := &net.IPNet{IP: net.IPv4(100, 64, 0, 0), Mask: net.CIDRMask(10, 32)}
+	return !cgnat.Contains(ip)
+}
+
+func deviceTypeForHostname(hostname string) string {
+	name := strings.ToLower(strings.Trim(strings.TrimSpace(hostname), "."))
+	name = strings.NewReplacer("_", "-", " ", "-").Replace(name)
+	patterns := []struct {
+		deviceType string
+		words      []string
+	}{
+		{"smart_tv", []string{"hisense", "bravia", "webos", "smarttv"}},
+		{"tv", []string{"tv", "television"}},
+		{"phone", []string{"phone", "iphone", "android", "xiaomi", "pixel", "galaxy", "mobile"}},
+		{"printer", []string{"printer", "brother", "laserjet", "deskjet", "officejet"}},
+		{"nas", []string{"nas", "synology", "qnap"}},
+		{"accesspoint", []string{"access-point", "accesspoint", "unifi", "airport"}},
+		{"router", []string{"router", "gateway", "firewall"}},
+		{"camera", []string{"camera", "webcam", "doorbell", "cam-"}},
+		{"laptop", []string{"laptop", "notebook", "macbook"}},
+		{"desktop", []string{"workstation", "desktop", "windows-pc", "computer", "trinity-install"}},
+		{"server", []string{"server", "hypervisor", "proxmox", "truenas"}},
+	}
+	for _, pattern := range patterns {
+		for _, word := range pattern.words {
+			if hostnameContainsToken(name, word) {
+				return pattern.deviceType
+			}
+		}
 	}
 	return "unknown"
+}
+
+func hostnameContainsToken(name, token string) bool {
+	if token == "cam-" {
+		return strings.HasPrefix(name, token)
+	}
+	for _, part := range strings.FieldsFunc(name, func(r rune) bool {
+		return r == '-' || r == '.' || r == ':' || r == '/'
+	}) {
+		if part == token {
+			return true
+		}
+	}
+	return strings.Contains(name, token) && len(token) >= 5
+}
+
+type neighborMetadata struct {
+	Hostname string
+	IP       string
+	MAC      string
+}
+
+func normalizeMAC(mac string) string {
+	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(mac), "-", ":"))
+}
+
+func metadataForNeighbor(metadata map[string]neighborMetadata, ip, mac string) neighborMetadata {
+	if meta, ok := metadata["ip:"+ip]; ok {
+		return meta
+	}
+	return metadata["mac:"+normalizeMAC(mac)]
+}
+
+func storeNeighborMetadata(metadata map[string]neighborMetadata, meta neighborMetadata) {
+	meta.Hostname = strings.Trim(strings.TrimSpace(meta.Hostname), ".")
+	meta.MAC = normalizeMAC(meta.MAC)
+	if meta.Hostname == "" {
+		return
+	}
+	if meta.IP != "" {
+		if _, exists := metadata["ip:"+meta.IP]; !exists {
+			metadata["ip:"+meta.IP] = meta
+		}
+	}
+	if meta.MAC != "" {
+		if _, exists := metadata["mac:"+meta.MAC]; !exists {
+			metadata["mac:"+meta.MAC] = meta
+		}
+	}
+}
+
+func readKeaNeighborMetadata() map[string]neighborMetadata {
+	metadata := make(map[string]neighborMetadata)
+	readKeaLeaseMetadata(metadata, "/var/lib/kea")
+	readKeaReservationMetadata(metadata, "/etc/kea/kea-dhcp4.conf")
+	readHostsMetadata(metadata, "/etc/hosts")
+	return metadata
+}
+
+func readHostsMetadata(metadata map[string]neighborMetadata, path string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		line = strings.SplitN(line, "#", 2)[0]
+		fields := strings.Fields(line)
+		if len(fields) < 2 || net.ParseIP(fields[0]) == nil {
+			continue
+		}
+		hostname := fields[1]
+		if hostname == "localhost" || strings.HasPrefix(hostname, "localhost.") {
+			continue
+		}
+		storeNeighborMetadata(metadata, neighborMetadata{IP: fields[0], Hostname: hostname})
+	}
+}
+
+func readKeaLeaseMetadata(metadata map[string]neighborMetadata, dir string) {
+	paths, _ := filepath.Glob(filepath.Join(dir, "dhcp4.leases*"))
+	type candidate struct {
+		path string
+		mod  time.Time
+	}
+	var candidates []candidate
+	for _, path := range paths {
+		base := filepath.Base(path)
+		suffix := strings.TrimPrefix(base, "dhcp4.leases")
+		if suffix != "" && (suffix[0] != '.' || strings.Trim(suffix[1:], "0123456789") != "") {
+			continue
+		}
+		if info, err := os.Stat(path); err == nil {
+			candidates = append(candidates, candidate{path: path, mod: info.ModTime()})
+		}
+	}
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].mod.After(candidates[j].mod) })
+	for _, candidate := range candidates {
+		file, err := os.Open(candidate.path)
+		if err != nil {
+			continue
+		}
+		reader := csv.NewReader(file)
+		header, err := reader.Read()
+		if err != nil {
+			file.Close()
+			continue
+		}
+		columns := make(map[string]int, len(header))
+		for i, name := range header {
+			columns[strings.TrimSpace(name)] = i
+		}
+		for {
+			record, err := reader.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				continue
+			}
+			value := func(name string) string {
+				if i, ok := columns[name]; ok && i < len(record) {
+					return record[i]
+				}
+				return ""
+			}
+			storeNeighborMetadata(metadata, neighborMetadata{IP: value("address"), MAC: value("hwaddr"), Hostname: value("hostname")})
+		}
+		file.Close()
+	}
+}
+
+func readKeaReservationMetadata(metadata map[string]neighborMetadata, path string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return
+	}
+	var config struct {
+		Dhcp4 struct {
+			Subnet4 []struct {
+				Reservations []struct {
+					IP       string `json:"ip-address"`
+					MAC      string `json:"hw-address"`
+					Hostname string `json:"hostname"`
+				} `json:"reservations"`
+			} `json:"subnet4"`
+		} `json:"Dhcp4"`
+	}
+	if json.Unmarshal(data, &config) != nil {
+		return
+	}
+	for _, subnet := range config.Dhcp4.Subnet4 {
+		for _, reservation := range subnet.Reservations {
+			storeNeighborMetadata(metadata, neighborMetadata{IP: reservation.IP, MAC: reservation.MAC, Hostname: reservation.Hostname})
+		}
+	}
 }
 
 // ============================================================

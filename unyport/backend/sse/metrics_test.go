@@ -1,6 +1,11 @@
 package sse
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
+)
 
 func TestSelectMainIfacePrefersBridgeWithIPv4(t *testing.T) {
 	rx := map[string]uint64{
@@ -62,6 +67,100 @@ func TestDeviceTypeForNeighborAlwaysReturnsAType(t *testing.T) {
 				t.Fatalf("deviceTypeForNeighbor() = %q, want %q", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestDeviceTypeForHostname(t *testing.T) {
+	tests := map[string]string{
+		"HISENSE-TV":          "smart_tv",
+		"xiaomi-13t-pro":      "phone",
+		"WINDOWS-WORKSTATION": "desktop",
+		"TRINITY-INSTALL":     "desktop",
+		"unknown-client":      "unknown",
+	}
+	for hostname, want := range tests {
+		if got := deviceTypeForHostname(hostname); got != want {
+			t.Errorf("deviceTypeForHostname(%q) = %q, want %q", hostname, got, want)
+		}
+	}
+}
+
+func TestManualDeviceTypeOverridesDHCPHostname(t *testing.T) {
+	got, source := deviceTypeForNeighborDetected("192.168.2.3", "a0:62:fb:1e:ab:23", "br-lan", "192.168.2.3=server", "HISENSE-TV")
+	if got != "server" || source != "manual" {
+		t.Fatalf("type/source = %q/%q, want server/manual", got, source)
+	}
+}
+
+func TestPublicNeighborUsesWANIconType(t *testing.T) {
+	tests := []struct {
+		ip   string
+		want string
+	}{
+		{"93.25.54.1", "router_wan"},
+		{"192.168.2.3", "unknown"},
+		{"10.0.0.1", "unknown"},
+		{"100.64.0.1", "unknown"},
+		{"169.254.1.1", "unknown"},
+		{"127.0.0.1", "unknown"},
+	}
+	for _, tt := range tests {
+		got, _ := deviceTypeForNeighborDetected(tt.ip, "aa:bb:cc:dd:ee:ff", "eth0", "", "")
+		if got != tt.want {
+			t.Errorf("device type for %s = %q, want %q", tt.ip, got, tt.want)
+		}
+	}
+}
+
+func TestReadKeaLeaseMetadataUsesNumberedActiveFileAndSkipsBackups(t *testing.T) {
+	dir := t.TempDir()
+	header := "address,hwaddr,client_id,valid_lifetime,expire,subnet_id,fqdn_fwd,fqdn_rev,hostname,state,user_context,pool_id\n"
+	if err := os.WriteFile(filepath.Join(dir, "dhcp4.leases"), []byte(header), 0600); err != nil {
+		t.Fatal(err)
+	}
+	active := filepath.Join(dir, "dhcp4.leases.2")
+	if err := os.WriteFile(active, []byte(header+"192.168.2.101,e4:bc:aa:ea:64:52,,86400,0,1,0,0,xiaomi-13t-pro,0,,0\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	backup := filepath.Join(dir, "dhcp4.leases.2.bak-old")
+	if err := os.WriteFile(backup, []byte(header+"192.168.2.101,00:00:00:00:00:01,,86400,0,1,0,0,wrong-host,0,,0\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now()
+	_ = os.Chtimes(active, now, now)
+	_ = os.Chtimes(backup, now.Add(time.Hour), now.Add(time.Hour))
+
+	metadata := make(map[string]neighborMetadata)
+	readKeaLeaseMetadata(metadata, dir)
+	meta := metadataForNeighbor(metadata, "192.168.2.101", "e4:bc:aa:ea:64:52")
+	if meta.Hostname != "xiaomi-13t-pro" {
+		t.Fatalf("hostname = %q, want xiaomi-13t-pro", meta.Hostname)
+	}
+}
+
+func TestReadKeaReservationMetadata(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "kea-dhcp4.conf")
+	config := `{"Dhcp4":{"subnet4":[{"reservations":[{"hw-address":"A0:62:FB:1E:AB:23","ip-address":"192.168.2.3","hostname":"HISENSE-TV"}]}]}}`
+	if err := os.WriteFile(path, []byte(config), 0600); err != nil {
+		t.Fatal(err)
+	}
+	metadata := make(map[string]neighborMetadata)
+	readKeaReservationMetadata(metadata, path)
+	meta := metadataForNeighbor(metadata, "192.168.2.3", "a0:62:fb:1e:ab:23")
+	if meta.Hostname != "HISENSE-TV" {
+		t.Fatalf("hostname = %q, want HISENSE-TV", meta.Hostname)
+	}
+}
+
+func TestReadHostsMetadata(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "hosts")
+	if err := os.WriteFile(path, []byte("127.0.0.1 localhost\n192.168.2.100 TRINITY-INSTALL install\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	metadata := make(map[string]neighborMetadata)
+	readHostsMetadata(metadata, path)
+	if got := metadataForNeighbor(metadata, "192.168.2.100", "").Hostname; got != "TRINITY-INSTALL" {
+		t.Fatalf("hostname = %q, want TRINITY-INSTALL", got)
 	}
 }
 
