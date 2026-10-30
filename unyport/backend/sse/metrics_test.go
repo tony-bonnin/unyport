@@ -1,11 +1,26 @@
 package sse
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 )
+
+func TestParseISPMetadataPrefersRegistrantOrganisation(t *testing.T) {
+	payload := rdapIPResponse{
+		Name: "FR-SFR-20071030", StartAddress: "93.0.0.0", EndAddress: "93.31.255.255",
+		Entities: []rdapEntity{{Roles: []string{"registrant"}, VCardArray: []json.RawMessage{
+			json.RawMessage(`"vcard"`),
+			json.RawMessage(`[["version",{},"text","4.0"],["fn",{},"text","Societe Francaise Du Radiotelephone - SFR SA"],["kind",{},"text","org"]]`),
+		}}},
+	}
+	got := parseISPMetadata(payload)
+	if got.Operator != "SFR" || got.Network != "93.0.0.0 – 93.31.255.255" {
+		t.Fatalf("ISP metadata = %#v", got)
+	}
+}
 
 func TestSelectMainIfacePrefersBridgeWithIPv4(t *testing.T) {
 	rx := map[string]uint64{

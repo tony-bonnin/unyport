@@ -55,15 +55,17 @@ function _decorateCard(card, payload) {
 function _nbCard(nb) {
   var ip = nb.ip || '?', mac = nb.mac || '|', state = nb.state || '|', iface = nb.iface || '|';
   var hostname = nb.hostname || '|', detection = nb.detection_source || '|';
+  var isp = nb.isp || '', asn = nb.asn || '', network = nb.network || '';
   var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveNetwork(requestedType) : '';
   var iconEntry = deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType] : null;
-  var hasHostname = hostname !== '|', displayHostname = hasHostname ? _displayHostname(hostname) : '', cardLabel = displayHostname || ip;
-  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, hasHostname ? ip : '');
+  var hasHostname = hostname !== '|', displayHostname = hasHostname ? _displayHostname(hostname) : '', cardLabel = isp || displayHostname || ip;
+  var hasIdentity = !!(isp || displayHostname);
+  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, hasIdentity ? ip : '');
   return _decorateCard(card, {
     kind: 'neighbor',
     title: cardLabel,
     label: cardLabel,
-    subtitle: hasHostname ? ip : '',
+    subtitle: hasIdentity ? ip : '',
     badge: state,
     badgeTone: state === 'reachable' ? 'ok' : (state === 'stale' ? 'warn' : 'muted'),
     summary: state === 'reachable' ? 'Reachable ARP neighbor' : (state === 'stale' ? 'Stale ARP neighbor' : 'Unknown neighbor state'),
@@ -72,6 +74,9 @@ function _nbCard(nb) {
       { key: 'Type', value: iconEntry ? iconEntry.label : 'Neighbor' },
       { key: 'Device type', value: requestedType || '|' },
       { key: 'Hostname', value: displayHostname || '|' },
+      { key: 'ISP', value: isp || '|' },
+      { key: 'ASN', value: asn || '|' },
+      { key: 'Public network', value: network || '|' },
       { key: 'Detection', value: detection },
       { key: 'State', value: state },
       { key: 'Interface', value: iface },

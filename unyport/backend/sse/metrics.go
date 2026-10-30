@@ -3,15 +3,18 @@ package sse
 import (
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -1221,6 +1224,9 @@ type ARPEntry struct {
 	DeviceType string `json:"device_type"` // always set; explicit inventory, safe heuristic, or "unknown"
 	Hostname   string `json:"hostname,omitempty"`
 	Detection  string `json:"detection_source,omitempty"`
+	ISP        string `json:"isp,omitempty"`
+	ASN        string `json:"asn,omitempty"`
+	Network    string `json:"network,omitempty"`
 }
 
 // NetworkMap regroupe les interfaces et les voisins pour la topologie.
@@ -1358,6 +1364,10 @@ func readARPTable() []ARPEntry {
 
 		meta := metadataForNeighbor(metadata, ip, mac)
 		deviceType, detection := deviceTypeForNeighborDetected(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES"), meta.Hostname)
+		isp := ispMetadataForPublicNeighbor(ip)
+		if isp.Operator != "" {
+			detection = "rdap"
+		}
 		result = append(result, ARPEntry{
 			IP:         ip,
 			MAC:        mac,
@@ -1366,9 +1376,166 @@ func readARPTable() []ARPEntry {
 			DeviceType: deviceType,
 			Hostname:   meta.Hostname,
 			Detection:  detection,
+			ISP:        isp.Operator,
+			ASN:        isp.ASN,
+			Network:    isp.Network,
 		})
 	}
 	return result
+}
+
+type ispMetadata struct {
+	Operator string
+	ASN      string
+	Network  string
+}
+
+type ispCacheEntry struct {
+	metadata ispMetadata
+	expires  time.Time
+}
+
+var ispRDAPCache = struct {
+	sync.Mutex
+	entries  map[string]ispCacheEntry
+	inFlight map[string]bool
+}{entries: make(map[string]ispCacheEntry), inFlight: make(map[string]bool)}
+
+var ispRDAPClient = &http.Client{Timeout: 4 * time.Second}
+
+// ispMetadataForPublicNeighbor never blocks metric collection. The first sighting
+// keeps the WAN fallback while a single RDAP lookup runs in the background;
+// subsequent snapshots use the cached ISP identity for 24 hours.
+func ispMetadataForPublicNeighbor(ip string) ispMetadata {
+	if !isPublicNeighborIP(ip) {
+		return ispMetadata{}
+	}
+	now := time.Now()
+	ispRDAPCache.Lock()
+	if entry, ok := ispRDAPCache.entries[ip]; ok && now.Before(entry.expires) {
+		ispRDAPCache.Unlock()
+		return entry.metadata
+	}
+	if !ispRDAPCache.inFlight[ip] {
+		ispRDAPCache.inFlight[ip] = true
+		go refreshISPMetadata(ip)
+	}
+	ispRDAPCache.Unlock()
+	return ispMetadata{}
+}
+
+func refreshISPMetadata(ip string) {
+	metadata, err := fetchISPMetadata(ip)
+	ttl := 24 * time.Hour
+	if err != nil {
+		ttl = time.Hour
+	}
+	ispRDAPCache.Lock()
+	ispRDAPCache.entries[ip] = ispCacheEntry{metadata: metadata, expires: time.Now().Add(ttl)}
+	delete(ispRDAPCache.inFlight, ip)
+	ispRDAPCache.Unlock()
+}
+
+type rdapEntity struct {
+	Roles      []string          `json:"roles"`
+	VCardArray []json.RawMessage `json:"vcardArray"`
+}
+
+type rdapIPResponse struct {
+	Name         string       `json:"name"`
+	Handle       string       `json:"handle"`
+	StartAddress string       `json:"startAddress"`
+	EndAddress   string       `json:"endAddress"`
+	Entities     []rdapEntity `json:"entities"`
+}
+
+func fetchISPMetadata(ip string) (ispMetadata, error) {
+	req, err := http.NewRequest(http.MethodGet, "https://rdap.org/ip/"+ip, nil)
+	if err != nil {
+		return ispMetadata{}, err
+	}
+	req.Header.Set("Accept", "application/rdap+json, application/json")
+	req.Header.Set("User-Agent", "UnyPort ISP discovery")
+	resp, err := ispRDAPClient.Do(req)
+	if err != nil {
+		return ispMetadata{}, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return ispMetadata{}, fmt.Errorf("RDAP HTTP %d", resp.StatusCode)
+	}
+	var payload rdapIPResponse
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 2<<20)).Decode(&payload); err != nil {
+		return ispMetadata{}, err
+	}
+	return parseISPMetadata(payload), nil
+}
+
+func parseISPMetadata(payload rdapIPResponse) ispMetadata {
+	operator := ""
+	for _, entity := range payload.Entities {
+		if !containsString(entity.Roles, "registrant") {
+			continue
+		}
+		if name := rdapVCardName(entity.VCardArray); name != "" {
+			operator = name
+			if rdapVCardKind(entity.VCardArray) == "org" {
+				break
+			}
+		}
+	}
+	if operator == "" {
+		operator = payload.Name
+	}
+	network := payload.Handle
+	if payload.StartAddress != "" && payload.EndAddress != "" {
+		network = payload.StartAddress + " – " + payload.EndAddress
+	}
+	return ispMetadata{Operator: shortOperatorName(operator), Network: network}
+}
+
+func containsString(values []string, wanted string) bool {
+	for _, value := range values {
+		if strings.EqualFold(value, wanted) {
+			return true
+		}
+	}
+	return false
+}
+
+func rdapVCardName(raw []json.RawMessage) string { return rdapVCardProperty(raw, "fn") }
+func rdapVCardKind(raw []json.RawMessage) string {
+	return strings.ToLower(rdapVCardProperty(raw, "kind"))
+}
+
+func rdapVCardProperty(raw []json.RawMessage, property string) string {
+	if len(raw) < 2 {
+		return ""
+	}
+	var rows [][]json.RawMessage
+	if json.Unmarshal(raw[1], &rows) != nil {
+		return ""
+	}
+	for _, row := range rows {
+		if len(row) < 4 {
+			continue
+		}
+		var name, value string
+		if json.Unmarshal(row[0], &name) == nil && strings.EqualFold(name, property) && json.Unmarshal(row[3], &value) == nil {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
+}
+
+func shortOperatorName(value string) string {
+	upper := strings.ToUpper(strings.TrimSpace(value))
+	for _, known := range []string{"SFR", "ORANGE", "BOUYGUES TELECOM", "FREE", "VODAFONE", "PROXIMUS", "SWISSCOM"} {
+		if strings.Contains(upper, known) {
+			return known
+		}
+	}
+	return strings.TrimSpace(value)
 }
 
 var validDeviceTypes = map[string]bool{
