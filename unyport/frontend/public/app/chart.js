@@ -284,8 +284,9 @@ function _showNmTooltip(node, data) {
   const tt = _getNmTooltip();
   let rows = '';
   for (const [k, v] of Object.entries(data)) {
-    if (v === undefined || v === null || v === '' || v === '|') continue;
-    rows += `<div class="nm-tt-row"><span class="nm-tt-key">${k}</span><span class="nm-tt-val">${v}</span></div>`;
+    const text = v === undefined || v === null ? '' : String(v).trim();
+    if (text === '' || text === '|') continue;
+    rows += `<div class="nm-tt-row"><span class="nm-tt-key">${k}</span><span class="nm-tt-val">${text}</span></div>`;
   }
   tt.innerHTML = `<div class="nm-tt-inner">${rows}</div>`;
   _positionTooltip(node);

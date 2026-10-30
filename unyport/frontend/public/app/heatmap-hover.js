@@ -70,7 +70,7 @@
   function showCard(target) {
     const card = document.getElementById('reboot-hover-card');
     if (!card || !target) return;
-    const date = target.dataset.rebootDate || '|';
+    const date = target.dataset.rebootDate || '';
     const label = target.dataset.rebootLabel || date;
     const count = target.dataset.rebootCount || '0';
     const level = target.dataset.rebootLevel || '0';
@@ -84,9 +84,13 @@
     if (dateEl) {
       dateEl.textContent = today ? 'Today' : date;
       dateEl.classList.toggle('is-today', today);
+      dateEl.style.display = today || date ? '' : 'none';
     }
     if (countEl) countEl.textContent = countLabel(count);
-    if (dayEl) dayEl.textContent = label;
+    if (dayEl) {
+      dayEl.textContent = label;
+      dayEl.style.display = label ? '' : 'none';
+    }
     if (levelEl) levelEl.textContent = levelLabel(level);
     if (statusEl) statusEl.textContent = today ? 'Current day' : 'Archived day';
 

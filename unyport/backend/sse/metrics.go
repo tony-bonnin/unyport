@@ -1790,6 +1790,7 @@ func readKeaReservationMetadata(metadata map[string]neighborMetadata, path strin
 // Zéro binaire externe | syscall.Statfs uniquement.
 type DiskMount struct {
 	Device    string `json:"device"`
+	Disk      string `json:"disk"`
 	Mount     string `json:"mount"`
 	FSType    string `json:"fstype"`
 	DiskType  string `json:"disk_type"`
@@ -1920,7 +1921,7 @@ func collectDisks() []DiskMount {
 		}
 		diskType, model, transport, icon := diskMetadata(device)
 		result = append(result, DiskMount{
-			Device: device, Mount: e.mount, FSType: e.fstype,
+			Device: device, Disk: "/dev/" + rootBlockDevice(device), Mount: e.mount, FSType: e.fstype,
 			DiskType: diskType, Model: model, Transport: transport, Icon: icon,
 			Total: total, Used: used, Free: free, UsedPct: pct, Pal: pal, BarCls: barCls,
 		})

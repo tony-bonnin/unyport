@@ -457,6 +457,16 @@ document.addEventListener('alpine:init', () => {
       return this._fmtMB(total);
     },
 
+    get diskGroups() {
+      const groups = window.UnyPortDiskGroups;
+      return groups ? groups.group(this.sysDisks) : [];
+    },
+
+    _diskTooltip(disk) {
+      const groups = window.UnyPortDiskGroups;
+      return groups ? groups.tooltip(disk, (mb) => this._fmtMB(mb)) : '';
+    },
+
     get svcFiltered() {
       return this.svcFilter === 'all' ? this.svcList : this.svcList.filter(s => s.state === this.svcFilter);
     },

@@ -60,10 +60,30 @@
     return `is-${tone}`;
   }
 
+  function hasTooltipValue(value) {
+    if (value === null || value === undefined) return false;
+    const text = String(value).trim();
+    return text !== '' && text !== '|';
+  }
+
+  function firstText(...values) {
+    for (const value of values) {
+      if (hasTooltipValue(value)) return String(value).trim();
+    }
+    return '';
+  }
+
   function rowsHtml(rows) {
-    return (rows || []).map((row) => (
-      `<div class="nm-detail-row"><span>${escapeHtml(row.key || '')}</span><strong>${escapeHtml(row.value || '|')}</strong></div>`
+    return (rows || []).filter((row) => row && hasTooltipValue(row.value)).map((row) => (
+      `<div class="nm-detail-row"><span>${escapeHtml(row.key || '')}</span><strong>${escapeHtml(String(row.value).trim())}</strong></div>`
     )).join('');
+  }
+
+  function applyOptionalText(el, value) {
+    if (!el) return;
+    const text = hasTooltipValue(value) ? String(value).trim() : '';
+    el.textContent = text;
+    if (el.style) el.style.display = text === '' ? 'none' : '';
   }
 
   function escapeHtml(value) {
@@ -88,7 +108,7 @@
             <span id="nm-hover-icon" class="nm-detail-icon" aria-hidden="true"></span>
             <strong id="nm-hover-title">Network node</strong>
           </div>
-          <span id="nm-hover-subtitle">|</span>
+          <span id="nm-hover-subtitle"></span>
         </div>
         <span id="nm-hover-badge" class="nm-detail-badge is-muted">Info</span>
       </div>
@@ -115,7 +135,7 @@
               <span id="nm-modal-icon" class="nm-detail-icon is-modal" aria-hidden="true"></span>
               <h2 id="nm-modal-title">Network node</h2>
             </div>
-            <span id="nm-modal-subtitle" class="modal-email">|</span>
+            <span id="nm-modal-subtitle" class="modal-email"></span>
           </div>
           <div class="nm-modal-header-meta">
             <span id="nm-modal-badge" class="nm-detail-badge is-muted">Info</span>
@@ -186,13 +206,13 @@
     const summary = card.querySelector('#nm-hover-summary');
     const rows = card.querySelector('#nm-hover-rows');
     renderNodeIcon(target, state.hoverIcon);
-    if (title) title.textContent = payload.title || payload.label || 'Network node';
-    if (subtitle) subtitle.textContent = payload.subtitle || '|';
+    if (title) title.textContent = firstText(payload.title, payload.label, 'Network node');
+    applyOptionalText(subtitle, payload.subtitle);
     if (badge) {
-      badge.textContent = payload.badge || payload.kind || 'Info';
+      badge.textContent = firstText(payload.badge, payload.kind, 'Info');
       badge.className = `nm-detail-badge ${badgeToneClass(payload)}`;
     }
-    if (summary) summary.textContent = payload.summary || 'Network details';
+    if (summary) summary.textContent = firstText(payload.summary, 'Network details');
     if (rows) rows.innerHTML = rowsHtml(payload.rows);
     positionHoverCard(target);
     card.classList.add('is-visible');
@@ -211,11 +231,11 @@
     const overlay = ensureModal();
     if (!payload || !overlay) return;
     renderNodeIcon(target, state.modalIcon);
-    state.modalTitle.textContent = payload.title || payload.label || 'Network node';
-    state.modalSubtitle.textContent = payload.subtitle || '|';
-    state.modalBadge.textContent = payload.badge || payload.kind || 'Info';
+    state.modalTitle.textContent = firstText(payload.title, payload.label, 'Network node');
+    applyOptionalText(state.modalSubtitle, payload.subtitle);
+    state.modalBadge.textContent = firstText(payload.badge, payload.kind, 'Info');
     state.modalBadge.className = `nm-detail-badge ${badgeToneClass(payload)}`;
-    state.modalSummary.textContent = payload.summary || 'Network details';
+    state.modalSummary.textContent = firstText(payload.summary, 'Network details');
     state.modalRows.innerHTML = rowsHtml(payload.rows);
     overlay.classList.add('is-visible');
     overlay.setAttribute('aria-hidden', 'false');
@@ -263,6 +283,10 @@
     });
     const observer = new MutationObserver(() => bindAll());
     observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { hasTooltipValue, firstText, rowsHtml, applyOptionalText };
   }
 
   if (document.readyState === 'loading') {

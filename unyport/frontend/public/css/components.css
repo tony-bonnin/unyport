@@ -591,6 +591,24 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 .storage-device-name{color:var(--text);font-size:14px;font-weight:750}.storage-device-model{max-width:100%;margin-top:4px;overflow:hidden;color:var(--text-dim);font:10px 'JetBrains Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
 .storage-device-card .storage-volume-meter{width:100%}.storage-device-card .storage-volume-meta{width:100%;justify-content:space-between;margin-top:10px}
 
+/* Disk card | one card per physical disk, partitions as tree branches */
+.storage-disk-card .storage-disk-tree{width:100%;margin-top:14px}
+.storage-disk-tree{position:relative;margin:0;padding:12px 0 0;list-style:none;border-top:1px solid var(--border)}
+.storage-disk-tree::before{content:'';position:absolute;left:0;top:12px;bottom:16px;border-left:1px solid var(--border)}
+.storage-disk-branch{position:relative;display:flex;align-items:flex-start;gap:8px;min-width:0;padding:7px 0 7px 14px}
+.storage-disk-branch::before{content:'';position:absolute;left:0;top:18px;width:14px;border-top:1px solid var(--border)}
+.storage-disk-branch-icon{flex:0 0 18px;width:18px;height:18px;margin-top:1px}
+.storage-disk-branch-icon img{display:block;width:100%;height:100%}
+.storage-disk-branch-body{display:flex;flex:1 1 auto;flex-direction:column;gap:4px;min-width:0;text-align:left}
+.storage-disk-branch-head{display:flex;gap:8px;min-width:0;color:var(--text-dim);font-size:11.5px}
+.storage-disk-branch-head strong{overflow:hidden;color:var(--text);font-weight:650;text-overflow:ellipsis;white-space:nowrap}
+.storage-disk-branch-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.storage-disk-branch-meta{display:flex;justify-content:space-between;gap:8px;color:var(--text-dim);font:10px 'JetBrains Mono',monospace}
+@media (max-width:520px){
+  .storage-device-grid{grid-template-columns:1fr}
+  .storage-disk-branch-meta{flex-wrap:wrap;justify-content:flex-start}
+}
+
 .storage-volume-list {
   display: grid;
   gap: 10px;

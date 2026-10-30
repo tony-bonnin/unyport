@@ -67,6 +67,7 @@
   <script defer src="/app/networkmap.js"></script>
   <script defer src="/app/networkmap-hover.js"></script>
   <script defer src="/app/metrics.js"></script>
+  <script defer src="/app/disk-groups.js"></script>
   <script defer src="/app/app.js"></script>
   <script defer src="/app/pwa-register.js"></script>
   <script defer src="/app/pwa-install.js"></script>
@@ -1042,29 +1043,49 @@
               </div>
             </div>
 
-            <div class="section-head"><h2>Volumes</h2><p>Mounted filesystems with usage breakdown.</p></div>
-            <div class="storage-device-grid" x-show="sysDisks.length > 0">
-              <template x-for="d in sysDisks" :key="d.mount">
-                <article class="storage-device-card">
+            <div class="section-head"><h2>Disks</h2><p>Physical disks with their mounted volumes and partitions.</p></div>
+            <div class="storage-device-grid" x-show="diskGroups.length > 0">
+              <template x-for="g in diskGroups" :key="g.key">
+                <article class="storage-device-card storage-disk-card">
                   <div class="storage-device-icon">
-                    <img :src="_diskIconAsset(d)" :alt="_diskIconName(d)">
+                    <img :src="_diskIconAsset(g)" :alt="_diskIconName(g)">
                   </div>
-                  <strong class="storage-device-name" x-text="d.device"></strong>
-                  <span class="storage-device-model" x-text="d.model || d.mount"></span>
+                  <strong class="storage-device-name" x-text="g.device"></strong>
+                  <span class="storage-device-model" x-text="g.model || g.volume_label"></span>
                   <div class="storage-volume-meter">
                     <div class="storage-volume-bar">
-                      <div class="storage-volume-fill" :class="d.bar_cls"></div>
+                      <div class="storage-volume-fill" :class="g.bar_cls" :style="'--disk-w:' + g.used_pct + '%'"></div>
                     </div>
-                    <span><strong x-text="_fmtMB(d.used_mb)"></strong> / <span x-text="_fmtMB(d.total_mb)"></span></span>
+                    <span><strong x-text="_fmtMB(g.used_mb)"></strong> / <span x-text="_fmtMB(g.total_mb)"></span></span>
                   </div>
                   <div class="storage-volume-meta">
-                    <span><b x-text="d.used_pct + '%'"></b> used</span>
-                    <span><b x-text="_fmtMB(d.free_mb)"></b> free</span>
+                    <span><b x-text="g.used_pct + '%'"></b> used</span>
+                    <span><b x-text="g.volume_label"></b></span>
                   </div>
+                  <ul class="storage-disk-tree" x-show="g.partitions.length > 0">
+                    <template x-for="p in g.partitions" :key="p.device + p.mount">
+                      <li class="storage-disk-branch" :title="_diskTooltip(p)">
+                        <span class="storage-disk-branch-icon">
+                          <img src="/media/icons/storage/ufs_chip.svg" alt="">
+                        </span>
+                        <div class="storage-disk-branch-body">
+                          <span class="storage-disk-branch-head"><strong x-text="p.device"></strong><span x-text="p.mount"></span></span>
+                          <div class="storage-volume-bar">
+                            <div class="storage-volume-fill" :class="p.bar_cls" :style="'--disk-w:' + p.used_pct + '%'"></div>
+                          </div>
+                          <div class="storage-disk-branch-meta">
+                            <span x-text="p.used_pct + '%'"></span>
+                            <span x-text="_fmtMB(p.used_mb) + ' / ' + _fmtMB(p.total_mb)"></span>
+                            <span x-text="p.fstype"></span>
+                          </div>
+                        </div>
+                      </li>
+                    </template>
+                  </ul>
                 </article>
               </template>
             </div>
-            <div class="placeholder-card" x-show="sysDisks.length === 0">
+            <div class="placeholder-card" x-show="diskGroups.length === 0">
               <i class="fa-solid fa-hard-drive placeholder-icon"></i>
               <h3>No volumes detected</h3>
               <p>Waiting for filesystem data from the host.</p>
@@ -1596,21 +1617,21 @@
 
   <div id="reboot-hover-card" class="reboot-hover-card" aria-hidden="true">
     <div class="reboot-hover-head">
-      <strong class="reboot-hover-date-wrap"><i class="fa-solid fa-calendar-day"></i><span id="reboot-hover-date">|</span></strong>
+      <strong class="reboot-hover-date-wrap"><i class="fa-solid fa-calendar-day"></i><span id="reboot-hover-date"></span></strong>
       <span id="reboot-hover-count" class="reboot-hover-badge">0 restart</span>
     </div>
     <hr class="reboot-hover-divider">
     <div class="reboot-hover-meta">
       <span class="reboot-hover-label">Day</span>
-      <span id="reboot-hover-day">|</span>
+      <span id="reboot-hover-day"></span>
     </div>
     <div class="reboot-hover-meta">
       <span class="reboot-hover-label">Level</span>
-      <span id="reboot-hover-level">|</span>
+      <span id="reboot-hover-level"></span>
     </div>
     <div class="reboot-hover-meta">
       <span class="reboot-hover-label">Status</span>
-      <span id="reboot-hover-status">|</span>
+      <span id="reboot-hover-status"></span>
     </div>
   </div>
 
