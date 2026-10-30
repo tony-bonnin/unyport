@@ -58,12 +58,12 @@ function _nbCard(nb) {
   var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveNetwork(requestedType) : '';
   var iconEntry = deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType] : null;
   var hasHostname = hostname !== '|', displayHostname = hasHostname ? _displayHostname(hostname) : '', cardLabel = displayHostname || ip;
-  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, '');
+  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, hasHostname ? ip : '');
   return _decorateCard(card, {
     kind: 'neighbor',
     title: cardLabel,
     label: cardLabel,
-    subtitle: '',
+    subtitle: hasHostname ? ip : '',
     badge: state,
     badgeTone: state === 'reachable' ? 'ok' : (state === 'stale' ? 'warn' : 'muted'),
     summary: state === 'reachable' ? 'Reachable ARP neighbor' : (state === 'stale' ? 'Stale ARP neighbor' : 'Unknown neighbor state'),
