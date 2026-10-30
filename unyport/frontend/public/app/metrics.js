@@ -19,7 +19,7 @@ function _updatePerCoreGrid(perCore, freqCore) {
     </div>`;
   }).join('');
   el.querySelectorAll('.core-block').forEach(block => {
-    block.querySelector('.core-bar-wrap').style.setProperty('--core-w', (block.dataset.pct || '0') + '%');
+    setRuntimeStyles(block.querySelector('.core-bar-wrap'), {'--core-w': (block.dataset.pct || '0') + '%'});
   });
 }
 
@@ -61,7 +61,7 @@ function _updateDiskBars(disks) {
     document.querySelectorAll('.disk-bar-wrap').forEach(function (wrap, i) {
       var d = disks[i];
       if (!d) return;
-      wrap.style.setProperty('--disk-w', Math.min(100, Math.max(0, d.used_pct || 0)) + '%');
+      setRuntimeStyles(wrap, {'--disk-w': Math.min(100, Math.max(0, d.used_pct || 0)) + '%'});
     });
   });
 }
@@ -72,7 +72,7 @@ function _updateTempBars(temps) {
   requestAnimationFrame(() => {
     document.querySelectorAll('.temp-row').forEach((row, i) => {
       const t = temps[i];
-      if (t) row.style.setProperty('--temp-w', Math.min(100, t.temp_c) + '%');
+      if (t) setRuntimeStyles(row, {'--temp-w': Math.min(100, t.temp_c) + '%'});
     });
   });
 }
@@ -83,8 +83,10 @@ function _updateHtop(snap) {
   if (!panel) return;
 
   const p = Math.round(Math.max(0, Math.min(100, snap.cpu_usage || 0)));
-  panel.style.setProperty('--htop-cpu', p + '%');
-  panel.style.setProperty('--htop-cpu-cls', p > 80 ? 'crit' : p > 60 ? 'warn' : 'ok');
+  setRuntimeStyles(panel, {
+    '--htop-cpu': p + '%',
+    '--htop-cpu-cls': p > 80 ? 'crit' : p > 60 ? 'warn' : 'ok'
+  });
 
   if (snap.mem_total_mb > 0) {
     const total = snap.mem_total_mb;
@@ -92,9 +94,11 @@ function _updateHtop(snap) {
     const cached = snap.mem_cached_mb || 0;
     const usedPct = Math.round((used / total) * 100);
     const cachePct = Math.round((cached / total) * 100);
-    panel.style.setProperty('--htop-mem', usedPct + '%');
-    panel.style.setProperty('--htop-cache-l', usedPct + '%');
-    panel.style.setProperty('--htop-cache-w', Math.min(cachePct, 100 - usedPct) + '%');
+    setRuntimeStyles(panel, {
+      '--htop-mem': usedPct + '%',
+      '--htop-cache-l': usedPct + '%',
+      '--htop-cache-w': Math.min(cachePct, 100 - usedPct) + '%'
+    });
   }
 
   const cpuBarEl = panel.querySelector('.htop-bar-cpu');
@@ -114,7 +118,7 @@ function _updateHtop(snap) {
       </div>`;
     }).join('');
     coresEl.querySelectorAll('.htop-core-row').forEach(row => {
-      row.querySelector('.htop-core-bar-wrap').style.setProperty('--w', (row.dataset.pct || '0') + '%');
+      setRuntimeStyles(row.querySelector('.htop-core-bar-wrap'), {'--w': (row.dataset.pct || '0') + '%'});
     });
   }
 }
@@ -124,10 +128,10 @@ function _updateTopProcBars() {
   requestAnimationFrame(() => {
     document.querySelectorAll('.tp-mem-bar').forEach(bar => {
       const pct = parseFloat(bar.dataset.pct || bar.closest('tr')?.querySelector('[data-pct]')?.dataset.pct || 0);
-      bar.style.setProperty('--tp-w', Math.min(100, Math.max(0, pct)) + '%');
-      if (pct > 80) bar.style.setProperty('background', '#dc2626');
-      else if (pct > 50) bar.style.setProperty('background', '#d97706');
-      else bar.style.removeProperty('background');
+      setRuntimeStyles(bar, {
+        '--tp-w': Math.min(100, Math.max(0, pct)) + '%',
+        'background': pct > 80 ? '#dc2626' : (pct > 50 ? '#d97706' : '')
+      });
     });
   });
 }

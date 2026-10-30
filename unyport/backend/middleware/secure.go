@@ -26,6 +26,10 @@ func Secure(next http.Handler, https bool) http.Handler {
 			"connect-src 'self' ws: wss:",
 			"script-src 'self'",
 			"style-src 'self'",
+			// Dynamic layout is written through the same-origin runtime.css CSSOM;
+			// inline style blocks and attributes remain forbidden.
+			"style-src-elem 'self'",
+			"style-src-attr 'none'",
 			"font-src 'self'",
 			"worker-src 'self'",
 			"manifest-src 'self'",

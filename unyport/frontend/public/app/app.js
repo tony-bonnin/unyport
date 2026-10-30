@@ -756,10 +756,12 @@ document.addEventListener('alpine:init', () => {
 
     _applyBrandingCSS() {
       const r = document.documentElement;
-      r.style.setProperty('--role-dom0', this.brandingColorDom0);
-      r.style.setProperty('--role-domu', this.brandingColorDomU);
-      r.style.setProperty('--role-container', this.brandingColorContainer);
-      r.style.setProperty('--role-alpine', this.brandingColorAlpine);
+      setRuntimeStyles(r, {
+        '--role-dom0': this.brandingColorDom0,
+        '--role-domu': this.brandingColorDomU,
+        '--role-container': this.brandingColorContainer,
+        '--role-alpine': this.brandingColorAlpine
+      });
       this.updateSwatches();
     },
 
@@ -772,7 +774,7 @@ document.addEventListener('alpine:init', () => {
       };
       for (const [id, color] of Object.entries(map)) {
         const el = document.getElementById(id);
-        if (el) el.style.setProperty('background', color);
+        if (el) setRuntimeStyles(el, {'background': color});
       }
     },
 
@@ -1814,18 +1816,14 @@ document.addEventListener('alpine:init', () => {
 
     _updateCSS() {
       const r = document.documentElement;
-      // Optimisation: Ne pas écrire dans le DOM si la valeur n'a pas changé
-      const cpuStr = `${this.cpuPct}%`;
-      if (r.style.getPropertyValue('--cpu-pct') !== cpuStr) r.style.setProperty('--cpu-pct', cpuStr);
-
-      const memStr = `${this.memPct}%`;
-      if (r.style.getPropertyValue('--mem-pct') !== memStr) r.style.setProperty('--mem-pct', memStr);
-
       const cpuCol = this.cpuPct > 80 ? '#dc2626' : this.cpuPct > 60 ? '#d97706' : '#3e3aab';
-      if (r.style.getPropertyValue('--cpu-color') !== cpuCol) r.style.setProperty('--cpu-color', cpuCol);
-
       const memCol = this.memPct > 85 ? '#dc2626' : this.memPct > 65 ? '#d97706' : '#16a34a';
-      if (r.style.getPropertyValue('--mem-color') !== memCol) r.style.setProperty('--mem-color', memCol);
+      setRuntimeStyles(r, {
+        '--cpu-pct': `${this.cpuPct}%`,
+        '--mem-pct': `${this.memPct}%`,
+        '--cpu-color': cpuCol,
+        '--mem-color': memCol
+      });
     },
 
     _updateLBU(data) {
@@ -2000,11 +1998,13 @@ document.addEventListener('alpine:init', () => {
       const mainScroll = document.querySelector('.main-scroll');
       if (mainScroll) {
         if (locked) mainScroll.scrollTop = 0;
-        mainScroll.style.overflowY = locked ? 'hidden' : 'auto';
-        mainScroll.style.touchAction = locked ? 'none' : '';
+        setRuntimeStyles(mainScroll, {
+          'overflow-y': locked ? 'hidden' : 'auto',
+          'touch-action': locked ? 'none' : ''
+        });
       }
       if (shell) {
-        shell.style.pointerEvents = locked ? 'none' : '';
+        setRuntimeStyles(shell, {'pointer-events': locked ? 'none' : ''});
       }
     },
   }));

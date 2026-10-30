@@ -123,10 +123,12 @@ function _firstChildRect(connect) {
 // Ajouter un connecteur dans nm-connect (positions en px depuis _cx)
 function _conn(parent, cls, l, t, w, h) {
   var d = _div(cls);
-  if (l !== null) d.style.left = l + 'px';
-  if (t !== null) d.style.top = t + 'px';
-  if (w !== null) d.style.width = w + 'px';
-  if (h !== null) d.style.height = h + 'px';
+  var layout = {};
+  if (l !== null) layout.left = l + 'px';
+  if (t !== null) layout.top = t + 'px';
+  if (w !== null) layout.width = w + 'px';
+  if (h !== null) layout.height = h + 'px';
+  setRuntimeStyles(d, layout);
   parent.appendChild(d);
   return d;
 }
@@ -263,7 +265,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
 
       if (p.type === 'host-rake') {
         var BAR = 20, DROP = 15, ARR = 35, H = 42;
-        p.connect.style.height = H + 'px';
+        setRuntimeStyles(p.connect, {height: H + 'px'});
         var mc = (_cx(p.childCols[0]) + _cx(p.childCols[p.childCols.length - 1])) / 2;
         _conn(p.connect, 'nm-manche', mc - 1, 0, null, BAR);
         if (p.childCols.length > 1) {
@@ -279,7 +281,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         var pRH = p.hostCard.getBoundingClientRect();
         var firstCHR = _firstChildRect(p.connect);
         var connHH = firstCHR ? Math.max(firstCHR.top - connR.top, 42) : 42;
-        p.connect.style.height = connHH + 'px';
+        setRuntimeStyles(p.connect, {height: connHH + 'px'});
         var mancheTopH = pRH.bottom - connR.top;
         var mancheHH = Math.max(connHH - mancheTopH - 22, 4);
         var barTopH = mancheTopH + mancheHH;
@@ -296,7 +298,7 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
         var pR = p.parentCard.getBoundingClientRect();
         var firstChildR = _firstChildRect(p.connect);
         var connH = firstChildR ? Math.max(firstChildR.top - connR.top, 42) : 42;
-        p.connect.style.height = connH + 'px';
+        setRuntimeStyles(p.connect, {height: connH + 'px'});
         var mancheTop = pR.bottom - connR.top;
 
         // Classe spéciale si manche traversant (parent plusieurs rangées au-dessus)

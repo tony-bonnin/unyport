@@ -42,6 +42,7 @@
           used_mb: 0,
           free_mb: 0,
           used_pct: 0,
+          pct_cls: 'pct-0',
           bar_cls: '',
           partitions: []
         };
@@ -59,7 +60,12 @@
     });
     out.forEach(function (item) {
       item.used_pct = item.total_mb > 0 ? Math.min(100, Math.round((item.used_mb * 100) / item.total_mb)) : 0;
+      item.pct_cls = 'pct-' + item.used_pct;
       item.bar_cls = item.used_pct > 75 ? 'crit' : (item.used_pct > 50 ? 'warn' : '');
+      item.partitions.forEach(function (partition) {
+        partition.used_pct = Math.min(100, Math.max(0, Math.round(num(partition.used_pct))));
+        partition.pct_cls = 'pct-' + partition.used_pct;
+      });
       item.volume_count = item.partitions.length;
       item.volume_label = item.partitions.length + (item.partitions.length === 1 ? ' volume' : ' volumes');
     });

@@ -276,8 +276,7 @@ function _positionTooltip(node) {
   let left = rect.left + scrollX + rect.width / 2 - ttW / 2;
   let top = rect.top + scrollY - 8; // au-dessus
   left = Math.max(8, Math.min(left, window.innerWidth + scrollX - ttW - 8));
-  tt.style.setProperty('--nm-tt-x', left + 'px');
-  tt.style.setProperty('--nm-tt-y', top + 'px');
+  setRuntimeStyles(tt, {'--nm-tt-x': left + 'px', '--nm-tt-y': top + 'px'});
 }
 
 function _showNmTooltip(node, data) {

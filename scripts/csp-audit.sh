@@ -15,14 +15,32 @@ check_absent() {
     --exclude-dir=assets \
     --exclude='*.min.js' \
     --exclude='*.min.css' \
+	--exclude='*_test.go' \
     "$pattern" "$@" >"$tmp" 2>/dev/null; then
     cat "$tmp" >&2
     failed=1
   fi
 }
 
-check_absent "unsafe-" \
-  "$ROOT_DIR/unyport/backend"
+check_absent "unsafe-eval" \
+	"$ROOT_DIR/unyport/backend"
+
+check_absent "unsafe-inline" \
+	"$ROOT_DIR/unyport/backend"
+
+check_absent "x-show=" \
+	"$ROOT_DIR/unyport/frontend/public/index.html"
+
+check_absent "x-transition" \
+	"$ROOT_DIR/unyport/frontend/public/index.html"
+
+check_absent "x-bind:style\|:style=" \
+	"$ROOT_DIR/unyport/frontend/public/index.html"
+
+check_absent "\.style\." \
+	"$ROOT_DIR/unyport/frontend/public/app/metrics.js" \
+	"$ROOT_DIR/unyport/frontend/public/app/chart.js" \
+	"$ROOT_DIR/unyport/frontend/public/app/networkmap.js"
 
 check_absent "sha256-" \
   "$ROOT_DIR/unyport/backend"

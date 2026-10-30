@@ -1217,16 +1217,19 @@ type NetIfaceInfo struct {
 // ARPEntry décrit un voisin réseau connu via la table ARP.
 // Lecture de /proc/net/arp | zéro binaire externe.
 type ARPEntry struct {
-	IP         string `json:"ip"`
-	MAC        string `json:"mac"`
-	Iface      string `json:"iface"`
-	State      string `json:"state"`       // "reachable" | "stale" | "unknown"
-	DeviceType string `json:"device_type"` // always set; explicit inventory, safe heuristic, or "unknown"
-	Hostname   string `json:"hostname,omitempty"`
-	Detection  string `json:"detection_source,omitempty"`
-	ISP        string `json:"isp,omitempty"`
-	ASN        string `json:"asn,omitempty"`
-	Network    string `json:"network,omitempty"`
+	IP         string   `json:"ip"`
+	MAC        string   `json:"mac"`
+	Iface      string   `json:"iface"`
+	State      string   `json:"state"`       // "reachable" | "stale" | "unknown"
+	DeviceType string   `json:"device_type"` // always set; explicit inventory, safe heuristic, or "unknown"
+	Hostname   string   `json:"hostname,omitempty"`
+	Detection  string   `json:"detection_source,omitempty"`
+	Vendor     string   `json:"vendor,omitempty"`     // constructeur OUI certain uniquement
+	Confidence float64  `json:"confidence,omitempty"` // 0..1, signaux concordants
+	Sources    []string `json:"sources,omitempty"`    // preuves du type retenu
+	ISP        string   `json:"isp,omitempty"`
+	ASN        string   `json:"asn,omitempty"`
+	Network    string   `json:"network,omitempty"`
 }
 
 // NetworkMap regroupe les interfaces et les voisins pour la topologie.
@@ -1363,8 +1366,11 @@ func readARPTable() []ARPEntry {
 		}
 
 		meta := metadataForNeighbor(metadata, ip, mac)
-		deviceType, detection := deviceTypeForNeighborDetected(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES"), meta.Hostname)
+		// Pas de collecteur de services passif ici : le dernier argument reste nil
+		// tant qu'aucune source (mDNS/SSDP) n'alimente cette carte.
+		identity := neighborIdentityFor(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES"), meta.Hostname, nil)
 		isp := ispMetadataForPublicNeighbor(ip)
+		detection := identity.Detection
 		if isp.Operator != "" {
 			detection = "rdap"
 		}
@@ -1373,9 +1379,12 @@ func readARPTable() []ARPEntry {
 			MAC:        mac,
 			Iface:      iface,
 			State:      state,
-			DeviceType: deviceType,
+			DeviceType: identity.DeviceType,
 			Hostname:   meta.Hostname,
 			Detection:  detection,
+			Vendor:     identity.Vendor,
+			Confidence: identity.Confidence,
+			Sources:    identity.Sources,
 			ISP:        isp.Operator,
 			ASN:        isp.ASN,
 			Network:    isp.Network,
@@ -1547,45 +1556,15 @@ var validDeviceTypes = map[string]bool{
 
 // deviceTypeForNeighbor garantit un type stable pour chaque voisin. L'inventaire
 // explicite utilise "IP=type" séparé par virgule, point-virgule ou espace.
-// Les heuristiques restent volontairement conservatrices : une VM reconnue est
-// un serveur ; tout équipement non prouvé reste "unknown".
+// L'identification complète (OUI, confiance, sources) vit dans device_identity.go.
 func deviceTypeForNeighbor(ip, mac, iface, inventory string) string {
 	deviceType, _ := deviceTypeForNeighborDetected(ip, mac, iface, inventory, "")
 	return deviceType
 }
 
 func deviceTypeForNeighborDetected(ip, mac, iface, inventory, hostname string) (string, string) {
-	for _, entry := range strings.FieldsFunc(inventory, func(r rune) bool {
-		return r == ',' || r == ';' || r == ' ' || r == '\n' || r == '\t'
-	}) {
-		parts := strings.SplitN(entry, "=", 2)
-		if len(parts) != 2 || strings.TrimSpace(parts[0]) != ip {
-			continue
-		}
-		deviceType := strings.ToLower(strings.TrimSpace(parts[1]))
-		networkStorage := deviceType == "nas" || deviceType == "san"
-		if (validDeviceTypes[deviceType] && deviceType != "storage") || (validExtendedDeviceTypes[deviceType] && (!validStorageDeviceTypes[deviceType] || networkStorage)) {
-			return deviceType, "manual"
-		}
-	}
-
-	if deviceType := deviceTypeForHostname(hostname); deviceType != "unknown" {
-		return deviceType, "dhcp"
-	}
-	if isPublicNeighborIP(ip) {
-		return "router_wan", "public-ip"
-	}
-
-	mac = strings.ToLower(strings.TrimSpace(mac))
-	for _, prefix := range []string{"00:16:3e:", "00:05:69:", "00:0c:29:", "00:1c:14:", "00:50:56:", "08:00:27:", "52:54:00:"} {
-		if strings.HasPrefix(mac, prefix) {
-			return "server", "mac"
-		}
-	}
-	if strings.HasPrefix(iface, "vif") || strings.HasPrefix(iface, "tap") {
-		return "server", "interface"
-	}
-	return "unknown", "arp"
+	identity := neighborIdentityFor(ip, mac, iface, inventory, hostname, nil)
+	return identity.DeviceType, identity.Detection
 }
 
 func isPublicNeighborIP(value string) bool {

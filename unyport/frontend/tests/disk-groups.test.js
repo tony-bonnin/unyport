@@ -97,7 +97,7 @@ test('index.html renders one card per disk with partition tree branches', () => 
   const html = fs.readFileSync(INDEX, 'utf8');
 
   assert.match(html, /x-for="g in diskGroups"/);
-  assert.match(html, /x-show="diskGroups\.length === 0"/);
+  assert.match(html, /:hidden="!\(diskGroups\.length === 0\)"/);
   assert.match(html, /class="storage-disk-tree"/);
   assert.match(html, /x-for="p in g\.partitions"/);
   assert.match(html, /media\/icons\/storage\/ufs_chip\.svg/);

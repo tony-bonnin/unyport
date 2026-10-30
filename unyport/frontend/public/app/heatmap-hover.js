@@ -84,12 +84,12 @@
     if (dateEl) {
       dateEl.textContent = today ? 'Today' : date;
       dateEl.classList.toggle('is-today', today);
-      dateEl.style.display = today || date ? '' : 'none';
+      dateEl.hidden = !(today || date);
     }
     if (countEl) countEl.textContent = countLabel(count);
     if (dayEl) {
       dayEl.textContent = label;
-      dayEl.style.display = label ? '' : 'none';
+      dayEl.hidden = !label;
     }
     if (levelEl) levelEl.textContent = levelLabel(level);
     if (statusEl) statusEl.textContent = today ? 'Current day' : 'Archived day';

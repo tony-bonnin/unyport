@@ -50,6 +50,7 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="color-scheme" content="light dark">
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/runtime.css" id="runtime-stylesheet">
 
   <script src="/app/theme-color.js"></script>
 
@@ -59,6 +60,7 @@
   <script src="/vendor/chartjs-plugin-streaming.umd.min.js"></script>
 
   <script defer src="/app/utils.js"></script>
+  <script defer src="/app/runtime-style.js"></script>
   <script defer src="/app/auth.js"></script>
   <script defer src="/app/sse.js"></script>
   <script defer src="/app/extended-device-types.js"></script>
@@ -82,7 +84,7 @@
   <!-- ===================================================== -->
   <!-- LOADING                                                -->
   <!-- ===================================================== -->
-  <div id="loading" class="page page-loading" x-show="page === 'loading'">
+  <div id="loading" class="page page-loading" :hidden="!(page === 'loading')">
     <div class="loading-panel">
       <div class="loading-logo">
         <img src="/media/img/logos/logo-unyport-simple.png" alt="TRINITY">
@@ -95,7 +97,7 @@
   <!-- ===================================================== -->
   <!-- LOGIN                                                  -->
   <!-- ===================================================== -->
-  <div id="login" class="page page-login" x-show="page === 'login'">
+  <div id="login" class="page page-login" :hidden="!(page === 'login')">
     <div class="login-left">
       <div class="login-brand">
         <img src="/media/img/logos/logo-unyport-white-full.png" alt="UnyPort">
@@ -118,7 +120,7 @@
           <p>Access to Unyport console</p>
         </div>
 
-        <p class="login-error" x-show="loginError">
+        <p class="login-error" :hidden="!(loginError)">
           <i class="fa-solid fa-triangle-exclamation"></i>
           <span x-text="loginError"></span>
         </p>
@@ -150,8 +152,8 @@
           </label>
 
           <button type="submit" class="btn-login" :disabled="loginLoading" title="Sign in to UnyPort">
-            <span x-show="!loginLoading">Sign in</span>
-            <span x-show="loginLoading">Signing in…</span>
+            <span :hidden="!(!loginLoading)">Sign in</span>
+            <span :hidden="!(loginLoading)">Signing in…</span>
           </button>
 
           <div class="oauth-divider"><span>or continue with</span></div>
@@ -175,15 +177,15 @@
   <!-- ===================================================== -->
   <!-- DASHBOARD                                              -->
   <!-- ===================================================== -->
-  <div id="app-shell" class="page page-dashboard" x-show="page === 'app'">
+  <div id="app-shell" class="page page-dashboard" :hidden="!(page === 'app')">
 
     <!-- ============== SIDEBAR ============== -->
     <aside class="sidebar">
 
       <div class="sidebar-brand">
         <a href="/dashboard" title="Go to dashboard" @click.prevent="navigate('/dashboard')">
-          <img x-show="brandingHasLogo" :src="brandingLogoSrc" alt="Logo" class="sidebar-brand-img">
-          <img x-show="!brandingHasLogo" src="/media/img/logos/logo-unyport-white-full.png" alt="Logo Unyport White" class="sidebar-brand-img">
+          <img :hidden="!(brandingHasLogo)" :src="brandingLogoSrc" alt="Logo" class="sidebar-brand-img">
+          <img :hidden="!(!brandingHasLogo)" src="/media/img/logos/logo-unyport-white-full.png" alt="Logo Unyport White" class="sidebar-brand-img">
         </a>
       </div>
 
@@ -249,15 +251,15 @@
       </nav>
 
       <div class="sidebar-footer">
-        <div x-show="showLbu">
-          <div class="lbu-status dirty" x-show="showLbuDirty">
+        <div :hidden="!(showLbu)">
+          <div class="lbu-status dirty" :hidden="!(showLbuDirty)">
             <div class="lbu-dot"></div>
             <div class="lbu-text">
               <strong x-text="lbuText"></strong>
               <span x-text="lbuSubText"></span>
             </div>
           </div>
-          <div class="lbu-status clean" x-show="showLbuClean">
+          <div class="lbu-status clean" :hidden="!(showLbuClean)">
             <div class="lbu-dot"></div>
             <div class="lbu-text">
               <strong x-text="lbuText"></strong>
@@ -268,13 +270,13 @@
 
         <div class="sidebar-user" title="Open your profile" @click="openProfile()">
           <div class="sidebar-user-avatar">
-            <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
-            <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+            <img :hidden="!(hasPhoto)" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+            <span :hidden="!(!hasPhoto)" x-text="userAvatarDisplay"></span>
             <span class="role-badge role-sticker" :class="roleBadgeClass" :title="roleBadgeLabel" x-text="roleStickerLabel"></span>
           </div>
           <div class="sidebar-user-info">
             <strong x-text="userName"></strong>
-            <span class="credential-dot credential-dot-inline" x-show="userDefaultCredentials" title="Default credentials in use"></span>
+            <span class="credential-dot credential-dot-inline" :hidden="!(userDefaultCredentials)" title="Default credentials in use"></span>
           </div>
           <i class="fa-solid fa-ellipsis-vertical sidebar-user-more"></i>
         </div>
@@ -284,7 +286,7 @@
           <span>Sign out</span>
         </a>
 
-        <a class="sidebar-version" :class="{ 'is-outdated': sysUnyportUpdateLevel === 'outdated' }" x-show="sysUnyportVersion" href="https://github.com/tony-bonnin/unyport/releases" target="_blank" rel="noopener noreferrer" :title="sysUnyportUpdateLevel === 'outdated' ? 'UnyPort update available: v' + sysUnyportLatestVersion : 'Open UnyPort releases'">
+        <a class="sidebar-version" :class="{ 'is-outdated': sysUnyportUpdateLevel === 'outdated' }" :hidden="!(sysUnyportVersion)" href="https://github.com/tony-bonnin/unyport/releases" target="_blank" rel="noopener noreferrer" :title="sysUnyportUpdateLevel === 'outdated' ? 'UnyPort update available: v' + sysUnyportLatestVersion : 'Open UnyPort releases'">
           <span class="sidebar-version-label">UnyPort</span>
           <strong class="sidebar-version-value" x-text="'v' + sysUnyportVersion"></strong>
         </a>
@@ -317,8 +319,8 @@
 
           <div class="live-badge" :class="sseConnected ? 'live' : 'dead'" :title="sseConnected ? 'Live metrics stream connected' : 'Live metrics stream disconnected'">
             <span class="live-dot"></span>
-            <span x-show="sseConnected">Live</span>
-            <span x-show="!sseConnected">Offline</span>
+            <span :hidden="!(sseConnected)">Live</span>
+            <span :hidden="!(!sseConnected)">Offline</span>
           </div>
 
           <button class="topbar-btn" type="button" title="Notifications">
@@ -328,23 +330,23 @@
           <div class="topbar-user-wrap" @click.outside="closeDropdown()">
             <button class="topbar-user" type="button" title="Open user menu" @click="toggleDropdown()">
               <div class="topbar-avatar">
-                <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
-                <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+                <img :hidden="!(hasPhoto)" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+                <span :hidden="!(!hasPhoto)" x-text="userAvatarDisplay"></span>
                 <span class="role-badge role-sticker" :class="roleBadgeClass" :title="roleBadgeLabel" x-text="roleStickerLabel"></span>
               </div>
               <div class="topbar-user-meta">
                 <span class="topbar-user-name" x-text="userName"></span>
                 <span class="topbar-role-badge role-badge" :class="roleBadgeClass" :title="'Current role: ' + roleBadgeLabel" x-text="roleBadgeLabel"></span>
               </div>
-              <span class="credential-dot topbar-credential-dot" x-show="userDefaultCredentials" title="Default credentials in use"></span>
+              <span class="credential-dot topbar-credential-dot" :hidden="!(userDefaultCredentials)" title="Default credentials in use"></span>
               <i class="fa-solid fa-chevron-down topbar-chevron" :class="dropdownOpen ? 'open' : ''"></i>
             </button>
 
-            <div class="topbar-dropdown" x-show="dropdownOpen" x-transition>
+            <div class="topbar-dropdown" :hidden="!(dropdownOpen)">
               <div class="topbar-dropdown-head">
                 <div class="topbar-avatar topbar-avatar-lg">
-                  <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
-                  <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+                  <img :hidden="!(hasPhoto)" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+                  <span :hidden="!(!hasPhoto)" x-text="userAvatarDisplay"></span>
                 </div>
                 <div>
                   <strong x-text="userName"></strong>
@@ -357,8 +359,8 @@
                 <span>My profile</span>
               </button>
               <button class="topbar-dropdown-item" title="Switch light or dark theme" @click="toggleThemeMenu()">
-                <i class="fa-regular fa-moon" x-show="themeIsLight"></i>
-                <i class="fa-regular fa-sun" x-show="themeIsDark"></i>
+                <i class="fa-regular fa-moon" :hidden="!(themeIsLight)"></i>
+                <i class="fa-regular fa-sun" :hidden="!(themeIsDark)"></i>
                 <span x-text="themeToggleLabel"></span>
               </button>
               <template x-if="isAdmin">
@@ -382,7 +384,7 @@
       <main class="main-scroll">
         <div class="main-inner">
 
-          <div class="message-container" x-show="userDefaultCredentials">
+          <div class="message-container" :hidden="!(userDefaultCredentials)">
             <div class="default-credential-warning">
               <i class="fa-solid fa-triangle-exclamation"></i>
               <span>Default credentials are still active. Change the password before exposing this instance.</span>
@@ -392,7 +394,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: DASHBOARD                                 -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'dashboard'">
+          <div :hidden="!(currentPage === 'dashboard')">
 
             <div class="page-header">
               <h1>Hello, <span x-text="userName"></span></h1>
@@ -453,10 +455,10 @@
                 </div>
               </div>
 
-              <p class="reboot-heatmap-error" x-show="rebootHeatmapError" x-text="rebootHeatmapError"></p>
-              <p class="reboot-heatmap-loading" x-show="rebootHeatmapLoading">Loading startup history…</p>
+              <p class="reboot-heatmap-error" :hidden="!(rebootHeatmapError)" x-text="rebootHeatmapError"></p>
+              <p class="reboot-heatmap-loading" :hidden="!(rebootHeatmapLoading)">Loading startup history…</p>
 
-              <div class="reboot-heatmap-grid-wrap" x-show="!rebootHeatmapLoading && !rebootHeatmapError">
+              <div class="reboot-heatmap-grid-wrap" :hidden="!(!rebootHeatmapLoading && !rebootHeatmapError)">
                 <div class="reboot-heatmap-months" aria-hidden="true">
                   <template x-for="month in rebootHeatmapMonths" :key="month.key">
                     <span class="reboot-heatmap-month" :class="month.columnClass" x-text="month.label"></span>
@@ -482,10 +484,10 @@
                 </div>
               </div>
 
-              <p class="reboot-heatmap-foot" x-show="!rebootHeatmapLoading && !rebootHeatmapError">
+              <p class="reboot-heatmap-foot" :hidden="!(!rebootHeatmapLoading && !rebootHeatmapError)">
                 Peak activity:
                 <strong x-text="rebootHeatmapMaxPerDay || 0"></strong>
-                startup<span x-show="rebootHeatmapMaxPerDay > 1">s</span> in one day.
+                startup<span :hidden="!(rebootHeatmapMaxPerDay > 1)">s</span> in one day.
               </p>
             </section>
 
@@ -548,11 +550,11 @@
 
                 <dl class="hyp-dl">
                   <div class="hyp-row has-ver-badge"><dt>OS</dt><dd>
-                    <span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span>
+                    <span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" :hidden="!(alpineUpdateLevel !== '')"></span>
                     <span x-text="alpineVerDisplay"></span>
                   </dd></div>
                   <div class="hyp-row has-ver-badge"><dt>Kernel</dt><dd>
-                    <span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span>
+                    <span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" :hidden="!(kernelUpdateLevel !== '')"></span>
                     <span x-text="kernelLts || kernelShort || sysKernel || '|'"></span>
                   </dd></div>
                   <div class="hyp-row"><dt x-text="hostRoleRowLabel"></dt><dd x-text="xenLabel || '|'"></dd></div>
@@ -587,8 +589,8 @@
                 </div>
                 <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(uptime)"></span><span x-text="_primaryRest(uptime)"></span></div>
                 <dl class="res-kv">
-                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" :hidden="!(alpineUpdateLevel !== '')"></span><span x-text="alpineVerDisplay"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" :hidden="!(kernelUpdateLevel !== '')"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
                   <div class="res-kv-row"><dt>Date</dt><dd x-text="sysDate || '|'"></dd></div>
                 </dl>
               </div>
@@ -670,7 +672,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: HYPERVISOR                                -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'hypervisor'">
+          <div :hidden="!(currentPage === 'hypervisor')">
             <div class="page-header">
               <h1><i :class="hostPageIcon"></i> <span x-text="hostPageTitle"></span></h1>
               <p x-text="hostPageSubtitle"></p>
@@ -715,8 +717,8 @@
                   <h3>Operating system</h3>
                 </div>
                 <dl class="res-kv">
-                  <div class="res-kv-row has-ver-badge"><dt>Distribution</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Distribution</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" :hidden="!(alpineUpdateLevel !== '')"></span><span x-text="alpineVerDisplay"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" :hidden="!(kernelUpdateLevel !== '')"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
                 </dl>
               </div>
               <div class="hyp-info-card">
@@ -739,14 +741,14 @@
                 <dl class="res-kv">
 	                  <dt x-text="hostRoleRowLabel"></dt><dd x-text="xenLabel || '|'"></dd>
 	                  <dt>Runtime</dt><dd x-text="runtimeName"></dd>
-	                  <dt x-show="showParentRuntime">Parent</dt><dd x-show="showParentRuntime" x-text="parentRuntimeDisplay"></dd>
-	                  <dt x-show="showXenInfo">Xen</dt><dd x-show="showXenInfo" x-text="xenInfo.xen_version || '|'"></dd>
-	                  <dt x-show="showXenInfo">Scheduler</dt><dd x-show="showXenInfo" x-text="xenInfo.scheduler || '|'"></dd>
+	                  <dt :hidden="!(showParentRuntime)">Parent</dt><dd :hidden="!(showParentRuntime)" x-text="parentRuntimeDisplay"></dd>
+	                  <dt :hidden="!(showXenInfo)">Xen</dt><dd :hidden="!(showXenInfo)" x-text="xenInfo.xen_version || '|'"></dd>
+	                  <dt :hidden="!(showXenInfo)">Scheduler</dt><dd :hidden="!(showXenInfo)" x-text="xenInfo.scheduler || '|'"></dd>
 	                  <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
 	                  <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
 	                </dl>
 	              </div>
-	              <div class="hyp-info-card" x-show="showXenInfo">
+	              <div class="hyp-info-card" :hidden="!(showXenInfo)">
 	                <div class="hyp-info-card-head">
 	                  <div class="res-icon res-purple"><i class="fa-solid fa-chart-pie"></i></div>
 	                  <h3>Xen resources</h3>
@@ -760,7 +762,7 @@
 		                  <dt>Usage</dt><dd x-text="xenMemoryPct + '%'"></dd>
 	                </dl>
 	              </div>
-	              <div class="hyp-info-card" x-show="showLbu">
+	              <div class="hyp-info-card" :hidden="!(showLbu)">
                 <div class="hyp-info-card-head">
                   <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
                     <i class="fa-solid fa-floppy-disk"></i>
@@ -779,7 +781,7 @@
             <template x-if="showVirtualMachinesSection">
               <div>
                 <div class="section-head"><h2>Virtual machines</h2><p>Live domains from the Xen Dom0 xl toolstack.</p></div>
-                <div class="proc-table-wrap" x-show="showXenDomains">
+                <div class="proc-table-wrap" :hidden="!(showXenDomains)">
                   <table class="proc-table">
                     <thead>
                       <tr>
@@ -789,7 +791,7 @@
                         <th>vCPUs</th>
                         <th>Memory</th>
                         <th>CPU</th>
-                        <th x-show="canRunXenActions">Actions</th>
+                        <th :hidden="!(canRunXenActions)">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -801,13 +803,13 @@
                           <td x-text="dom.vcpus"></td>
                           <td x-text="_fmtMB((dom.mem_mb || 0) * 1024)"></td>
                           <td x-text="pct1(dom.cpu_pct)"></td>
-                          <td x-show="canRunXenActions">
-                            <div class="xen-action-row" x-show="canActOnXenDomain(dom)">
+                          <td :hidden="!(canRunXenActions)">
+                            <div class="xen-action-row" :hidden="!(canActOnXenDomain(dom))">
                               <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'shutdown')" title="Shutdown domain" @click="runXenAction(dom, 'shutdown')">Shutdown</button>
                               <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'reboot')" title="Reboot domain" @click="runXenAction(dom, 'reboot')">Reboot</button>
                               <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'pause')" title="Pause domain" @click="runXenAction(dom, 'pause')">Pause</button>
                               <button class="btn-ghost-sm" :disabled="xenActionBusy === xenActionKey(dom, 'unpause')" title="Unpause domain" @click="runXenAction(dom, 'unpause')">Unpause</button>
-                              <button class="btn-danger-sm" x-show="isAdmin" :disabled="xenActionBusy === xenActionKey(dom, 'destroy')" title="Force destroy domain" @click="runXenAction(dom, 'destroy')">
+                              <button class="btn-danger-sm" :hidden="!(isAdmin)" :disabled="xenActionBusy === xenActionKey(dom, 'destroy')" title="Force destroy domain" @click="runXenAction(dom, 'destroy')">
                                 <i class="fa-solid fa-bolt"></i>
                               </button>
                             </div>
@@ -817,7 +819,7 @@
                     </tbody>
                   </table>
                 </div>
-                <div class="placeholder-card" x-show="!showXenDomains">
+                <div class="placeholder-card" :hidden="!(!showXenDomains)">
                   <i class="fa-solid fa-terminal placeholder-icon"></i>
                   <h3>No Xen domains reported</h3>
                   <p>No domains were reported by the Xen Dom0 xl toolstack.</p>
@@ -830,7 +832,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: HOST RESOURCES                            -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'resources'">
+          <div :hidden="!(currentPage === 'resources')">
             <div class="page-header">
               <h1><i class="fa-solid fa-server"></i> Host resources</h1>
               <p>CPU, memory, load and process metrics | live.</p>
@@ -913,7 +915,7 @@
                   <dt>Total</dt><dd x-text="memTotalFmt"></dd>
                 </dl>
               </div>
-              <div class="res-card" x-show="sysCPUTemps.length > 0">
+              <div class="res-card" :hidden="!(sysCPUTemps.length > 0)">
                 <div class="res-card-head">
                   <div class="res-icon res-orange"><i class="fa-solid fa-temperature-half"></i></div>
                   <h3>Thermal zones</h3>
@@ -937,7 +939,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: NETWORK                                   -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'network'">
+          <div :hidden="!(currentPage === 'network')">
             <div class="page-header">
               <h1><i class="fa-solid fa-network-wired"></i> Network</h1>
               <p>Interfaces, throughput and ARP neighbors | live.</p>
@@ -1004,7 +1006,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: STORAGE                                   -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'storage'">
+          <div :hidden="!(currentPage === 'storage')">
             <div class="page-header">
               <h1><i class="fa-solid fa-hard-drive"></i> Storage</h1>
               <p>Mounted volumes and Data Disk Mode persistence state.</p>
@@ -1044,7 +1046,7 @@
             </div>
 
             <div class="section-head"><h2>Disks</h2><p>Physical disks with their mounted volumes and partitions.</p></div>
-            <div class="storage-device-grid" x-show="diskGroups.length > 0">
+            <div class="storage-device-grid" :hidden="!(diskGroups.length > 0)">
               <template x-for="g in diskGroups" :key="g.key">
                 <article class="storage-device-card storage-disk-card">
                   <div class="storage-device-icon">
@@ -1054,7 +1056,7 @@
                   <span class="storage-device-model" x-text="g.model || g.volume_label"></span>
                   <div class="storage-volume-meter">
                     <div class="storage-volume-bar">
-                      <div class="storage-volume-fill" :class="g.bar_cls" :style="'--disk-w:' + g.used_pct + '%'"></div>
+                      <div class="storage-volume-fill" :class="[g.bar_cls, g.pct_cls]"></div>
                     </div>
                     <span><strong x-text="_fmtMB(g.used_mb)"></strong> / <span x-text="_fmtMB(g.total_mb)"></span></span>
                   </div>
@@ -1062,7 +1064,7 @@
                     <span><b x-text="g.used_pct + '%'"></b> used</span>
                     <span><b x-text="g.volume_label"></b></span>
                   </div>
-                  <ul class="storage-disk-tree" x-show="g.partitions.length > 0">
+                  <ul class="storage-disk-tree" :hidden="!(g.partitions.length > 0)">
                     <template x-for="p in g.partitions" :key="p.device + p.mount">
                       <li class="storage-disk-branch" :title="_diskTooltip(p)">
                         <span class="storage-disk-branch-icon">
@@ -1071,7 +1073,7 @@
                         <div class="storage-disk-branch-body">
                           <span class="storage-disk-branch-head"><strong x-text="p.device"></strong><span x-text="p.mount"></span></span>
                           <div class="storage-volume-bar">
-                            <div class="storage-volume-fill" :class="p.bar_cls" :style="'--disk-w:' + p.used_pct + '%'"></div>
+                            <div class="storage-volume-fill" :class="[p.bar_cls, p.pct_cls]"></div>
                           </div>
                           <div class="storage-disk-branch-meta">
                             <span x-text="p.used_pct + '%'"></span>
@@ -1085,14 +1087,14 @@
                 </article>
               </template>
             </div>
-            <div class="placeholder-card" x-show="diskGroups.length === 0">
+            <div class="placeholder-card" :hidden="!(diskGroups.length === 0)">
               <i class="fa-solid fa-hard-drive placeholder-icon"></i>
               <h3>No volumes detected</h3>
               <p>Waiting for filesystem data from the host.</p>
             </div>
 
-            <div class="section-head" x-show="showLbu"><h2>LBU | Data Disk Mode</h2><p>Alpine Linux Backup persistence state.</p></div>
-            <div class="resources-grid" x-show="showLbu">
+            <div class="section-head" :hidden="!(showLbu)"><h2>LBU | Data Disk Mode</h2><p>Alpine Linux Backup persistence state.</p></div>
+            <div class="resources-grid" :hidden="!(showLbu)">
               <div class="res-card">
                 <div class="res-card-head">
                   <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
@@ -1122,8 +1124,8 @@
                 <div class="res-primary"><span class="res-primary-first">Semi-persistent</span></div>
                 <dl class="res-kv">
                   <dt>Mode</dt><dd>Data Disk (LBU)</dd>
-                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" x-show="alpineUpdateLevel !== ''"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" x-show="kernelUpdateLevel !== ''"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" :hidden="!(alpineUpdateLevel !== '')"></span><span x-text="alpineVerDisplay"></span></dd></div>
+                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" :hidden="!(kernelUpdateLevel !== '')"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
                   <dt>Uptime</dt><dd x-text="uptime"></dd>
                 </dl>
               </div>
@@ -1134,7 +1136,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: SECURITY                                  -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'security'">
+          <div :hidden="!(currentPage === 'security')">
             <div class="page-header">
               <h1><i class="fa-solid fa-shield-halved"></i> Security</h1>
               <p>Kernel hardening, exposed services and process status.</p>
@@ -1143,12 +1145,12 @@
             <div class="settings-section-actions security-actions">
               <button class="btn-ghost" title="Refresh security status" @click="loadSecurity()" :disabled="securityLoading">
                 <i class="fa-solid fa-rotate"></i>
-                <span x-show="!securityLoading">Refresh</span>
-                <span x-show="securityLoading">Refreshing...</span>
+                <span :hidden="!(!securityLoading)">Refresh</span>
+                <span :hidden="!(securityLoading)">Refreshing...</span>
               </button>
             </div>
 
-            <p class="form-error" x-show="securityError" x-text="securityError"></p>
+            <p class="form-error" :hidden="!(securityError)" x-text="securityError"></p>
 
             <div class="resources-grid">
               <div class="res-card">
@@ -1186,7 +1188,7 @@
             </div>
 
             <div class="section-head"><h2>Hardening checks</h2><p>Kernel, network and authentication posture.</p></div>
-            <div class="resources-grid" x-show="securityChecks.length > 0">
+            <div class="resources-grid" :hidden="!(securityChecks.length > 0)">
               <template x-for="check in securityChecks" :key="check.key">
                 <div class="res-card security-card">
                   <div class="res-card-head">
@@ -1258,7 +1260,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: SETTINGS                                  -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div x-show="currentPage === 'settings'">
+          <div :hidden="!(currentPage === 'settings')">
             <div class="page-header">
               <h1><i class="fa-solid fa-gear"></i> Settings</h1>
               <p>Instance configuration | branding, colors and advanced options.</p>
@@ -1271,16 +1273,16 @@
                   <p>Customize the logo and role colors of this TRINITY instance.</p>
                 </div>
                 <div class="settings-section-actions">
-                  <button class="btn-ghost" x-show="canEditBranding" title="Restore default branding colors and logo" @click="resetBranding()">Reset defaults</button>
-                  <button class="btn-primary" x-show="canEditBranding" title="Save branding changes" @click="saveBranding()" :disabled="brandingSaving">
-                    <span x-show="!brandingSaving">Save branding</span>
-                    <span x-show="brandingSaving">Saving…</span>
+                  <button class="btn-ghost" :hidden="!(canEditBranding)" title="Restore default branding colors and logo" @click="resetBranding()">Reset defaults</button>
+                  <button class="btn-primary" :hidden="!(canEditBranding)" title="Save branding changes" @click="saveBranding()" :disabled="brandingSaving">
+                    <span :hidden="!(!brandingSaving)">Save branding</span>
+                    <span :hidden="!(brandingSaving)">Saving…</span>
                   </button>
                 </div>
               </div>
 
-              <p class="form-error"   x-show="brandingError"   x-text="brandingError"></p>
-              <p class="form-success" x-show="brandingSuccess" x-text="brandingSuccess"></p>
+              <p class="form-error"   :hidden="!(brandingError)"   x-text="brandingError"></p>
+              <p class="form-success" :hidden="!(brandingSuccess)" x-text="brandingSuccess"></p>
 
               <div class="settings-grid">
 
@@ -1289,8 +1291,8 @@
                   <p class="settings-card-desc">Replace the default UnyPort logo. PNG, SVG or WebP, max 2 MB.</p>
                   <div class="photo-widget">
                     <div class="logo-preview">
-                      <img x-show="brandingHasLogoPreview" :src="brandingLogoEffective" alt="Logo preview" class="logo-preview-img">
-                      <div class="logo-preview-placeholder" x-show="!brandingHasLogoPreview">
+                      <img :hidden="!(brandingHasLogoPreview)" :src="brandingLogoEffective" alt="Logo preview" class="logo-preview-img">
+                      <div class="logo-preview-placeholder" :hidden="!(!brandingHasLogoPreview)">
                         <i class="fa-solid fa-image"></i>
                       </div>
                     </div>
@@ -1304,10 +1306,10 @@
                         <input type="url" x-model="brandingLogoUrlInput" placeholder="https://example.com/logo.png" class="photo-url-input" :disabled="!canEditBranding" :title="canEditBranding ? 'Logo image URL' : 'Administrator role required'" @keydown.enter="applyBrandingLogoUrl()">
                         <button class="btn-ghost-sm" :title="canEditBranding ? 'Use this logo URL' : 'Administrator role required'" :disabled="!canEditBranding" @click="applyBrandingLogoUrl()">Apply</button>
                       </div>
-                      <button class="btn-danger-text" x-show="brandingHasLogoPreview && canEditBranding" title="Remove custom logo" @click="removeBrandingLogo()">
+                      <button class="btn-danger-text" :hidden="!(brandingHasLogoPreview && canEditBranding)" title="Remove custom logo" @click="removeBrandingLogo()">
                         <i class="fa-solid fa-trash"></i> Remove logo
                       </button>
-                      <p class="form-error" x-show="brandingLogoError" x-text="brandingLogoError"></p>
+                      <p class="form-error" :hidden="!(brandingLogoError)" x-text="brandingLogoError"></p>
                     </div>
                   </div>
                 </div>
@@ -1372,14 +1374,14 @@
   <!-- ===================================================== -->
   <!-- MODAL: PROFILE                                         -->
   <!-- ===================================================== -->
-  <div class="modal-overlay" x-show="profileOpen" @click.self="closeProfile()" x-transition>
+  <div class="modal-overlay" :hidden="!(profileOpen)" @click.self="closeProfile()">
     <div class="modal modal-profile">
 
       <div class="modal-header">
         <div class="modal-header-left">
           <div class="modal-avatar">
-            <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
-            <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+            <img :hidden="!(hasPhoto)" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+            <span :hidden="!(!hasPhoto)" x-text="userAvatarDisplay"></span>
           </div>
           <div>
             <h2 x-text="userName"></h2>
@@ -1398,7 +1400,7 @@
         </button>
         <button class="modal-tab" title="Change your password" :class="profilePage === 'password' ? 'active' : ''" @click="profilePage = 'password'">
           <i class="fa-solid fa-lock"></i> Password
-          <span class="credential-dot modal-tab-dot" x-show="userDefaultCredentials" title="Default credentials in use"></span>
+          <span class="credential-dot modal-tab-dot" :hidden="!(userDefaultCredentials)" title="Default credentials in use"></span>
         </button>
         <button class="modal-tab" title="Manage your public SSH key" :class="profilePage === 'ssh' ? 'active' : ''" @click="profilePage = 'ssh'">
           <i class="fa-solid fa-key"></i> SSH key
@@ -1407,13 +1409,13 @@
 
       <div class="modal-body">
 
-        <div x-show="profilePage === 'info'">
+        <div :hidden="!(profilePage === 'info')">
           <div class="form-row">
             <label>Profile photo</label>
             <div class="photo-widget">
               <div class="photo-preview">
-                <img x-show="hasPhotoPreview" :src="photoPreviewSrc" alt="Profile photo" class="photo-preview-img">
-                <div class="photo-preview-placeholder" x-show="!hasPhotoPreview">
+                <img :hidden="!(hasPhotoPreview)" :src="photoPreviewSrc" alt="Profile photo" class="photo-preview-img">
+                <div class="photo-preview-placeholder" :hidden="!(!hasPhotoPreview)">
                   <span x-text="userAvatarDisplay"></span>
                 </div>
               </div>
@@ -1427,10 +1429,10 @@
                   <input type="url" x-model="profilePhotoUrlInput" placeholder="https://example.com/photo.jpg" class="photo-url-input" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Profile photo URL'" @keydown.enter="applyPhotoUrl()">
                   <button class="btn-ghost-sm" :title="isViewer ? 'Viewer role is read-only' : 'Use this profile photo URL'" :disabled="isViewer" @click="applyPhotoUrl()">Apply</button>
                 </div>
-                <button class="btn-danger-text" x-show="hasPhotoPreview" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Remove profile photo'" @click="removePhoto()">
+                <button class="btn-danger-text" :hidden="!(hasPhotoPreview)" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Remove profile photo'" @click="removePhoto()">
                   <i class="fa-solid fa-trash"></i> Remove photo
                 </button>
-                <p class="form-error" x-show="profilePhotoError" x-text="profilePhotoError"></p>
+                <p class="form-error" :hidden="!(profilePhotoError)" x-text="profilePhotoError"></p>
               </div>
             </div>
           </div>
@@ -1452,19 +1454,19 @@
             <input type="text" :value="roleBadgeLabel" disabled class="input-disabled">
           </div>
 
-          <p class="form-error"   x-show="profileError"   x-text="profileError"></p>
-          <p class="form-success" x-show="profileSuccess" x-text="profileSuccess"></p>
+          <p class="form-error"   :hidden="!(profileError)"   x-text="profileError"></p>
+          <p class="form-success" :hidden="!(profileSuccess)" x-text="profileSuccess"></p>
 
           <div class="modal-actions">
             <button class="btn-ghost" title="Discard profile changes" @click="closeProfile()">Cancel</button>
             <button class="btn-primary" title="Save profile changes" @click="saveProfile()" :disabled="profileSaving || isViewer">
-              <span x-show="!profileSaving">Save</span>
-              <span x-show="profileSaving">Saving…</span>
+              <span :hidden="!(!profileSaving)">Save</span>
+              <span :hidden="!(profileSaving)">Saving…</span>
             </button>
           </div>
         </div>
 
-        <form x-show="profilePage === 'password'" @submit.prevent="savePassword()">
+        <form :hidden="!(profilePage === 'password')" @submit.prevent="savePassword()">
           <input type="text" name="username" autocomplete="username" :value="userEmail || ''" hidden readonly>
           <div class="form-row">
             <label>Current password</label>
@@ -1478,27 +1480,27 @@
             <label>Confirm</label>
             <input type="password" x-model="pwdConfirm" autocomplete="new-password" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Confirm new password'">
           </div>
-          <p class="form-error"   x-show="pwdError"   x-text="pwdError"></p>
-          <p class="form-success" x-show="pwdSuccess" x-text="pwdSuccess"></p>
+          <p class="form-error"   :hidden="!(pwdError)"   x-text="pwdError"></p>
+          <p class="form-success" :hidden="!(pwdSuccess)" x-text="pwdSuccess"></p>
           <div class="modal-actions">
             <button type="button" class="btn-ghost" title="Cancel password change" @click="closeProfile()">Cancel</button>
             <button type="submit" class="btn-primary" title="Update your password" :disabled="isViewer">Change password</button>
           </div>
         </form>
 
-        <div x-show="profilePage === 'ssh'">
+        <div :hidden="!(profilePage === 'ssh')">
           <div class="form-row">
             <label>Public SSH key</label>
             <textarea x-model="profileSSHKey" rows="5" placeholder="ssh-ed25519 AAAA… user@host" class="input-mono" :disabled="isViewer" :title="isViewer ? 'Viewer role is read-only' : 'Public SSH key'"></textarea>
           </div>
           <p class="form-hint">Paste your public key (~/.ssh/id_ed25519.pub). It will be stored in your profile and can be used by TRINITY services.</p>
-          <p class="form-error"   x-show="profileError"   x-text="profileError"></p>
-          <p class="form-success" x-show="profileSuccess" x-text="profileSuccess"></p>
+          <p class="form-error"   :hidden="!(profileError)"   x-text="profileError"></p>
+          <p class="form-success" :hidden="!(profileSuccess)" x-text="profileSuccess"></p>
           <div class="modal-actions">
             <button class="btn-ghost" title="Discard SSH key changes" @click="closeProfile()">Cancel</button>
             <button class="btn-primary" title="Save SSH key" @click="saveProfile()" :disabled="profileSaving || isViewer">
-              <span x-show="!profileSaving">Save</span>
-              <span x-show="profileSaving">Saving…</span>
+              <span :hidden="!(!profileSaving)">Save</span>
+              <span :hidden="!(profileSaving)">Saving…</span>
             </button>
           </div>
         </div>
@@ -1510,7 +1512,7 @@
   <!-- ===================================================== -->
   <!-- MODAL: ADMIN USERS                                     -->
   <!-- ===================================================== -->
-  <div class="modal-overlay" x-show="adminUsersOpen" @click.self="closeAdminUsers()" x-transition>
+  <div class="modal-overlay" :hidden="!(adminUsersOpen)" @click.self="closeAdminUsers()">
     <div class="modal modal-admin">
 
       <div class="modal-header">
@@ -1525,7 +1527,7 @@
 
       <div class="modal-body">
 
-        <div class="admin-users-list" x-show="!adminUsersLoading">
+        <div class="admin-users-list" :hidden="!(!adminUsersLoading)">
           <template x-for="u in adminUsers" :key="u.email">
             <div class="admin-user-row">
               <div class="admin-user-avatar" x-text="u.avatar"></div>
@@ -1550,10 +1552,10 @@
               </div>
             </div>
           </template>
-          <p class="admin-users-empty" x-show="adminUsers.length === 0">No users found.</p>
+          <p class="admin-users-empty" :hidden="!(adminUsers.length === 0)">No users found.</p>
         </div>
 
-        <div class="spinner-wrap" x-show="adminUsersLoading">
+        <div class="spinner-wrap" :hidden="!(adminUsersLoading)">
           <div class="spinner"></div>
         </div>
 
@@ -1571,14 +1573,14 @@
               <i class="fa-solid fa-plus"></i> Create
             </button>
           </div>
-          <p class="form-error" x-show="adminCreateError" x-text="adminCreateError"></p>
+          <p class="form-error" :hidden="!(adminCreateError)" x-text="adminCreateError"></p>
         </form>
 
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" x-show="rebootHeatmapDetailOpen" @click.self="closeRebootHeatmapDetail()" x-transition>
+  <div class="modal-overlay" :hidden="!(rebootHeatmapDetailOpen)" @click.self="closeRebootHeatmapDetail()">
     <div class="modal modal-heatmap">
       <div class="modal-header">
         <div class="modal-header-left">
@@ -1638,9 +1640,9 @@
   <!-- ===================================================== -->
   <!-- MOBILE MENU                                            -->
   <!-- ===================================================== -->
-  <div class="mobile-menu-overlay" x-show="mobileMenuOpen" :class="mobileMenuOpen ? 'is-open' : ''" @click="closeMobileMenu()" x-transition.opacity></div>
+  <div class="mobile-menu-overlay" :hidden="!(mobileMenuOpen)" :class="mobileMenuOpen ? 'is-open' : ''" @click="closeMobileMenu()"></div>
 
-  <div class="mobile-menu" x-show="mobileMenuOpen" :class="mobileMenuOpen ? 'is-open' : ''" :aria-hidden="mobileMenuOpen ? 'false' : 'true'" x-transition:enter="mobile-menu-enter" x-transition:enter-start="mobile-menu-enter-start" x-transition:enter-end="mobile-menu-enter-end" x-transition:leave="mobile-menu-leave" x-transition:leave-start="mobile-menu-leave-start" x-transition:leave-end="mobile-menu-leave-end">
+  <div class="mobile-menu" :hidden="!(mobileMenuOpen)" :class="mobileMenuOpen ? 'is-open' : ''" :aria-hidden="mobileMenuOpen ? 'false' : 'true'">
 
     <div class="mobile-menu-header">
       <img src="/media/img/logos/logo-unyport-white-full.png" alt="UnyPort" class="mobile-menu-logo">
@@ -1651,8 +1653,8 @@
 
       <div class="mobile-menu-user" title="Open your profile" @click="openProfileAndCloseMobileMenu()">
       <div class="mobile-menu-avatar">
-        <img x-show="hasPhoto" :src="userPhotoUrl" alt="avatar" class="avatar-img">
-        <span x-show="!hasPhoto" x-text="userAvatarDisplay"></span>
+        <img :hidden="!(hasPhoto)" :src="userPhotoUrl" alt="avatar" class="avatar-img">
+        <span :hidden="!(!hasPhoto)" x-text="userAvatarDisplay"></span>
       </div>
       <div class="mobile-menu-user-info">
         <strong x-text="userName"></strong>

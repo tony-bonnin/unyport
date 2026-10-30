@@ -31,6 +31,11 @@ type Broker struct {
 	hostRole           HostRole // détecté une fois au démarrage, immuable
 	rebootLogPath      string
 	startupHistoryPath string
+	versionsMu         sync.Mutex
+	versionsKernel     string
+	versionsAlpine     string
+	versionsChecked    time.Time
+	versionsFetcher    func(*http.Client, string) (string, string, error)
 }
 
 func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath string) *Broker {
@@ -57,6 +62,7 @@ func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath str
 		hostRole:           role,
 		rebootLogPath:      rebootLogPath,
 		startupHistoryPath: startupHistoryPath,
+		versionsFetcher:    fetchLatestRepoVersions,
 	}
 	go b.loop()
 	return b
@@ -507,18 +513,34 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		roleSlug = "domU"
 	}
 
-	client := &http.Client{Timeout: 8 * time.Second}
-	kernelVer, alpineVer, err := fetchLatestRepoVersions(client, roleSlug)
-	if err != nil {
-		http.Error(w, `{"error":"fetch_failed"}`, http.StatusBadGateway)
-		return
-	}
-
 	type versionsResp struct {
 		KernelLts string `json:"kernel_lts"`
 		Alpine    string `json:"alpine"`
 		Role      string `json:"role"`
+		Available bool   `json:"available"`
 	}
+
+	b.versionsMu.Lock()
+	kernelVer, alpineVer := b.versionsKernel, b.versionsAlpine
+	cacheFresh := !b.versionsChecked.IsZero() && time.Since(b.versionsChecked) < time.Hour
+	if !cacheFresh {
+		client := &http.Client{Timeout: 8 * time.Second}
+		fetcher := b.versionsFetcher
+		if fetcher == nil {
+			fetcher = fetchLatestRepoVersions
+		}
+		fetchedKernel, fetchedAlpine, err := fetcher(client, roleSlug)
+		if err != nil {
+			b.logger.Warn("version check unavailable", "error", err)
+			b.versionsChecked = time.Now()
+		} else {
+			kernelVer, alpineVer = fetchedKernel, fetchedAlpine
+			b.versionsKernel, b.versionsAlpine = kernelVer, alpineVer
+			b.versionsChecked = time.Now()
+		}
+	}
+	b.versionsMu.Unlock()
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	// Cache 1h | les releases ne changent pas toutes les minutes
 	w.Header().Set("Cache-Control", "public, max-age=3600")
@@ -526,6 +548,7 @@ func (b *Broker) VersionsHandler(w http.ResponseWriter, r *http.Request) {
 		KernelLts: strings.TrimSpace(kernelVer),
 		Alpine:    strings.TrimSpace(alpineVer),
 		Role:      roleSlug,
+		Available: kernelVer != "" || alpineVer != "",
 	})
 }
 

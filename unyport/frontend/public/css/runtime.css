@@ -1,0 +1,2 @@
+/* Runtime rules are inserted into this same-origin stylesheet through CSSOM.
+   No element receives a style attribute, so style-src-attr can remain 'none'. */

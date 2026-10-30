@@ -83,7 +83,7 @@
     if (!el) return;
     const text = hasTooltipValue(value) ? String(value).trim() : '';
     el.textContent = text;
-    if (el.style) el.style.display = text === '' ? 'none' : '';
+    el.hidden = text === '';
   }
 
   function escapeHtml(value) {

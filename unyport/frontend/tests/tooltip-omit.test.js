@@ -65,17 +65,17 @@ test('rowsHtml tolerates missing row collections', () => {
 });
 
 test('applyOptionalText hides empty subtitles instead of printing a placeholder', () => {
-  const el = { textContent: '|', style: { display: '' } };
+  const el = { textContent: '|', hidden: false };
   applyOptionalText(el, '|');
   assert.equal(el.textContent, '');
-  assert.equal(el.style.display, 'none');
+  assert.equal(el.hidden, true);
 
   applyOptionalText(el, '   ');
-  assert.equal(el.style.display, 'none');
+  assert.equal(el.hidden, true);
 
   applyOptionalText(el, ' br-wan ');
   assert.equal(el.textContent, 'br-wan');
-  assert.equal(el.style.display, '');
+  assert.equal(el.hidden, false);
 });
 
 test('firstText skips placeholder candidates and keeps real ones', () => {
