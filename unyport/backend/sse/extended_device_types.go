@@ -103,6 +103,7 @@ var validExtendedDeviceTypes = map[string]bool{
 	"raspberry_pi":             true,
 	"relay_module":             true,
 	"replication":              true,
+	"reverse_proxy":            true,
 	"robot":                    true,
 	"rom_flash_chip":           true,
 	"router_wan":               true,

@@ -95,6 +95,17 @@ func TestNeighborIdentityHostnameBeatsOUI(t *testing.T) {
 	}
 }
 
+func TestNeighborIdentityRecognizesReverseProxyHostname(t *testing.T) {
+	resetNeighborIdentityCache(t)
+	identity := neighborIdentityFor("192.168.3.2", "00:16:3e:00:03:02", "br-srv", "", "REVERSE-PROXY", nil)
+	if identity.DeviceType != "reverse_proxy" {
+		t.Fatalf("DeviceType = %q, want reverse_proxy", identity.DeviceType)
+	}
+	if identity.Detection != "dhcp" {
+		t.Fatalf("Detection = %q, want dhcp", identity.Detection)
+	}
+}
+
 func TestNeighborIdentityAgreementRaisesConfidence(t *testing.T) {
 	resetNeighborIdentityCache(t)
 	// Hostname Brother + OUI Brother : signaux concordants, confiance plafonnée.

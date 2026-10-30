@@ -1584,6 +1584,7 @@ func deviceTypeForHostname(hostname string) string {
 		deviceType string
 		words      []string
 	}{
+		{"reverse_proxy", []string{"reverse-proxy", "reverseproxy"}},
 		{"smart_tv", []string{"hisense", "bravia", "webos", "smarttv"}},
 		{"tv", []string{"tv", "television"}},
 		{"phone", []string{"phone", "iphone", "android", "xiaomi", "pixel", "galaxy", "mobile"}},

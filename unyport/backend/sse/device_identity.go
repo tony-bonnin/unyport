@@ -232,7 +232,8 @@ func computeNeighborIdentity(ip, mac, iface, inventory, hostname string, service
 		signals = append(signals, deviceSignal{Source: source, Type: deviceType, Weight: weight})
 	}
 
-	add("dhcp", deviceTypeForHostname(hostname), weightHostname)
+	hostnameType := deviceTypeForHostname(hostname)
+	add("dhcp", hostnameType, weightHostname)
 	if isPublicNeighborIP(ip) {
 		add("public-ip", "router_wan", weightPublicIP)
 	}
@@ -272,6 +273,11 @@ func computeNeighborIdentity(ip, mac, iface, inventory, hostname string, service
 		if scores[candidate] > scores[winner] {
 			winner = candidate
 		}
+	}
+	// A rôle explicite dans le hostname est plus précis que les indices
+	// génériques "server" d'une MAC d'hyperviseur ou d'une interface virtuelle.
+	if hostnameType != "unknown" && hostnameType != "server" && winner == "server" {
+		winner = hostnameType
 	}
 
 	confidence := math.Min(1, scores[winner])

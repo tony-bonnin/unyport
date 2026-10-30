@@ -103,6 +103,7 @@
     { type: 'raspberry_pi', asset: 'maker/raspberry_pi.svg' },
     { type: 'relay_module', asset: 'maker/relay_module.svg' },
     { type: 'replication', asset: 'storage/replication.svg' },
+    { type: 'reverse_proxy', asset: 'network/reverse_proxy.svg' },
     { type: 'robot', asset: 'maker/robot.svg' },
     { type: 'rom_flash_chip', asset: 'storage/rom_flash_chip.svg' },
     { type: 'router_wan', asset: 'network/router_wan.svg' },
