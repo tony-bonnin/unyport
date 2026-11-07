@@ -13,6 +13,13 @@ const _DURATION = 30000;
 const _REFRESH = 2000;
 const _DELAY = 500;
 
+function _animateChartCanvas(canvas) {
+  if (!canvas) return;
+  canvas.classList.remove('chart-load-enter');
+  void canvas.offsetWidth;
+  canvas.classList.add('chart-load-enter');
+}
+
 function _brand(alpha) {
   const hex = getComputedStyle(document.documentElement)
     .getPropertyValue('--brand').trim() || '#3e3aab';
@@ -128,6 +135,7 @@ function _initFreq(el) {
       plugins: { legend: { display: false } },
     },
   });
+  _animateChartCanvas(el);
 }
 
 function _initMem(el) {
@@ -168,6 +176,88 @@ function _initMem(el) {
       plugins: { legend: { display: false } },
     },
   });
+  _animateChartCanvas(el);
+}
+
+// ── Disk activity charts ─────────────────────────────────────────────────────
+const _diskCharts = new Map();
+const _diskState = new Map();
+
+function _diskRateLabel(value) {
+  const bytes = Number(value) || 0;
+  if (bytes >= 1e9) return (bytes / 1e9).toFixed(1) + ' GB/s';
+  if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + ' MB/s';
+  if (bytes >= 1e3) return Math.round(bytes / 1e3) + ' KB/s';
+  return Math.round(bytes) + ' B/s';
+}
+
+function _refreshDisk(chart, key) {
+  if (!chart?.canvas?.isConnected || chart.canvas.offsetParent === null) return;
+  const state = _diskState.get(key) || { read: 0, write: 0 };
+  const now = Date.now();
+  chart.data.datasets[0].data.push({ x: now, y: state.read });
+  chart.data.datasets[1].data.push({ x: now, y: state.write });
+  chart.data.datasets[0].borderColor = _brand(.9);
+  chart.data.datasets[0].backgroundColor = _brand(.08);
+  chart.data.datasets[1].borderColor = _brand(.5);
+}
+
+function _createDiskChart(canvas, key) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  let chart;
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [
+        { data: [], borderColor: _brand(.9), backgroundColor: _brand(.08), borderWidth: 1.6, tension: .3, fill: true, pointRadius: 0 },
+        { data: [], borderColor: _brand(.5), backgroundColor: 'transparent', borderWidth: 1.4, borderDash: [4, 3], tension: .3, fill: false, pointRadius: 0 },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      scales: {
+        x: {
+          type: 'realtime',
+          realtime: { duration: _DURATION, refresh: _REFRESH, delay: _DELAY, onRefresh: () => _refreshDisk(chart, key) },
+          grid: { color: _GRID }, ticks: _TICK,
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: _GRID },
+          ticks: { ..._TICK, maxTicksLimit: 4, callback: _diskRateLabel },
+        },
+      },
+      plugins: { legend: { display: false } },
+    },
+  });
+  _animateChartCanvas(canvas);
+  return chart;
+}
+
+function _syncDiskCharts() {
+  const live = new Set();
+  document.querySelectorAll('canvas.storage-disk-chart[data-disk-key]').forEach((canvas) => {
+    const key = canvas.dataset.diskKey || '';
+    if (!key) return;
+    live.add(key);
+    const current = _diskCharts.get(key);
+    if (!current || current.canvas !== canvas) {
+      if (current) current.destroy();
+      const chart = _createDiskChart(canvas, key);
+      if (chart) _diskCharts.set(key, chart);
+    }
+  });
+  _diskCharts.forEach((chart, key) => {
+    if (!live.has(key) || !chart.canvas?.isConnected) {
+      chart.destroy();
+      _diskCharts.delete(key);
+    }
+  });
+}
+
+function initDiskCharts() {
+  requestAnimationFrame(_syncDiskCharts);
 }
 
 // ── pushSnapshot ──────────────────────────────────────────────────────────────
@@ -181,6 +271,13 @@ function pushSnapshot(snap) {
   _state.memUsedMb = Number(snap.mem_used_mb) || 0;
   _state.memYMin = Number(snap.mem_y_min) || 0;
   _state.memYMax = Number(snap.mem_y_max) || Number(snap.mem_total_mb) || 4096;
+
+  const groups = window.UnyPortDiskGroups?.group(snap.disks) || [];
+  _diskState.clear();
+  groups.forEach((disk) => {
+    _diskState.set(disk.key, { read: Number(disk.read_bps) || 0, write: Number(disk.write_bps) || 0 });
+  });
+  requestAnimationFrame(_syncDiskCharts);
 
   // Si les charts n'ont pas encore pu s'initialiser (section masquée),
   // réessayer à chaque snapshot reçu.
@@ -206,6 +303,8 @@ function destroyCharts() {
   if (_initTimer) { clearTimeout(_initTimer); _initTimer = null; }
   _chartsSuspended = true;
   [_freqChart, _memChart].forEach(_suspendChart);
+  _diskCharts.forEach((chart) => chart.destroy());
+  _diskCharts.clear();
 }
 
 function _suspendChart(chart) {

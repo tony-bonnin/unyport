@@ -91,6 +91,7 @@ func TestDeviceTypeForHostname(t *testing.T) {
 		"xiaomi-13t-pro":      "phone",
 		"WINDOWS-WORKSTATION": "desktop",
 		"TRINITY-INSTALL":     "desktop",
+		"ALPINE-XEN":          "hypervisor",
 		"unknown-client":      "unknown",
 	}
 	for hostname, want := range tests {
@@ -207,6 +208,21 @@ func TestRootBlockDevice(t *testing.T) {
 		if got := rootBlockDevice(device); got != want {
 			t.Errorf("rootBlockDevice(%q) = %q, want %q", device, got, want)
 		}
+	}
+}
+
+func TestFallbackDiskModel(t *testing.T) {
+	tests := map[string]string{
+		"xvda": "Xen virtual disk", "vda": "VirtIO block device", "nvme0n1": "NVMe disk",
+		"mmcblk0": "eMMC storage", "sda": "SCSI/SATA disk", "loop0": "Block device",
+	}
+	for name, want := range tests {
+		if got := fallbackDiskModel(name, ""); got != want {
+			t.Errorf("fallbackDiskModel(%q) = %q, want %q", name, got, want)
+		}
+	}
+	if got := fallbackDiskModel("sda", "usb"); got != "USB storage" {
+		t.Errorf("USB fallback = %q", got)
 	}
 }
 

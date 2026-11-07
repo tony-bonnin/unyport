@@ -1,12 +1,16 @@
 package sse
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type SecurityStatus struct {
@@ -169,21 +173,41 @@ func failedServicesCheck() SecurityCheck {
 }
 
 func collectSecurityServices() []SecurityService {
+	nftInstalled, nftActive := nftablesRuntimeState()
 	watched := map[string]bool{
-		"sshd": true, "dropbear": true, "nftables": true, "iptables": true,
-		"ip6tables": true, "auditd": true, "chronyd": false, "syslog": false,
-		"rsyslog": false, "crond": false, "acpid": false,
+		"sshd": true, "dropbear": true, "nftables": true, "auditd": true,
+		"chronyd": false, "ntpd": false, "openntpd": false, "systemd-timesyncd": false,
+		"syslog": false, "rsyslog": false, "syslog-ng": false,
+		"crond": false, "acpid": false,
+	}
+	if !nftInstalled {
+		watched["iptables"] = true
+		watched["ip6tables"] = true
 	}
 	services := CollectOpenRCServices()
 	byName := make(map[string]OpenRCService, len(services))
 	for _, svc := range services {
 		byName[svc.Name] = svc
 	}
+	if _, openSSHInstalled := byName["sshd"]; openSSHInstalled {
+		delete(watched, "dropbear")
+	}
 
 	result := make([]SecurityService, 0, len(watched))
 	for name, critical := range watched {
 		svc, ok := byName[name]
+		if name == "nftables" && nftActive {
+			runlevels := []string(nil)
+			if ok {
+				runlevels = svc.Runlevels
+			}
+			result = append(result, SecurityService{Name: name, State: "started", Status: "ok", Critical: critical, Runlevels: runlevels, Detail: "Active kernel ruleset"})
+			continue
+		}
 		if !ok {
+			if !critical {
+				continue
+			}
 			status := "unknown"
 			if critical {
 				status = "warn"
@@ -210,11 +234,23 @@ func collectSecurityServices() []SecurityService {
 	return result
 }
 
+func nftablesRuntimeState() (installed, active bool) {
+	path, err := exec.LookPath("nft")
+	if err != nil {
+		return false, false
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, path, "list", "ruleset").Output()
+	return true, err == nil && strings.TrimSpace(string(out)) != ""
+}
+
 func collectSecurityProcesses() []SecurityProcess {
 	targets := []string{"unyport", "sshd", "dropbear", "xenstored", "xenconsoled", "qemu-system", "dnsmasq", "dockerd", "containerd"}
 	found := scanProcesses(targets)
-	result := make([]SecurityProcess, 0, len(targets))
-	for _, name := range targets {
+	visible := selectSecurityProcessTargets(targets, found, daemonInstalled)
+	result := make([]SecurityProcess, 0, len(visible))
+	for _, name := range visible {
 		pids := found[name]
 		status := "unknown"
 		detail := "Not running"
@@ -225,6 +261,36 @@ func collectSecurityProcesses() []SecurityProcess {
 		result = append(result, SecurityProcess{Name: name, Count: len(pids), Status: status, PIDs: pids, Detail: detail})
 	}
 	return result
+}
+
+func selectSecurityProcessTargets(targets []string, found map[string][]int, installed func(string) bool) []string {
+	sshdPresent := len(found["sshd"]) > 0 || installed("sshd")
+	visible := make([]string, 0, len(targets))
+	for _, name := range targets {
+		if name == "dropbear" && sshdPresent {
+			continue
+		}
+		if len(found[name]) == 0 && !installed(name) {
+			continue
+		}
+		visible = append(visible, name)
+	}
+	return visible
+}
+
+func daemonInstalled(name string) bool {
+	if name == "unyport" {
+		return true
+	}
+	if _, err := os.Stat("/etc/init.d/" + name); err == nil {
+		return true
+	}
+	if name == "qemu-system" {
+		matches, _ := filepath.Glob("/usr/bin/qemu-system-*")
+		return len(matches) > 0
+	}
+	_, err := exec.LookPath(name)
+	return err == nil
 }
 
 func scanProcesses(targets []string) map[string][]int {
@@ -253,7 +319,8 @@ func scanProcesses(targets []string) map[string][]int {
 }
 
 func collectSecurityListeners() []SecurityListener {
-	listeners := append(parseTCPListeners("/proc/net/tcp", "tcp4"), parseTCPListeners("/proc/net/tcp6", "tcp6")...)
+	raw := append(parseTCPListeners("/proc/net/tcp", "tcp4"), parseTCPListeners("/proc/net/tcp6", "tcp6")...)
+	listeners := mergeTCPListeners(raw)
 	sort.Slice(listeners, func(i, j int) bool {
 		if listeners[i].Port != listeners[j].Port {
 			return listeners[i].Port < listeners[j].Port
@@ -261,6 +328,25 @@ func collectSecurityListeners() []SecurityListener {
 		return listeners[i].Proto < listeners[j].Proto
 	})
 	return listeners
+}
+
+func mergeTCPListeners(raw []SecurityListener) []SecurityListener {
+	byPort := make(map[int]SecurityListener, len(raw))
+	for _, listener := range raw {
+		if current, ok := byPort[listener.Port]; ok {
+			if current.Proto != listener.Proto {
+				current.Proto = "tcp4/6"
+				byPort[listener.Port] = current
+			}
+			continue
+		}
+		byPort[listener.Port] = listener
+	}
+	result := make([]SecurityListener, 0, len(byPort))
+	for _, listener := range byPort {
+		result = append(result, listener)
+	}
+	return result
 }
 
 func parseTCPListeners(path, proto string) []SecurityListener {
@@ -293,7 +379,7 @@ func parseTCPListeners(path, proto string) []SecurityListener {
 		seen[port] = true
 		status := "ok"
 		detail := "Listening TCP port"
-		if port <= 1024 {
+		if port > 0 && port < 1024 {
 			status = "warn"
 			detail = "Privileged TCP port exposed"
 		}
@@ -305,7 +391,7 @@ func parseTCPListeners(path, proto string) []SecurityListener {
 func listenerExposureCheck(listeners []SecurityListener) SecurityCheck {
 	privileged := 0
 	for _, l := range listeners {
-		if l.Port <= 1024 {
+		if l.Port > 0 && l.Port < 1024 {
 			privileged++
 		}
 	}

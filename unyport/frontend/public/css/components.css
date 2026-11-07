@@ -142,7 +142,7 @@
 .stat-body { min-width: 0; }
 
 .stat-value {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.2;
@@ -463,6 +463,18 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.resource-performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.resource-performance-card{min-width:0;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow)}
+.resource-performance-head{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 22px 14px}
+.resource-performance-identity{display:flex;min-width:0;align-items:center;gap:12px}.resource-performance-identity>div:last-child{min-width:0}.resource-performance-identity span{display:block;margin-bottom:3px;color:var(--text-dim);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.resource-performance-identity h3{overflow:hidden;color:var(--text);font-size:14px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.resource-performance-value{display:grid;flex:0 0 auto;text-align:right}.resource-performance-value strong{color:var(--brand);font-size:1.66rem;opacity:.66}.resource-performance-value span{margin-top:5px;color:var(--text-dim);font-size:10px}
+.resource-performance-meta{display:flex;gap:8px;padding:0 22px 15px}.resource-performance-meta span{padding:6px 9px;border-radius:4px;background:color-mix(in srgb,var(--brand) 7%,transparent);color:var(--text-muted);font-size:10px}.resource-performance-meta b{color:var(--brand);font:700 10px 'JetBrains Mono',monospace}
+.resource-performance-chart{height:180px;padding:8px 14px 4px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.resource-performance-chart canvas{width:100%!important;height:100%!important}
+.resource-core-grid{padding:16px 22px 20px}
+.resource-memory-total{padding:0 22px 10px;color:var(--text-muted);font-size:12px}.resource-memory-total strong{color:var(--text);font:750 18px 'JetBrains Mono',monospace}.resource-memory-total b{color:var(--text-soft);font:650 13px 'JetBrains Mono',monospace}
+.resource-memory-meter{margin:0 22px 15px}
+.resource-memory-breakdown{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;padding:16px 22px 20px}.resource-memory-breakdown div{display:grid;gap:5px;padding-left:12px;border-left:1px solid var(--border)}.resource-memory-breakdown div:first-child{padding-left:0;border-left:0}.resource-memory-breakdown dt{color:var(--text-dim);font-size:9px;font-weight:700;text-transform:uppercase}.resource-memory-breakdown dd{overflow:hidden;color:var(--text);font:650 11px 'JetBrains Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
+
 .res-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -498,6 +510,8 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
     font-size: 0.9rem;
     color: #fff;
 }
+.res-icon.res-icon-device{width:2.65rem;height:2.65rem;border:0!important;background:transparent!important;opacity:1!important}
+.res-icon.res-icon-device img{display:block;width:100%;height:100%;object-fit:contain}
 
 /* res-* : brand unifié | couleurs arbitraires par catégorie supprimées.
    Les états sémantiques (LBU clean/dirty) utilisent res-ok / res-warn. */
@@ -526,6 +540,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 .res-primary > :first-child,
 .res-primary-first {
   color: var(--brand);
+  opacity: .66;
 }
 
 .res-primary small {
@@ -585,30 +600,72 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 /* ============================================================
    STORAGE VOLUMES
    ============================================================ */
-.storage-device-grid{display:grid;grid-template-columns:minmax(0,1fr);width:100%;gap:18px}
-.storage-device-card{display:flex;flex-direction:column;align-items:center;min-width:0;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow)}
-.storage-disk-card{width:100%;max-width:none}
-.storage-device-icon{width:88px;height:88px;margin-bottom:10px}.storage-device-icon img{width:100%;height:100%;display:block}
-.storage-device-name{color:var(--text);font-size:14px;font-weight:750}.storage-device-model{max-width:100%;margin-top:4px;overflow:hidden;color:var(--text-dim);font:10px 'JetBrains Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
-.storage-device-card .storage-volume-meter{width:100%}.storage-device-card .storage-volume-meta{width:100%;justify-content:space-between;margin-top:10px}
+.storage-device-grid{--storage-accent:#625ec7;--storage-accent-soft:#f1effb;display:grid;grid-template-columns:minmax(0,1fr);width:100%;gap:14px}
+[data-theme="dark"] .storage-device-grid{--storage-accent:#aaa6f0;--storage-accent-soft:rgba(139,134,224,.14)}
+.storage-device-card{min-width:0;overflow:hidden;padding:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.storage-disk-card{display:grid;width:100%;max-width:none;gap:0}
+.storage-disk-overview{display:flex;align-items:center;justify-content:space-between;min-width:0;padding:18px 22px 14px;gap:20px}
+.storage-disk-identity{display:flex;align-items:center;min-width:0;gap:14px}
+.storage-device-icon{isolation:isolate;flex:0 0 48px;width:48px;height:48px;overflow:hidden;border-radius:50%;background:var(--brand)}.storage-device-icon img{display:block;width:100%;height:100%;transform:scale(1.067);mix-blend-mode:luminosity}
+.storage-disk-title{display:flex;flex-direction:column;min-width:0;gap:4px}
+.storage-disk-heading{display:flex;align-items:center;min-width:0;gap:10px}
+.storage-device-name{overflow:hidden;color:var(--text);font:750 16px 'JetBrains Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
+.storage-device-model{max-width:320px;overflow:hidden;padding:3px 8px;border:0;border-radius:2px;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);font:600 10px 'JetBrains Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
+.storage-device-kind{color:var(--text-dim);font:9.5px 'JetBrains Mono',monospace;text-transform:uppercase}
+.storage-disk-capacity{display:flex;align-items:baseline;flex:0 0 auto;gap:5px;color:var(--text-dim);font-size:11px}
+.storage-disk-capacity strong{color:var(--text);font-size:20px;line-height:1}
+.storage-disk-usage{display:grid;padding:0 22px 18px;gap:8px}
+.storage-disk-meter{height:14px}
+.storage-disk-usage-meta{display:flex;justify-content:space-between;gap:16px;color:var(--text-dim);font-size:11px}
+.storage-disk-usage-meta strong{color:var(--text-soft);font-weight:750}
+.storage-disk-activity{min-width:0;padding:14px 22px 18px;border-top:1px solid color-mix(in srgb,var(--border) 72%,transparent)}
+.storage-disk-activity-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;color:var(--text-dim);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.storage-disk-activity-head>div{display:flex;gap:18px;letter-spacing:0;text-transform:none}
+.storage-disk-activity-head strong{color:var(--brand);font:700 10px 'JetBrains Mono',monospace}
+.storage-disk-chart-wrap{position:relative;width:100%;height:130px}
+.storage-disk-chart{display:block;width:100%!important;height:100%!important}
 
 /* Disk card | one card per physical disk, partitions as tree branches */
-.storage-disk-card .storage-disk-tree{width:100%;margin-top:14px}
-.storage-disk-tree{position:relative;margin:0;padding:12px 0 0;list-style:none;border-top:1px solid var(--border)}
-.storage-disk-tree::before{content:'';position:absolute;left:0;top:12px;bottom:16px;border-left:1px solid var(--border)}
-.storage-disk-branch{position:relative;display:flex;align-items:flex-start;gap:8px;min-width:0;padding:7px 0 7px 14px}
-.storage-disk-branch::before{content:'';position:absolute;left:0;top:18px;width:14px;border-top:1px solid var(--border)}
-.storage-disk-branch-icon{flex:0 0 18px;width:18px;height:18px;margin-top:1px}
+.storage-disk-volumes{overflow:hidden;border:0;border-top:1px solid var(--border);border-radius:0;background:var(--surface)}
+.storage-disk-volumes-head{display:flex;align-items:center;justify-content:space-between;padding:9px 22px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface-sunk) 58%,var(--surface));color:var(--text-dim);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.storage-disk-volumes-head strong{color:var(--text-soft);font-size:10px}
+.storage-disk-tree{position:relative;margin:0;padding:2px 22px 5px 44px;list-style:none}
+.storage-disk-tree::before{content:'';position:absolute;left:32px;top:0;bottom:22px;border-left:1px solid color-mix(in srgb,var(--storage-accent) 22%,var(--border))}
+.storage-disk-branch{position:relative;display:flex;align-items:flex-start;gap:10px;min-width:0;padding:11px 0}
+.storage-disk-branch+.storage-disk-branch{border-top:1px solid color-mix(in srgb,var(--border) 72%,transparent)}
+.storage-disk-branch::before{content:'';position:absolute;left:-12px;top:20px;width:12px;border-top:1px solid color-mix(in srgb,var(--storage-accent) 22%,var(--border))}
+.storage-disk-branch-icon{flex:0 0 22px;width:22px;height:22px;margin-top:1px}
 .storage-disk-branch-icon img{display:block;width:100%;height:100%}
-.storage-disk-branch-body{display:flex;flex:1 1 auto;flex-direction:column;gap:4px;min-width:0;text-align:left}
-.storage-disk-branch-head{display:flex;gap:8px;min-width:0;color:var(--text-dim);font-size:11.5px}
-.storage-disk-branch-head strong{overflow:hidden;color:var(--text);font-weight:650;text-overflow:ellipsis;white-space:nowrap}
-.storage-disk-branch-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.storage-disk-branch-meta{display:flex;justify-content:space-between;gap:8px;color:var(--text-dim);font:10px 'JetBrains Mono',monospace}
+.storage-disk-branch-body{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(180px,1.4fr) minmax(180px,.8fr);align-items:center;flex:1 1 auto;min-width:0;gap:18px;text-align:left}
+.storage-disk-branch-head{display:flex;align-items:center;justify-content:space-between;min-width:0;gap:8px;color:var(--text-dim);font-size:11px}
+.storage-disk-branch-name{display:flex;min-width:0;gap:8px}
+.storage-disk-branch-name strong{overflow:hidden;color:var(--text);font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.storage-disk-branch-name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.storage-disk-fstype{box-sizing:border-box;flex:0 0 46px;width:46px;padding:2px 4px;border:0;border-radius:2px;background:color-mix(in srgb,var(--brand) 14%,transparent);color:var(--brand);font:9px 'JetBrains Mono',monospace;text-align:center;text-transform:uppercase}
+.storage-disk-branch-meter{display:grid;grid-template-columns:minmax(80px,1fr) 34px;align-items:center;gap:8px}
+.storage-disk-branch-meter strong{color:var(--text-soft);font:700 10px 'JetBrains Mono',monospace;text-align:right}
+.storage-disk-branch-meta{display:flex;justify-content:flex-end;gap:12px;color:var(--text-dim);font:10px 'JetBrains Mono',monospace;white-space:nowrap}
+.storage-disk-branch-meta b{color:var(--text-soft);font-weight:700}
 @media (max-width:520px){
   .storage-device-grid{grid-template-columns:1fr}
-  .storage-disk-branch-meta{flex-wrap:wrap;justify-content:flex-start}
+  .storage-device-card{padding:0}
+  .storage-disk-overview{padding:14px 14px 12px}
+  .storage-disk-usage{padding:0 14px 14px}
+  .storage-disk-activity{padding:12px 14px 14px}
+  .storage-disk-activity-head{align-items:flex-start;gap:8px}
+  .storage-disk-activity-head>div{flex-direction:column;gap:3px;text-align:right}
+  .storage-disk-chart-wrap{height:112px}
+  .storage-disk-volumes-head{padding-inline:14px}
+  .storage-disk-tree{padding-right:14px}
+  .storage-disk-overview{align-items:flex-start}
+  .storage-device-icon{flex-basis:46px;width:46px;height:46px}
+  .storage-disk-capacity strong{font-size:17px}
+  .storage-disk-usage-meta{flex-wrap:wrap}
+  .storage-disk-tree{padding-right:10px}
+  .storage-disk-branch-body{grid-template-columns:1fr;gap:7px}
+  .storage-disk-branch-meta{justify-content:flex-start;flex-wrap:wrap}
 }
+@media (min-width:521px) and (max-width:900px){.storage-disk-branch-body{grid-template-columns:minmax(160px,1fr) minmax(160px,1fr)}.storage-disk-branch-meta{grid-column:1/-1;justify-content:flex-start}}
 
 .storage-volume-list {
   display: grid;
@@ -702,22 +759,30 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 }
 
 .storage-volume-bar {
-  height: 5px;
+  height: 20px;
   overflow: hidden;
+  padding: 6px;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--surface-sunk);
+  background:color-mix(in srgb,var(--surface-sunk) 76%,var(--surface));
+  box-shadow:inset 0 1px 2px rgba(15,23,42,.08);
+  box-sizing:border-box;
 }
 
 .storage-volume-fill {
   width: var(--disk-w, 0%);
   height: 100%;
   border-radius: inherit;
-  background: #16a34a;
+  background:var(--brand);
+  box-shadow:none;
   transition: width .4s ease, background .4s ease;
+  opacity:.8;
 }
 
-.storage-volume-fill.warn { background: #d97706; }
-.storage-volume-fill.crit { background: #dc2626; }
+.storage-volume-fill.warn,.storage-volume-fill.crit { background:var(--brand);box-shadow:none }
+.resource-memory-meter .storage-volume-fill{width:var(--mem-pct,0%);background:var(--brand)}
+.storage-volume-bar-partition{height:16px;overflow:hidden;padding:4px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface-sunk) 76%,var(--surface));box-shadow:inset 0 1px 2px rgba(15,23,42,.08);box-sizing:border-box}
+.storage-disk-branch .storage-volume-fill{opacity:.33}
 
 /* Finite percentage classes avoid dynamic style attributes under strict CSP. */
 .pct-0{width:0%}.pct-1{width:1%}.pct-2{width:2%}.pct-3{width:3%}.pct-4{width:4%}.pct-5{width:5%}.pct-6{width:6%}.pct-7{width:7%}.pct-8{width:8%}.pct-9{width:9%}.pct-10{width:10%}
@@ -926,6 +991,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 }
 
 @media (max-width: 900px) {
+  .resource-performance-grid{grid-template-columns:1fr}
   body { overflow: auto; }
   #app { height: auto; min-height: 100vh; min-height: 100dvh; min-height: -webkit-fill-available; }
   .main-inner { width: calc(100% - 32px); gap: 20px; }

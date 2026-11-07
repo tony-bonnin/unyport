@@ -33,10 +33,14 @@ function _updateNetIfacesGrid(netMap) {
     const rx = _fmtBpsMap(iface.rx_bps || 0);
     const tx = _fmtBpsMap(iface.tx_bps || 0);
     const up = iface.up !== false;
+    const iconType = typeof _ifaceIconType === 'function' ? _ifaceIconType(iface) : 'nic_ethernet';
+    const iconEntry = window.UnyPortDeviceIcons?.catalog?.[iconType];
+    const iconAsset = iconEntry?.asset || 'network/nic_ethernet.svg';
+    const iconLabel = iconEntry?.label || 'Network interface';
     return `<div class="res-card">
       <div class="res-card-head">
-        <div class="res-icon ${up ? 'res-blue' : 'res-orange'}">
-          <i class="fa-solid fa-network-wired"></i>
+        <div class="res-icon res-icon-device">
+          <img src="/media/icons/${iconAsset}" alt="${iconLabel}">
         </div>
         <h3>${iface.name}</h3>
         <span class="metric-badge ${up ? 'badge-up' : 'badge-down'}">${up ? 'UP' : 'DOWN'}</span>

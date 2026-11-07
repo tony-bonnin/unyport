@@ -16,8 +16,8 @@ import (
 // Valeurs par défaut alignées sur style.css [data-role].
 type BrandingColors struct {
 	Dom0      string `yaml:"dom0"`      // défaut : #3e3aab
-	DomU      string `yaml:"domu"`      // défaut : #a0284a
-	Container string `yaml:"container"` // défaut : #b05a1a
+	DomU      string `yaml:"domu"`      // défaut : #c80039
+	Container string `yaml:"container"` // défaut : #ff7800
 	Alpine    string `yaml:"alpine"`    // défaut : #28587c
 }
 
@@ -56,10 +56,10 @@ func (b *Branding) defaults() {
 		b.Colors.Dom0 = "#3e3aab"
 	}
 	if b.Colors.DomU == "" {
-		b.Colors.DomU = "#a0284a"
+		b.Colors.DomU = "#c80039"
 	}
 	if b.Colors.Container == "" {
-		b.Colors.Container = "#b05a1a"
+		b.Colors.Container = "#ff7800"
 	}
 	if b.Colors.Alpine == "" {
 		b.Colors.Alpine = "#28587c"

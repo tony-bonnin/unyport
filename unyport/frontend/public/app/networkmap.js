@@ -23,7 +23,7 @@ function _ifaceAddress(iface) {
 }
 
 // Icônes (identiques)
-function _hostRoleColor(role) { var key = String(role || 'Alpine').trim().toLowerCase(); if (['dom0', 'domu', 'container', 'alpine'].indexOf(key) < 0) key = 'alpine'; var fallback = { dom0: '#3e3aab', domu: '#a0284a', container: '#b05a1a', alpine: '#28587c' }; var custom = window.getComputedStyle ? getComputedStyle(document.documentElement).getPropertyValue('--role-' + key).trim() : ''; return custom || fallback[key]; }
+function _hostRoleColor(role) { var key = String(role || 'Alpine').trim().toLowerCase(); if (['dom0', 'domu', 'container', 'alpine'].indexOf(key) < 0) key = 'alpine'; var fallback = { dom0: '#3e3aab', domu: '#c80039', container: '#ff7800', alpine: '#28587c' }; var custom = window.getComputedStyle ? getComputedStyle(document.documentElement).getPropertyValue('--role-' + key).trim() : ''; return custom || fallback[key]; }
 function _icoHost(p, cx, cy, role) { var R = 32, color = _hostRoleColor(role); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: color })); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'rgba(0,0,0,.08)', 'stroke-width': 2 })); var g = _el('g', { transform: 'translate(' + (cx - 17) + ',' + (cy - 16) + ')' }); g.appendChild(_el('rect', { x: 0, y: 1, width: 34, height: 28, rx: 5, fill: '#fff' })); [5, 13, 21].forEach(function (y) { g.appendChild(_el('rect', { x: 4, y: y, width: 26, height: 6, rx: 2, fill: color, opacity: '.24' })); g.appendChild(_el('circle', { cx: 8, cy: y + 3, r: 1.5, fill: color })); g.appendChild(_el('rect', { x: 12, y: y + 2, width: 14, height: 2, rx: 1, fill: color, opacity: '.78' })); }); g.appendChild(_el('rect', { x: 7, y: 29, width: 5, height: 3, rx: 1, fill: '#fff' })); g.appendChild(_el('rect', { x: 22, y: 29, width: 5, height: 3, rx: 1, fill: '#fff' })); p.appendChild(g); }
 function _icoIfaceUp(p, cx, cy) { var R = 32; p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: '#26c6c6' })); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'rgba(0,0,0,.08)', 'stroke-width': 2 })); var mg = _el('g', { transform: 'translate(' + (cx - 15) + ',' + (cy - 14) + ')' }); mg.appendChild(_el('rect', { x: 0, y: 0, width: 30, height: 20, rx: 3, fill: '#fff' })); mg.appendChild(_el('rect', { x: 2, y: 2, width: 26, height: 14, rx: 2, fill: '#26c6c6', opacity: '0.4' })); mg.appendChild(_el('rect', { x: 11, y: 20, width: 8, height: 5, fill: '#fff' })); mg.appendChild(_el('rect', { x: 7, y: 24, width: 16, height: 3, rx: 1, fill: '#fff' })); mg.appendChild(_el('rect', { x: 6, y: 14, width: 3, height: 4, rx: 1, fill: '#fff', opacity: '0.9' })); mg.appendChild(_el('rect', { x: 11, y: 11, width: 3, height: 7, rx: 1, fill: '#fff', opacity: '0.9' })); mg.appendChild(_el('rect', { x: 16, y: 8, width: 3, height: 10, rx: 1, fill: '#fff', opacity: '0.9' })); mg.appendChild(_el('rect', { x: 21, y: 6, width: 3, height: 12, rx: 1, fill: '#fff', opacity: '0.9' })); p.appendChild(mg); }
 function _icoIfaceDn(p, cx, cy) { var R = 32; p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: '#ffa726' })); p.appendChild(_el('circle', { cx: cx, cy: cy, r: R, fill: 'none', stroke: 'rgba(0,0,0,.08)', 'stroke-width': 2 })); var mg = _el('g', { transform: 'translate(' + (cx - 15) + ',' + (cy - 13) + ')' }); mg.appendChild(_el('rect', { x: 0, y: 0, width: 30, height: 20, rx: 3, fill: '#fff' })); mg.appendChild(_el('rect', { x: 2, y: 2, width: 26, height: 14, rx: 2, fill: 'rgba(255,167,38,0.3)' })); mg.appendChild(_el('line', { x1: 9, y1: 6, x2: 21, y2: 18, stroke: '#fff', 'stroke-width': 2.5, 'stroke-linecap': 'round' })); mg.appendChild(_el('line', { x1: 21, y1: 6, x2: 9, y2: 18, stroke: '#fff', 'stroke-width': 2.5, 'stroke-linecap': 'round' })); mg.appendChild(_el('rect', { x: 11, y: 20, width: 8, height: 5, fill: '#fff' })); mg.appendChild(_el('rect', { x: 7, y: 24, width: 16, height: 3, rx: 1, fill: '#fff' })); p.appendChild(mg); }
@@ -57,10 +57,15 @@ function _nbCard(nb) {
   var hostname = nb.hostname || '|', detection = nb.detection_source || '|';
   var isp = nb.isp || '', asn = nb.asn || '', network = nb.network || '';
   var requestedType = nb.device_type || nb.deviceType || '', deviceType = requestedType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveNetwork(requestedType) : '';
-  var iconEntry = deviceType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[deviceType] : null;
-  var hasHostname = hostname !== '|', displayHostname = hasHostname ? _displayHostname(hostname) : '', cardLabel = isp || displayHostname || ip;
-  var hasIdentity = !!(isp || displayHostname);
-  var card = _mkCard(function (s, cx, cy) { if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, hasIdentity ? ip : '');
+  var osType = window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.resolveOS(hostname) : '';
+  var osEligible = ['desktop', 'laptop', 'phone', 'tablet', 'unknown'].indexOf(deviceType) >= 0;
+  var displayIconType = osType && osEligible ? osType : deviceType;
+  var iconEntry = displayIconType && window.UnyPortDeviceIcons ? window.UnyPortDeviceIcons.catalog[displayIconType] : null;
+  var hasHostname = hostname !== '|', displayHostname = hasHostname ? _displayHostname(hostname) : '';
+  var typeName = requestedType && requestedType !== 'unknown' ? requestedType.replace(/_/g, ' ').toUpperCase() : '';
+  var cardLabel = isp || displayHostname || typeName || ip;
+  var hasIdentity = !!(isp || displayHostname || typeName);
+  var card = _mkCard(function (s, cx, cy) { if (osType && osEligible) window.UnyPortDeviceIcons.drawOS(s, cx, cy, hostname); else if (deviceType) window.UnyPortDeviceIcons.drawNetwork(s, cx, cy, deviceType); else if (state === 'reachable') _icoNbAlive(s, cx, cy); else if (state === 'stale') _icoNbStale(s, cx, cy); else _icoNbUnk(s, cx, cy); }, cardLabel, hasIdentity ? ip : '');
   return _decorateCard(card, {
     kind: 'neighbor',
     title: cardLabel,
@@ -106,6 +111,21 @@ function _calcCols(el) {
   return Math.max(1, Math.min(NM_MAXCOLS, Math.floor((w - 64 + NM_GAP) / NM_STEP)));
 }
 
+function _watchNetworkMap(el) {
+  if (!el || el._nmResizeObserver || typeof ResizeObserver === 'undefined') return;
+  el._nmResizeObserver = new ResizeObserver(function () {
+    if (!el.isConnected || !el._nmArgs || el._nmResizeFrame) return;
+    el._nmResizeFrame = requestAnimationFrame(function () {
+      el._nmResizeFrame = 0;
+      var nextCols = _calcCols(el);
+      if (nextCols === el._nmCols) return;
+      var args = el._nmArgs;
+      renderNetworkMap(args[0], args[1], args[2], args[3], args[4], el.id);
+    });
+  });
+  el._nmResizeObserver.observe(el);
+}
+
 function _neighborsByIface(ifaces, neighbors) {
   var byName = Object.create(null);
   ifaces.forEach(function (iface) { byName[iface.name] = []; });
@@ -113,6 +133,18 @@ function _neighborsByIface(ifaces, neighbors) {
     if (n && byName[n.iface]) byName[n.iface].push(n);
   });
   return byName;
+}
+
+function _networkMapSignature(ifaces, neighbors, role, runtime, host, ip, cols) {
+  return JSON.stringify({
+    role: role || '', runtime: runtime || '', host: host || '', ip: ip || '', cols: cols,
+    interfaces: ifaces.map(function (item) {
+      return [item.name, item.ip, item.master, item.master_ip, item.up !== false];
+    }),
+    neighbors: neighbors.map(function (item) {
+      return [item.iface, item.ip, item.mac, item.state, item.hostname, item.device_type, item.isp, item.asn, item.network];
+    })
+  });
 }
 
 function _firstChildRect(connect) {
@@ -137,14 +169,21 @@ function _conn(parent, cls, l, t, w, h) {
 function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, containerId) {
   var el = document.getElementById(containerId || 'netmap-container');
   if (!el) return;
+  el._nmArgs = [netMap, hostRole, hostRuntime, hostName, hostIP];
+  _watchNetworkMap(el);
   var ifaces = netMap && Array.isArray(netMap.interfaces) ? netMap.interfaces : [];
   var neighbors = netMap && Array.isArray(netMap.neighbors) ? netMap.neighbors : [];
   if (ifaces.length === 0) { el.innerHTML = '<p class="nm-empty">Aucune interface réseau…</p>'; return; }
 
+  var COLS = _calcCols(el);
+  var signature = _networkMapSignature(ifaces, neighbors, hostRole, hostRuntime, hostName, hostIP, COLS);
+  if (el._nmSignature === signature && el.firstElementChild) return;
+  el._nmSignature = signature;
+
   var renderId = (el._nmRenderId || 0) + 1;
   el._nmRenderId = renderId;
   var nbPerIface = _neighborsByIface(ifaces, neighbors);
-  var COLS = _calcCols(el);
+  el._nmCols = COLS;
   var role = hostRole || 'Alpine';
   var root = _div('nm-level');
 
@@ -257,7 +296,9 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
 
   el.innerHTML = ''; el.appendChild(root);
 
-  requestAnimationFrame(function () {
+  if (el._nmLayoutFrame) cancelAnimationFrame(el._nmLayoutFrame);
+  el._nmLayoutFrame = requestAnimationFrame(function () {
+    el._nmLayoutFrame = 0;
     if (el._nmRenderId !== renderId || !root.isConnected) return;
 
     pending.forEach(function (p) {

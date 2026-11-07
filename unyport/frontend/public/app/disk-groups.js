@@ -44,6 +44,8 @@
           used_pct: 0,
           pct_cls: 'pct-0',
           bar_cls: '',
+          read_bps: 0,
+          write_bps: 0,
           partitions: []
         };
         out.push(item);
@@ -53,6 +55,8 @@
       item.transport = item.transport || String(disk.transport || '');
       item.icon = item.icon || String(disk.icon || '');
       item.pal = item.pal || String(disk.pal || '');
+      item.read_bps = Math.max(item.read_bps, num(disk.read_bps));
+      item.write_bps = Math.max(item.write_bps, num(disk.write_bps));
       item.total_mb += num(disk.total_mb);
       item.used_mb += num(disk.used_mb);
       item.free_mb += num(disk.free_mb);
@@ -61,10 +65,11 @@
     out.forEach(function (item) {
       item.used_pct = item.total_mb > 0 ? Math.min(100, Math.round((item.used_mb * 100) / item.total_mb)) : 0;
       item.pct_cls = 'pct-' + item.used_pct;
-      item.bar_cls = item.used_pct > 75 ? 'crit' : (item.used_pct > 50 ? 'warn' : '');
+      item.bar_cls = '';
       item.partitions.forEach(function (partition) {
         partition.used_pct = Math.min(100, Math.max(0, Math.round(num(partition.used_pct))));
         partition.pct_cls = 'pct-' + partition.used_pct;
+        partition.bar_cls = '';
       });
       item.volume_count = item.partitions.length;
       item.volume_label = item.partitions.length + (item.partitions.length === 1 ? ' volume' : ' volumes');

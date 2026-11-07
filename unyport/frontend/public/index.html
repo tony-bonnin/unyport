@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>UnyPort | TRINITY Labs · Xen Alpine Linux</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#3e3aab">
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#3e3aab">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#101119">
@@ -42,7 +42,7 @@
   </script>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/media/img/icons/unyport-app.png">
-  <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+  <link rel="manifest" href="/manifest.json?v=9" crossorigin="use-credentials">
   <meta name="apple-mobile-web-app-title" content="UnyPort">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -53,6 +53,7 @@
   <link rel="stylesheet" href="/css/runtime.css" id="runtime-stylesheet">
 
   <script src="/app/theme-color.js"></script>
+  <script defer src="/app/launch-screen.js"></script>
 
   <script src="/vendor/chart.umd.min.js"></script>
   <script src="/vendor/luxon.min.js"></script>
@@ -66,6 +67,7 @@
   <script defer src="/app/extended-device-types.js"></script>
   <script defer src="/app/device-icons.js"></script>
   <script defer src="/app/chart.js"></script>
+  <script defer src="/app/security-charts.js"></script>
   <script defer src="/app/networkmap.js"></script>
   <script defer src="/app/networkmap-hover.js"></script>
   <script defer src="/app/metrics.js"></script>
@@ -79,6 +81,9 @@
 </head>
 
 <body>
+<div id="launch-screen" class="launch-screen" aria-label="UnyPort is loading" role="status">
+  <img src="/media/img/logos/logo-unyport-simple.png" alt="UnyPort">
+</div>
 <div id="app" x-data="unyport" x-cloak>
 
   <!-- ===================================================== -->
@@ -308,7 +313,7 @@
         </div>
 
         <div class="topbar-center">
-          <button class="topbar-search" type="button" title="Search is not available yet">
+          <button class="topbar-search" type="button" title="Search UnyPort (Ctrl + K)" @click="openSearch()">
             <i class="fa-solid fa-magnifying-glass"></i>
             <span>Search a machine, application or action</span>
             <kbd>Ctrl + K</kbd>
@@ -380,6 +385,27 @@
         </div>
 
       </header>
+
+      <div class="global-search-overlay" :hidden="!searchOpen" @click="closeSearch()">
+        <section class="global-search-palette" role="dialog" aria-modal="true" aria-label="Search UnyPort" @click.stop>
+          <div class="global-search-field">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="global-search-input" type="search" x-model="searchQuery" placeholder="Search pages, machines, services or packages" autocomplete="off" spellcheck="false" @input="resetSearchIndex()" @keydown.down.prevent="moveSearch(1)" @keydown.up.prevent="moveSearch(-1)" @keydown.enter.prevent="activateSearchIndex()" @keydown.escape.prevent="closeSearch()">
+            <kbd>Esc</kbd>
+          </div>
+          <div class="global-search-results" role="listbox">
+            <template x-for="(item, index) in searchResults" :key="item.key">
+              <button class="global-search-result" type="button" role="option" :class="index === searchIndex ? 'is-selected' : ''" @mouseenter="setSearchIndex(index)" @click="activateSearch(item)">
+                <span class="global-search-result-icon"><i :class="item.icon"></i></span>
+                <span class="global-search-result-copy"><strong x-text="item.label"></strong><small x-text="item.detail"></small></span>
+                <span class="global-search-result-kind" x-text="item.kind"></span>
+              </button>
+            </template>
+            <p class="global-search-empty" :hidden="!(searchResults.length === 0)">No matching result</p>
+          </div>
+          <footer class="global-search-help"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>Enter</kbd> Open</span></footer>
+        </section>
+      </div>
 
       <main class="main-scroll">
         <div class="main-inner">
@@ -610,28 +636,6 @@
               </div>
             </div>
 
-            <div class="section-head">
-              <h2>Real-time activity</h2>
-              <p>System load and traffic visualisation.</p>
-            </div>
-
-            <div class="charts-grid charts-2col">
-              <div class="chart-card">
-                <div class="chart-card-head">
-                  <i class="fa-solid fa-heart-pulse"></i>
-                  <h3>CPU frequency</h3>
-                </div>
-                <canvas id="chartFreq"></canvas>
-              </div>
-              <div class="chart-card">
-                <div class="chart-card-head">
-                  <i class="fa-solid fa-memory"></i>
-                  <h3>Memory</h3>
-                </div>
-                <canvas id="chartMem"></canvas>
-              </div>
-            </div>
-
             <div class="stats-strip activity-resource-strip">
               <div class="stat-block">
                 <div class="stat-icon stat-orange"><i class="fa-solid fa-microchip"></i></div>
@@ -672,7 +676,7 @@
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: HYPERVISOR                                -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div :hidden="!(currentPage === 'hypervisor')">
+          <div class="host-overview-page" :hidden="!(currentPage === 'hypervisor')">
             <div class="page-header">
               <h1><i :class="hostPageIcon"></i> <span x-text="hostPageTitle"></span></h1>
               <p x-text="hostPageSubtitle"></p>
@@ -711,7 +715,7 @@
 
             <div class="section-head"><h2>System</h2><p>OS and hardware identification.</p></div>
             <div class="hyp-detail-grid">
-              <div class="hyp-info-card">
+              <div class="hyp-info-card hyp-card-os">
                 <div class="hyp-info-card-head">
                   <div class="res-icon res-blue"><i class="fa-solid fa-server"></i></div>
                   <h3>Operating system</h3>
@@ -721,7 +725,7 @@
                   <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" :hidden="!(kernelUpdateLevel !== '')"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
                 </dl>
               </div>
-              <div class="hyp-info-card">
+              <div class="hyp-info-card hyp-card-processor">
                 <div class="hyp-info-card-head">
                   <div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div>
                   <h3>Processor</h3>
@@ -733,7 +737,7 @@
                   <dt>Max frequency</dt><dd x-text="sysCpuFreqMax ? _fmtFreq(sysCpuFreqMax) : '|'"></dd>
                 </dl>
               </div>
-              <div class="hyp-info-card">
+              <div class="hyp-info-card hyp-card-profile">
                 <div class="hyp-info-card-head">
                   <div class="res-icon res-orange"><i :class="hostProfileIcon"></i></div>
                   <h3 x-text="hostProfileTitle"></h3>
@@ -748,7 +752,7 @@
 	                  <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
 	                </dl>
 	              </div>
-	              <div class="hyp-info-card" :hidden="!(showXenInfo)">
+	              <div class="hyp-info-card hyp-card-xen-resources" :hidden="!(showXenInfo)">
 	                <div class="hyp-info-card-head">
 	                  <div class="res-icon res-purple"><i class="fa-solid fa-chart-pie"></i></div>
 	                  <h3>Xen resources</h3>
@@ -762,7 +766,7 @@
 		                  <dt>Usage</dt><dd x-text="xenMemoryPct + '%'"></dd>
 	                </dl>
 	              </div>
-	              <div class="hyp-info-card" :hidden="!(showLbu)">
+	              <div class="hyp-info-card hyp-card-persistence" :hidden="!(showLbu)">
                 <div class="hyp-info-card-head">
                   <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
                     <i class="fa-solid fa-floppy-disk"></i>
@@ -771,7 +775,7 @@
                 </div>
                 <dl class="res-kv">
                   <dt>State</dt><dd x-text="lbuText"></dd>
-                  <dt>Archive</dt><dd x-text="lbuArchive || '|'"></dd>
+                  <dt>Archive</dt><dd x-text="lbuArchive || 'Not configured'"></dd>
                   <dt>Mode</dt><dd>Data Disk (semi-persistent)</dd>
                   <dt>Protected paths</dt><dd>/etc/apk/protected-paths.d</dd>
                 </dl>
@@ -869,6 +873,29 @@
               </div>
             </div>
 
+            <div class="section-head"><h2>Compute</h2><p>Live CPU and memory activity.</p></div>
+            <div class="resource-performance-grid">
+              <article class="resource-performance-card">
+                <header class="resource-performance-head">
+                  <div class="resource-performance-identity"><div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div><div><span>Processor</span><h3 x-text="cpuModelClean"></h3></div></div>
+                  <div class="resource-performance-value"><strong x-text="cpuPct + '%'">0%</strong><span>average load</span></div>
+                </header>
+                <div class="resource-performance-meta"><span><b x-text="cpuCoresDisplay"></b> cores</span><span><b x-text="cpuFreqFmt"></b> frequency</span><span><b x-text="cpuTempFmt"></b> temperature</span></div>
+                <div class="resource-performance-chart"><canvas id="chartFreq"></canvas></div>
+                <div id="per-core-grid" class="per-core-grid resource-core-grid"></div>
+              </article>
+              <article class="resource-performance-card">
+                <header class="resource-performance-head">
+                  <div class="resource-performance-identity"><div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div><div><span>Memory</span><h3>Physical RAM</h3></div></div>
+                  <div class="resource-performance-value"><strong x-text="memPct + '%'">0%</strong><span>used</span></div>
+                </header>
+                <div class="resource-memory-total"><strong x-text="memUsedFmt"></strong><span> of </span><b x-text="memTotalFmt"></b></div>
+                <div class="storage-volume-bar resource-memory-meter"><div class="storage-volume-fill mem-bar"></div></div>
+                <div class="resource-performance-chart"><canvas id="chartMem"></canvas></div>
+                <dl class="resource-memory-breakdown"><div><dt>Used</dt><dd x-text="memUsedFmt"></dd></div><div><dt>Cached</dt><dd x-text="_fmtMB(sysMemCachedMb)"></dd></div><div><dt>Free</dt><dd x-text="memFreeFmt"></dd></div><div><dt>Total</dt><dd x-text="memTotalFmt"></dd></div></dl>
+              </article>
+            </div>
+
             <div class="section-head"><h2>Top processes</h2><p>Sorted by memory usage.</p></div>
             <div class="proc-table-wrap">
               <table class="proc-table">
@@ -886,52 +913,6 @@
                   </template>
                 </tbody>
               </table>
-            </div>
-
-            <div class="section-head"><h2>CPU</h2><p>Per-core usage and frequency.</p></div>
-            <div class="metric-card">
-              <div class="metric-card-head">
-                <div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div>
-                <h3 x-text="cpuModelClean"></h3>
-                <span class="metric-badge" x-text="cpuPct + '% avg'"></span>
-              </div>
-              <div class="res-bar-wrap res-bar-wrap-lg"><div class="res-bar cpu-bar"></div></div>
-              <div id="per-core-grid" class="per-core-grid"></div>
-            </div>
-
-            <div class="section-head"><h2>Memory</h2><p>RAM usage breakdown.</p></div>
-            <div class="resources-grid">
-              <div class="res-card">
-                <div class="res-card-head">
-                  <div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div>
-                  <h3>RAM</h3>
-                </div>
-                <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(memUsedFmt + ' / ' + memTotalFmt)"></span><span x-text="_primaryRest(memUsedFmt + ' / ' + memTotalFmt)"></span></div>
-                <div class="res-bar-wrap"><div class="res-bar mem-bar"></div></div>
-                <dl class="res-kv">
-                  <dt>Used</dt><dd><span x-text="memUsedFmt"></span> (<span x-text="memPct"></span>%)</dd>
-                  <dt>Cached</dt><dd x-text="_fmtMB(sysMemCachedMb)"></dd>
-                  <dt>Free</dt><dd x-text="memFreeFmt"></dd>
-                  <dt>Total</dt><dd x-text="memTotalFmt"></dd>
-                </dl>
-              </div>
-              <div class="res-card" :hidden="!(sysCPUTemps.length > 0)">
-                <div class="res-card-head">
-                  <div class="res-icon res-orange"><i class="fa-solid fa-temperature-half"></i></div>
-                  <h3>Thermal zones</h3>
-                </div>
-                <div class="temp-grid">
-                  <template x-for="t in sysCPUTemps" :key="t.zone">
-                    <div class="temp-row">
-                      <span class="temp-label" x-text="t.label"></span>
-                      <div class="temp-bar-wrap">
-                        <div class="temp-bar" :class="t.temp_c > 80 ? 'crit' : t.temp_c > 60 ? 'warn' : ''"></div>
-                      </div>
-                      <span class="temp-value" x-text="t.temp_c + '°C'"></span>
-                    </div>
-                  </template>
-                </div>
-              </div>
             </div>
 
           </div><!-- /page resources -->
@@ -985,7 +966,7 @@
             <div class="resources-grid" id="net-ifaces-grid">
               <div class="res-card">
                 <div class="res-card-head">
-                  <div class="res-icon res-blue"><i class="fa-solid fa-network-wired"></i></div>
+                  <div class="res-icon res-icon-device"><img src="/media/icons/network/nic_ethernet.svg" alt="Network interface"></div>
                   <h3 x-text="netIfaceDisplay"></h3>
                   <span class="metric-badge badge-up">UP</span>
                 </div>
@@ -1039,7 +1020,7 @@
               <div class="stat-block">
                 <div class="stat-icon stat-orange"><i class="fa-solid fa-file-zipper"></i></div>
                 <div class="stat-body">
-                  <div class="stat-value" x-text="lbuArchive || '|'"></div>
+                  <div class="stat-value" x-text="lbuArchive || 'Not configured'"></div>
                   <div class="stat-label">LBU archive</div>
                 </div>
               </div>
@@ -1049,41 +1030,70 @@
             <div class="storage-device-grid" :hidden="!(diskGroups.length > 0)">
               <template x-for="g in diskGroups" :key="g.key">
                 <article class="storage-device-card storage-disk-card">
-                  <div class="storage-device-icon">
-                    <img :src="_diskIconAsset(g)" :alt="_diskIconName(g)">
-                  </div>
-                  <strong class="storage-device-name" x-text="g.device"></strong>
-                  <span class="storage-device-model" x-text="g.model || g.volume_label"></span>
-                  <div class="storage-volume-meter">
-                    <div class="storage-volume-bar">
+                  <header class="storage-disk-overview">
+                    <div class="storage-disk-identity">
+                      <div class="storage-device-icon">
+                        <img :src="_diskIconAsset(g)" :alt="_diskIconName(g)">
+                      </div>
+                      <div class="storage-disk-title">
+                        <div class="storage-disk-heading"><strong class="storage-device-name" x-text="g.device"></strong><span class="storage-device-model" x-text="g.model || 'Unknown model'"></span></div>
+                        <span class="storage-device-kind" x-text="g.transport || g.disk_type || 'block device'"></span>
+                      </div>
+                    </div>
+                    <div class="storage-disk-capacity">
+                      <strong x-text="g.used_pct + '%'"></strong>
+                      <span>used</span>
+                    </div>
+                  </header>
+                  <div class="storage-disk-usage">
+                    <div class="storage-volume-bar storage-disk-meter">
                       <div class="storage-volume-fill" :class="[g.bar_cls, g.pct_cls]"></div>
                     </div>
-                    <span><strong x-text="_fmtMB(g.used_mb)"></strong> / <span x-text="_fmtMB(g.total_mb)"></span></span>
+                    <div class="storage-disk-usage-meta">
+                      <span><strong x-text="_fmtMB(g.used_mb)"></strong> used of <strong x-text="_fmtMB(g.total_mb)"></strong></span>
+                      <span><strong x-text="_fmtMB(g.free_mb)"></strong> free</span>
+                    </div>
                   </div>
-                  <div class="storage-volume-meta">
-                    <span><b x-text="g.used_pct + '%'"></b> used</span>
-                    <span><b x-text="g.volume_label"></b></span>
+                  <div class="storage-disk-activity">
+                    <div class="storage-disk-activity-head">
+                      <span>Disk activity</span>
+                      <div><span>Read <strong x-text="_fmtRate(g.read_bps)"></strong></span><span>Write <strong x-text="_fmtRate(g.write_bps)"></strong></span></div>
+                    </div>
+                    <div class="storage-disk-chart-wrap">
+                      <canvas class="storage-disk-chart" :data-disk-key="g.key"></canvas>
+                    </div>
                   </div>
-                  <ul class="storage-disk-tree" :hidden="!(g.partitions.length > 0)">
-                    <template x-for="p in g.partitions" :key="p.device + p.mount">
-                      <li class="storage-disk-branch" :title="_diskTooltip(p)">
-                        <span class="storage-disk-branch-icon">
-                          <img src="/media/icons/storage/ufs_chip.svg" alt="">
-                        </span>
-                        <div class="storage-disk-branch-body">
-                          <span class="storage-disk-branch-head"><strong x-text="p.device"></strong><span x-text="p.mount"></span></span>
-                          <div class="storage-volume-bar">
-                            <div class="storage-volume-fill" :class="[p.bar_cls, p.pct_cls]"></div>
+                  <div class="storage-disk-volumes" :hidden="!(g.partitions.length > 0)">
+                    <div class="storage-disk-volumes-head">
+                      <span>Volumes</span>
+                      <strong x-text="g.volume_label"></strong>
+                    </div>
+                    <ul class="storage-disk-tree">
+                      <template x-for="p in g.partitions" :key="p.device + p.mount">
+                        <li class="storage-disk-branch" :title="_diskTooltip(p)">
+                          <span class="storage-disk-branch-icon">
+                            <img src="/media/icons/storage/ufs_chip.svg" alt="">
+                          </span>
+                          <div class="storage-disk-branch-body">
+                            <div class="storage-disk-branch-head">
+                              <span class="storage-disk-branch-name"><strong x-text="p.device"></strong><span x-text="p.mount || 'Not mounted'"></span></span>
+                              <span class="storage-disk-fstype" x-text="p.fstype || 'volume'"></span>
+                            </div>
+                            <div class="storage-disk-branch-meter">
+                              <div class="storage-volume-bar storage-volume-bar-partition">
+                                <div class="storage-volume-fill" :class="[p.bar_cls, p.pct_cls]"></div>
+                              </div>
+                              <strong x-text="p.used_pct + '%'"></strong>
+                            </div>
+                            <div class="storage-disk-branch-meta">
+                              <span><b x-text="_fmtMB(p.used_mb)"></b> used</span>
+                              <span><b x-text="_fmtMB(p.total_mb)"></b> total</span>
+                            </div>
                           </div>
-                          <div class="storage-disk-branch-meta">
-                            <span x-text="p.used_pct + '%'"></span>
-                            <span x-text="_fmtMB(p.used_mb) + ' / ' + _fmtMB(p.total_mb)"></span>
-                            <span x-text="p.fstype"></span>
-                          </div>
-                        </div>
-                      </li>
-                    </template>
-                  </ul>
+                        </li>
+                      </template>
+                    </ul>
+                  </div>
                 </article>
               </template>
             </div>
@@ -1093,50 +1103,51 @@
               <p>Waiting for filesystem data from the host.</p>
             </div>
 
-            <div class="section-head" :hidden="!(showLbu)"><h2>LBU | Data Disk Mode</h2><p>Alpine Linux Backup persistence state.</p></div>
-            <div class="resources-grid" :hidden="!(showLbu)">
-              <div class="res-card">
-                <div class="res-card-head">
-                  <div class="res-icon" :class="lbuState === 'clean' ? 'res-ok' : 'res-warn'">
-                    <i class="fa-solid fa-floppy-disk"></i>
-                  </div>
-                  <h3>LBU state</h3>
-                </div>
-                <div class="res-primary"><span class="res-primary-first" x-text="_primaryFirst(lbuText)"></span><span x-text="_primaryRest(lbuText)"></span></div>
-                <div class="lbu-status" :class="lbuState">
-                  <div class="lbu-dot"></div>
-                  <div class="lbu-text">
-                    <strong x-text="lbuText"></strong>
-                    <span x-text="lbuSubText"></span>
-                  </div>
-                </div>
-                <dl class="res-kv res-kv-mt">
-                  <dt>State</dt><dd x-text="lbuState"></dd>
-                  <dt>Archive</dt><dd x-text="lbuArchive || '|'"></dd>
-                  <dt>Paths</dt><dd>/etc/apk/protected-paths.d</dd>
-                </dl>
-              </div>
-              <div class="res-card">
-                <div class="res-card-head">
-                  <div class="res-icon res-blue"><i class="fa-solid fa-circle-info"></i></div>
-                  <h3>Data Disk Mode</h3>
-                </div>
-                <div class="res-primary"><span class="res-primary-first">Semi-persistent</span></div>
-                <dl class="res-kv">
-                  <dt>Mode</dt><dd>Data Disk (LBU)</dd>
-                  <div class="res-kv-row has-ver-badge"><dt>OS</dt><dd><span :class="alpineVerBadgeClass" x-text="alpineVerBadgeLabel" :hidden="!(alpineUpdateLevel !== '')"></span><span x-text="alpineVerDisplay"></span></dd></div>
-                  <div class="res-kv-row has-ver-badge"><dt>Kernel</dt><dd><span :class="kernelVerBadgeClass" x-text="kernelVerBadgeLabel" :hidden="!(kernelUpdateLevel !== '')"></span><span x-text="kernelLts || sysKernel || '|'"></span></dd></div>
-                  <dt>Uptime</dt><dd x-text="uptime"></dd>
-                </dl>
-              </div>
-            </div>
-
           </div><!-- /page storage -->
 
           <!-- ═══════════════════════════════════════════════ -->
           <!-- PAGE: SECURITY                                  -->
           <!-- ═══════════════════════════════════════════════ -->
-          <div :hidden="!(currentPage === 'security')">
+          <div class="security-dashboard" :hidden="!(currentPage === 'security')">
+            <div class="security-page-head">
+              <div class="page-header"><h1><i class="fa-solid fa-shield-halved"></i> Security</h1><p>Kernel hardening, exposed services and runtime posture.</p></div>
+              <button class="btn-ghost" title="Refresh security status" @click="loadSecurity()" :disabled="securityLoading"><i class="fa-solid fa-rotate"></i><span :hidden="!(!securityLoading)">Refresh</span><span :hidden="!(securityLoading)">Refreshing...</span></button>
+            </div>
+            <p class="form-error" :hidden="!(securityError)" x-text="securityError"></p>
+
+            <section class="security-overview">
+              <article class="security-posture-card">
+                <div class="security-panel-head"><div><span class="security-eyebrow">Overall posture</span><h2>Security score</h2></div><span class="security-live-dot"><i></i> Live</span></div>
+                <div class="security-posture-body">
+                  <div class="security-donut-wrap"><canvas id="security-posture-chart" aria-label="Security posture chart"></canvas><div class="security-donut-value"><strong x-text="securityScore + '%'">0%</strong><span>score</span></div></div>
+                  <div class="security-posture-copy"><strong x-text="securityScoreLabel"></strong><span x-text="securityTotal + ' checks evaluated'"></span><div class="security-legend-stack"><span><i class="security-dot security-dot-ok"></i><b x-text="securitySummary.ok || 0"></b> passed</span><span><i class="security-dot security-dot-warn"></i><b x-text="securitySummary.warn || 0"></b> warnings</span><span><i class="security-dot security-dot-critical"></i><b x-text="securitySummary.critical || 0"></b> critical</span></div></div>
+                </div>
+              </article>
+              <article class="security-chart-card security-category-card"><div class="security-panel-head"><div><span class="security-eyebrow">Distribution</span><h2>Checks by category</h2></div></div><div class="security-category-chart"><canvas id="security-category-chart" aria-label="Checks by category chart"></canvas></div></article>
+              <article class="security-chart-card security-services-chart-card"><div class="security-panel-head"><div><span class="security-eyebrow">OpenRC</span><h2>Service health</h2></div><strong x-text="securityHealthyServices + '/' + securityServices.length"></strong></div><div class="security-service-chart"><canvas id="security-service-chart" aria-label="Security service status chart"></canvas></div></article>
+            </section>
+
+            <div class="security-stat-strip">
+              <div class="security-stat"><span class="security-stat-icon security-tone-ok"><i class="fa-solid fa-circle-check"></i></span><div><strong x-text="securitySummary.ok || 0"></strong><span>Passed checks</span></div></div>
+              <div class="security-stat"><span class="security-stat-icon security-tone-warn"><i class="fa-solid fa-triangle-exclamation"></i></span><div><strong x-text="securitySummary.warn || 0"></strong><span>Need review</span></div></div>
+              <div class="security-stat"><span class="security-stat-icon security-tone-critical"><i class="fa-solid fa-shield-virus"></i></span><div><strong x-text="securitySummary.critical || 0"></strong><span>Critical findings</span></div></div>
+              <div class="security-stat"><span class="security-stat-icon security-tone-brand"><i class="fa-solid fa-user-lock"></i></span><div><strong x-text="userDefaultCredentials ? 'Default' : 'Custom'"></strong><span>Credentials</span></div></div>
+            </div>
+
+            <div class="section-head security-section-title"><h2>Hardening checks</h2><p>Risk-first view of kernel, network and authentication controls.</p></div>
+            <div class="security-check-list" :hidden="!(securityChecks.length > 0)"><template x-for="check in securitySortedChecks" :key="check.key"><article class="security-check-row" :class="'is-' + (check.status || 'unknown')"><span class="security-check-icon"><i :class="securityIconClass(check.status)"></i></span><div class="security-check-main"><strong x-text="check.label"></strong><span x-text="check.detail" :title="check.detail"></span></div><span class="security-category-badge" x-text="check.category"></span><span class="security-status-pill" x-text="check.status"></span></article></template></div>
+
+            <div class="section-head security-section-title"><h2>Security services</h2><p>OpenRC status for authentication, firewall, audit and time services.</p></div>
+            <div class="security-service-table"><div class="security-service-table-head"><span>Service</span><span>State</span><span>Runlevels</span><span>Assessment</span></div><template x-for="svc in securityServices" :key="svc.name"><div class="security-service-row"><div class="security-service-name"><i class="security-service-state" :class="'is-' + (svc.status || 'unknown')"></i><strong x-text="svc.name"></strong></div><span x-text="svc.state"></span><span x-text="(svc.runlevels || []).join(', ') || 'Not configured'"></span><div class="security-service-assessment"><span class="security-status-pill" :class="securityStatusClass(svc.status)" x-text="svc.status"></span><small x-text="svc.detail"></small></div></div></template></div>
+
+            <div class="section-head security-section-title"><h2>Runtime exposure</h2><p>Observed processes and listening TCP endpoints.</p></div>
+            <div class="security-runtime-grid">
+              <article class="security-runtime-card"><div class="security-panel-head"><div><span class="security-eyebrow">Processes</span><h2>Watched daemons</h2></div><strong x-text="securityActiveProcesses + ' active'"></strong></div><div class="security-process-list"><template x-for="proc in securityProcesses" :key="proc.name"><div class="security-process-row"><span class="security-process-mark" :class="proc.count > 0 ? 'is-active' : (proc.status === 'critical' ? 'is-critical' : 'is-stopped')"></span><strong x-text="proc.name"></strong><small x-text="proc.detail" :title="proc.detail"></small><b x-text="proc.count"></b></div></template></div></article>
+              <article class="security-runtime-card"><div class="security-panel-head"><div><span class="security-eyebrow">Network</span><h2>TCP listeners</h2></div><strong x-text="securityUniquePorts + ' ports'"></strong></div><div class="security-listener-grid"><template x-for="listener in securityListeners" :key="listener.port"><div class="security-listener-chip" :class="listener.status === 'warn' ? 'is-privileged' : 'is-unprivileged'" :title="listener.detail"><i class="fa-solid fa-ethernet"></i><div><strong x-text="':' + listener.port"></strong><span x-text="listener.proto"></span></div></div></template><div class="security-empty" :hidden="!(securityListeners.length === 0)"><i class="fa-solid fa-lock"></i><span>No TCP listeners exposed</span></div></div></article>
+            </div>
+          </div><!-- /new security dashboard -->
+
+          <div hidden>
             <div class="page-header">
               <h1><i class="fa-solid fa-shield-halved"></i> Security</h1>
               <p>Kernel hardening, exposed services and process status.</p>
@@ -1328,13 +1339,13 @@
                       <div class="color-swatch" id="swatch-domu"></div>
                       <div class="color-info"><label>DomU</label><span>Xen virtual machine</span></div>
                       <input type="color" x-model="brandingColorDomU" class="color-picker" :disabled="!canEditBranding" :title="canEditBranding ? 'Set DomU color' : 'Administrator role required'" @input="updateSwatches()">
-                      <input type="text"  x-model="brandingColorDomU" class="color-hex" maxlength="7" placeholder="#a0284a" :disabled="!canEditBranding" :title="canEditBranding ? 'Set DomU color hex value' : 'Administrator role required'" @input="updateSwatches()">
+                      <input type="text"  x-model="brandingColorDomU" class="color-hex" maxlength="7" placeholder="#c80039" :disabled="!canEditBranding" :title="canEditBranding ? 'Set DomU color hex value' : 'Administrator role required'" @input="updateSwatches()">
                     </div>
                     <div class="color-row">
                       <div class="color-swatch" id="swatch-container"></div>
                       <div class="color-info"><label>Container</label><span>Docker / LXC environment</span></div>
                       <input type="color" x-model="brandingColorContainer" class="color-picker" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Container color' : 'Administrator role required'" @input="updateSwatches()">
-                      <input type="text"  x-model="brandingColorContainer" class="color-hex" maxlength="7" placeholder="#b05a1a" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Container color hex value' : 'Administrator role required'" @input="updateSwatches()">
+                      <input type="text"  x-model="brandingColorContainer" class="color-hex" maxlength="7" placeholder="#ff7800" :disabled="!canEditBranding" :title="canEditBranding ? 'Set Container color hex value' : 'Administrator role required'" @input="updateSwatches()">
                     </div>
                     <div class="color-row">
                       <div class="color-swatch" id="swatch-alpine"></div>

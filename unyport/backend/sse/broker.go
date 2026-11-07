@@ -95,6 +95,27 @@ func (b *Broker) loop() {
 			}
 		}
 
+		// Activité réelle des disques depuis /proc/diskstats.
+		if !prevSnap.Timestamp.IsZero() {
+			dt := snap.Timestamp.Sub(prevSnap.Timestamp).Seconds()
+			if dt > 0 {
+				previous := make(map[string]DiskMount, len(prevSnap.Disks))
+				for _, disk := range prevSnap.Disks {
+					previous[disk.Disk] = disk
+				}
+				for i := range snap.Disks {
+					if old, ok := previous[snap.Disks[i].Disk]; ok {
+						if snap.Disks[i].ReadBytes >= old.ReadBytes {
+							snap.Disks[i].ReadBps = uint64(float64(snap.Disks[i].ReadBytes-old.ReadBytes) / dt)
+						}
+						if snap.Disks[i].WriteBytes >= old.WriteBytes {
+							snap.Disks[i].WriteBps = uint64(float64(snap.Disks[i].WriteBytes-old.WriteBytes) / dt)
+						}
+					}
+				}
+			}
+		}
+
 		// Network map | collecte avec débits par interface
 		dt := 0.0
 		if !prevSnap.Timestamp.IsZero() {

@@ -41,6 +41,10 @@ document.addEventListener('alpine:init', () => {
     page: 'loading',
     currentPage: 'dashboard',
     theme: localStorage.getItem('theme') || 'light',
+    searchOpen: false,
+    searchQuery: '',
+    searchIndex: 0,
+    _searchKeyHandler: null,
 
     email: '',
     password: '',
@@ -91,7 +95,7 @@ document.addEventListener('alpine:init', () => {
 
     brandingLogoSrc: '',
     brandingHasLogo: false,
-    brandingColors: { dom0: '#3e3aab', domu: '#a0284a', container: '#b05a1a', alpine: '#28587c' },
+    brandingColors: { dom0: '#3e3aab', domu: '#c80039', container: '#ff7800', alpine: '#28587c' },
 
     brandingLogoBase64: '',
     brandingLogoUrl: '',
@@ -100,8 +104,8 @@ document.addEventListener('alpine:init', () => {
     brandingLogoMode: 'current',
     brandingLogoError: '',
     brandingColorDom0: '#3e3aab',
-    brandingColorDomU: '#a0284a',
-    brandingColorContainer: '#b05a1a',
+    brandingColorDomU: '#c80039',
+    brandingColorContainer: '#ff7800',
     brandingColorAlpine: '#28587c',
     brandingSaving: false,
     brandingError: '',
@@ -230,6 +234,13 @@ document.addEventListener('alpine:init', () => {
       return this._diskIconAsset(disk).split('/').pop();
     },
     _fmtBytes: fmtBytes,
+    _fmtRate(value) {
+      const bytes = Number(value) || 0;
+      if (bytes >= 1e9) return (bytes / 1e9).toFixed(2) + ' GB/s';
+      if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + ' MB/s';
+      if (bytes >= 1e3) return Math.round(bytes / 1e3) + ' KB/s';
+      return Math.round(bytes) + ' B/s';
+    },
     _cleanCPU: cleanCPU,
     _formatUptime: formatUptime,
     _xenRoleLabel: xenRoleLabel,
@@ -438,7 +449,7 @@ document.addEventListener('alpine:init', () => {
     get lbuText() {
       if (this.lbuState === 'clean') return 'Committed';
       if (this.lbuState === 'dirty') return 'Uncommitted';
-      return '|';
+      return 'Not available';
     },
 
     get loadAvgFmt() {
@@ -460,6 +471,66 @@ document.addEventListener('alpine:init', () => {
     get diskGroups() {
       const groups = window.UnyPortDiskGroups;
       return groups ? groups.group(this.sysDisks) : [];
+    },
+
+    get searchResults() {
+      const routes = [
+        ['dashboard', 'Dashboard', 'Host overview and quick actions', '/dashboard', 'fa-solid fa-gauge-high'],
+        ['hypervisor', 'Hypervisor', 'Virtual machines and Xen controls', '/hypervisor', 'fa-solid fa-server'],
+        ['resources', 'Resources', 'CPU, memory, processes and services', '/resources', 'fa-solid fa-heart-pulse'],
+        ['network', 'Network', 'Interfaces, throughput and topology', '/network', 'fa-solid fa-network-wired'],
+        ['storage', 'Storage', 'Physical disks, volumes and LBU', '/storage', 'fa-solid fa-hard-drive'],
+        ['security', 'Security', 'Sessions, listeners and security checks', '/security', 'fa-solid fa-shield-halved'],
+        ['settings', 'Settings', 'Profile, users and branding', '/settings', 'fa-solid fa-gear']
+      ].map((r) => ({ key: 'page-' + r[0], label: r[1], detail: r[2], path: r[3], icon: r[4], kind: 'Page', terms: r.join(' ') }));
+      const machines = (Array.isArray(this.xenDomains) ? this.xenDomains : []).map((dom, index) => ({
+        key: 'machine-' + (dom.domid ?? index), label: dom.name || ('Domain ' + (dom.domid ?? index)), detail: 'Virtual machine · ' + (dom.state || 'unknown'), path: '/hypervisor', icon: 'fa-solid fa-display', kind: 'Machine', terms: [dom.name, dom.domid, dom.state, 'machine vm domain'].join(' ')
+      }));
+      const services = (Array.isArray(this.svcList) ? this.svcList : []).map((svc, index) => ({
+        key: 'service-' + (svc.name || index), label: svc.name || 'Service', detail: 'Service · ' + (svc.state || 'unknown'), path: '/resources', icon: 'fa-solid fa-gears', kind: 'Service', terms: [svc.name, svc.state, 'service application'].join(' ')
+      }));
+      const packages = (Array.isArray(this.apkList) ? this.apkList : []).map((pkg, index) => ({
+        key: 'package-' + (pkg.name || index), label: pkg.name || 'Package', detail: 'Installed package' + (pkg.version ? ' · ' + pkg.version : ''), path: '/resources', icon: 'fa-solid fa-box', kind: 'Package', terms: [pkg.name, pkg.version, 'package application apk'].join(' ')
+      }));
+      const query = String(this.searchQuery || '').trim().toLocaleLowerCase();
+      const items = routes.concat(machines, services, packages);
+      if (!query) return routes;
+      return items.filter((item) => (item.label + ' ' + item.detail + ' ' + item.terms).toLocaleLowerCase().includes(query)).slice(0, 12);
+    },
+
+    openSearch() {
+      if (this.page !== 'app') return;
+      this.searchQuery = '';
+      this.searchIndex = 0;
+      this.searchOpen = true;
+      this.$nextTick(() => document.getElementById('global-search-input')?.focus());
+    },
+    closeSearch() { this.searchOpen = false; this.searchQuery = ''; this.searchIndex = 0; },
+    resetSearchIndex() { this.searchIndex = 0; },
+    setSearchIndex(index) { this.searchIndex = Number(index) || 0; },
+    moveSearch(delta) {
+      const count = this.searchResults.length;
+      if (!count) return;
+      this.searchIndex = (this.searchIndex + Number(delta) + count) % count;
+    },
+    activateSearchIndex() { const item = this.searchResults[this.searchIndex]; if (item) this.activateSearch(item); },
+    activateSearch(item) {
+      if (!item || !item.path) return;
+      this.closeSearch();
+      this.navigate(item.path);
+    },
+
+    _bindSearchShortcut() {
+      if (this._searchKeyHandler) return;
+      this._searchKeyHandler = (event) => {
+        if (this.page !== 'app') return;
+        if ((event.ctrlKey || event.metaKey) && String(event.key).toLowerCase() === 'k') {
+          event.preventDefault();
+          event.stopPropagation();
+          if (this.searchOpen) this.closeSearch(); else this.openSearch();
+        }
+      };
+      document.addEventListener('keydown', this._searchKeyHandler, true);
     },
 
     _diskTooltip(disk) {
@@ -726,8 +797,8 @@ document.addEventListener('alpine:init', () => {
         if (b.colors) {
           this.brandingColors = b.colors;
           this.brandingColorDom0 = b.colors.dom0 || '#3e3aab';
-          this.brandingColorDomU = b.colors.domu || '#a0284a';
-          this.brandingColorContainer = b.colors.container || '#b05a1a';
+          this.brandingColorDomU = b.colors.domu || '#c80039';
+          this.brandingColorContainer = b.colors.container || '#ff7800';
           this.brandingColorAlpine = b.colors.alpine || '#28587c';
         }
         this._applyBrandingCSS();
@@ -885,8 +956,8 @@ document.addEventListener('alpine:init', () => {
         await apiFetch('/api/branding/reset', { method: 'DELETE' });
         this.brandingLogoSrc = this.brandingLogoPreview = this.brandingLogoBase64 = this.brandingLogoUrl = '';
         this.brandingColorDom0 = '#3e3aab';
-        this.brandingColorDomU = '#a0284a';
-        this.brandingColorContainer = '#b05a1a';
+        this.brandingColorDomU = '#c80039';
+        this.brandingColorContainer = '#ff7800';
         this.brandingColorAlpine = '#28587c';
         this._applyBrandingCSS();
         this.brandingSuccess = 'Branding reset to defaults.';
@@ -912,7 +983,8 @@ document.addEventListener('alpine:init', () => {
 
     _applyRoute(key) {
       this.currentPage = key;
-      if (key === 'dashboard') this.$nextTick(() => typeof initCharts === 'function' && initCharts());
+      if (key === 'resources') this.$nextTick(() => typeof initCharts === 'function' && initCharts());
+      if (key === 'storage') this.$nextTick(() => typeof initDiskCharts === 'function' && initDiskCharts());
       if (key === 'network') {
         this.$nextTick(() => {
           if (typeof renderNetworkMap === 'function' && window._nmLastArgs) {
@@ -999,6 +1071,34 @@ document.addEventListener('alpine:init', () => {
       };
       return icons[status] || icons.unknown;
     },
+    get securityTotal() {
+      const s = this.securitySummary || {};
+      return (s.ok || 0) + (s.warn || 0) + (s.critical || 0) + (s.unknown || 0);
+    },
+    get securityScore() {
+      const total = this.securityTotal;
+      if (!total) return 0;
+      const s = this.securitySummary || {};
+      return Math.max(0, Math.round((((s.ok || 0) + ((s.warn || 0) * .35)) / total) * 100));
+    },
+    get securityScoreLabel() {
+      if (this.securitySummary.critical > 0) return 'Immediate action';
+      if (this.securitySummary.warn > 0) return 'Review recommended';
+      return this.securityTotal ? 'Hardened posture' : 'Waiting for data';
+    },
+    get securitySortedChecks() {
+      const rank = { critical: 0, warn: 1, unknown: 2, ok: 3 };
+      return [...(this.securityChecks || [])].sort((a, b) => (rank[a.status] ?? 4) - (rank[b.status] ?? 4));
+    },
+    get securityHealthyServices() {
+      return (this.securityServices || []).filter((svc) => svc.status === 'ok').length;
+    },
+    get securityActiveProcesses() {
+      return (this.securityProcesses || []).filter((proc) => Number(proc.count) > 0).length;
+    },
+    get securityUniquePorts() {
+      return new Set((this.securityListeners || []).map((listener) => String(listener.port))).size;
+    },
     pct1(value) {
       const n = Number(value) || 0;
       return n.toFixed(1) + '%';
@@ -1038,6 +1138,7 @@ document.addEventListener('alpine:init', () => {
 
     // ── Init ─────────────────────────────────────────────────
     async init() {
+      this._bindSearchShortcut();
       document.documentElement.setAttribute('data-theme', this.theme);
       if (window.__unyportSyncThemeColor) {
         window.__unyportSyncThemeColor(this.theme, this.hostRoleRole || 'Dom0');
@@ -1511,6 +1612,7 @@ document.addEventListener('alpine:init', () => {
           this.securityServices = r.services || [];
           this.securityProcesses = r.processes || [];
           this.securityListeners = r.listeners || [];
+          if (window.UnyPortSecurityCharts) window.UnyPortSecurityCharts.render({ summary: this.securitySummary, checks: this.securityChecks, services: this.securityServices });
         }
       } catch (e) {
         this.securityError = e?.message || 'Security status unavailable.';
@@ -1633,7 +1735,7 @@ document.addEventListener('alpine:init', () => {
         const _ip = this.sysNetIp || '';
         window._nmLastArgs = [snap.net_map, _role, _runtime, _host, _ip];
         document.querySelectorAll('.netmap-container').forEach(el => {
-          if (el.id) renderNetworkMap(snap.net_map, _role, _runtime, _host, _ip, el.id);
+          if (el.id && el.offsetParent !== null) renderNetworkMap(snap.net_map, _role, _runtime, _host, _ip, el.id);
         });
       }
 
@@ -1787,14 +1889,14 @@ document.addEventListener('alpine:init', () => {
       const key = String(role || '').trim().toLowerCase();
       const light = {
         dom0: '#3e3aab',
-        domu: '#a0284a',
-        container: '#b05a1a',
+        domu: '#c80039',
+        container: '#ff7800',
         alpine: '#28587c',
       };
       const dark = {
         dom0: '#6864d4',
-        domu: '#d45c82',
-        container: '#de8d50',
+        domu: '#e55c80',
+        container: '#ff9b47',
         alpine: '#4d8cb0',
       };
       const palette = (theme === 'dark') ? dark : light;

@@ -3,8 +3,8 @@
    ============================================================ */
 :root {
   --role-dom0:      #3e3aab;
-  --role-domu:      #a0284a;
-  --role-container: #b05a1a;
+  --role-domu:      #c80039;
+  --role-container: #ff7800;
   --role-alpine:    #28587c;
 }
 
@@ -13,6 +13,34 @@
 [data-role="domu"]      { --current-role-color: var(--role-domu); }
 [data-role="container"] { --current-role-color: var(--role-container); }
 [data-role="alpine"]    { --current-role-color: var(--role-alpine); }
+
+/* Keep the standalone PWA dock and home-indicator area continuous with the
+   central workspace in both light and dark themes. */
+@media (display-mode: standalone) and (max-width: 900px) {
+  html,
+  body,
+  #app,
+  .page-dashboard,
+  .main-scroll {
+    background-color: var(--bg);
+  }
+
+  .page-dashboard::after {
+    content: "";
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 450;
+    height: env(safe-area-inset-bottom, 0px);
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  .main-inner {
+    padding-bottom: max(56px, calc(32px + env(safe-area-inset-bottom, 0px)));
+  }
+}
 
 /* ============================================================
    PAGE SETTINGS | layout sections

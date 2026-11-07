@@ -1,6 +1,7 @@
 package sse
 
 import (
+	"context"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -247,58 +248,78 @@ func collect() Snapshot {
 //     • Protected-paths.d plus récent que archive → state:"dirty"
 //
 // Zéro binaire externe, zéro exec | uniquement os.Stat + os.ReadDir.
-func collectLBU() LBUStatus {
-	const protectedPathsDir = "/etc/apk/protected-paths.d"
-	const lbuCacheDir = "/var/cache/lbu"
+var lbuStatusCache struct {
+	sync.Mutex
+	value   LBUStatus
+	expires time.Time
+}
 
-	// ── 1. Présence de LBU ──────────────────────────────────────
-	ppStat, err := os.Stat(protectedPathsDir)
-	if err != nil {
-		// Répertoire absent → LBU non installé
+func collectLBU() LBUStatus {
+	lbuStatusCache.Lock()
+	defer lbuStatusCache.Unlock()
+	if time.Now().Before(lbuStatusCache.expires) {
+		return lbuStatusCache.value
+	}
+	lbuStatusCache.value = collectLBUUncached()
+	lbuStatusCache.expires = time.Now().Add(30 * time.Second)
+	return lbuStatusCache.value
+}
+
+func collectLBUUncached() LBUStatus {
+	if _, err := exec.LookPath("lbu"); err != nil {
 		return LBUStatus{Present: false, State: "absent"}
 	}
-	ppMtime := ppStat.ModTime()
+	archive := latestLBUArchive()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, "lbu", "status")
+	cmd.Stderr = io.Discard
+	out, err := cmd.Output()
+	if err != nil || strings.TrimSpace(string(out)) != "" || archive == "" {
+		return LBUStatus{Present: true, State: "dirty", Archive: archive}
+	}
+	return LBUStatus{Present: true, State: "clean", Archive: archive}
+}
 
-	// ── 2. Dernière archive dans /var/cache/lbu/ ─────────────────
-	entries, err := os.ReadDir(lbuCacheDir)
+func latestLBUArchive() string {
+	media, backupDir := "", ""
+	if data, err := os.ReadFile("/etc/lbu/lbu.conf"); err == nil {
+		for _, line := range strings.Split(string(data), "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+			switch {
+			case strings.HasPrefix(line, "LBU_BACKUPDIR="):
+				backupDir = strings.Trim(strings.TrimSpace(strings.TrimPrefix(line, "LBU_BACKUPDIR=")), "'\"")
+			case strings.HasPrefix(line, "LBU_MEDIA="):
+				media = strings.Trim(strings.TrimSpace(strings.TrimPrefix(line, "LBU_MEDIA=")), "'\"")
+			}
+		}
+	}
+	root := backupDir
+	if root == "" && media != "" {
+		root = filepath.Join("/media", filepath.Base(media))
+	}
+	if root == "" {
+		return ""
+	}
+	entries, err := os.ReadDir(root)
 	if err != nil {
-		// Cache inaccessible → traité comme dirty (jamais commité)
-		return LBUStatus{Present: true, State: "dirty"}
+		return ""
 	}
-
-	var latestArchive string
+	var latest string
 	var latestMtime time.Time
-
-	for _, e := range entries {
-		if e.IsDir() {
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".apkovl.tar.gz") {
 			continue
 		}
-		name := e.Name()
-		if !strings.HasSuffix(name, ".tar.gz") {
-			continue
-		}
-		info, err2 := e.Info()
-		if err2 != nil {
-			continue
-		}
-		if latestArchive == "" || info.ModTime().After(latestMtime) {
-			latestArchive = name
-			latestMtime = info.ModTime()
+		info, err := entry.Info()
+		if err == nil && (latest == "" || info.ModTime().After(latestMtime)) {
+			latest, latestMtime = entry.Name(), info.ModTime()
 		}
 	}
-
-	// ── 3. Aucune archive → jamais commité ──────────────────────
-	if latestArchive == "" {
-		return LBUStatus{Present: true, State: "dirty"}
-	}
-
-	// ── 4. Comparaison mtime ─────────────────────────────────────
-	// clean  : archive >= protected-paths.d
-	// dirty  : protected-paths.d > archive  (modifications non persistées)
-	if ppMtime.After(latestMtime) {
-		return LBUStatus{Present: true, State: "dirty", Archive: latestArchive}
-	}
-	return LBUStatus{Present: true, State: "clean", Archive: latestArchive}
+	return latest
 }
 
 func mathAbs(x float64) float64 {
@@ -1338,6 +1359,7 @@ func readARPTable() []ARPEntry {
 	}
 
 	metadata := readKeaNeighborMetadata()
+	defaultGateway := readDefaultGatewayIPv4()
 	var result []ARPEntry
 	lines := strings.Split(string(data), "\n")
 	if len(lines) < 2 {
@@ -1369,6 +1391,12 @@ func readARPTable() []ARPEntry {
 		// Pas de collecteur de services passif ici : le dernier argument reste nil
 		// tant qu'aucune source (mDNS/SSDP) n'alimente cette carte.
 		identity := neighborIdentityFor(ip, mac, iface, os.Getenv("UNYPORT_DEVICE_TYPES"), meta.Hostname, nil)
+		if ip == defaultGateway && (identity.DeviceType == "" || identity.DeviceType == "unknown") {
+			identity.DeviceType = "gateway"
+			identity.Detection = "default-route"
+			identity.Confidence = 1
+			identity.Sources = append(identity.Sources, "default-route")
+		}
 		isp := ispMetadataForPublicNeighbor(ip)
 		detection := identity.Detection
 		if isp.Operator != "" {
@@ -1391,6 +1419,25 @@ func readARPTable() []ARPEntry {
 		})
 	}
 	return result
+}
+
+func readDefaultGatewayIPv4() string {
+	data, err := os.ReadFile("/proc/net/route")
+	if err != nil {
+		return ""
+	}
+	for _, line := range strings.Split(string(data), "\n")[1:] {
+		fields := strings.Fields(line)
+		if len(fields) < 3 || fields[1] != "00000000" {
+			continue
+		}
+		value, err := strconv.ParseUint(fields[2], 16, 32)
+		if err != nil || value == 0 {
+			continue
+		}
+		return net.IPv4(byte(value), byte(value>>8), byte(value>>16), byte(value>>24)).String()
+	}
+	return ""
 }
 
 type ispMetadata struct {
@@ -1595,7 +1642,8 @@ func deviceTypeForHostname(hostname string) string {
 		{"camera", []string{"camera", "webcam", "doorbell", "cam-"}},
 		{"laptop", []string{"laptop", "notebook", "macbook"}},
 		{"desktop", []string{"workstation", "desktop", "windows-pc", "computer", "trinity-install"}},
-		{"server", []string{"server", "hypervisor", "proxmox", "truenas"}},
+		{"hypervisor", []string{"xen", "hypervisor"}},
+		{"server", []string{"server", "truenas"}},
 	}
 	for _, pattern := range patterns {
 		for _, word := range pattern.words {
@@ -1769,20 +1817,49 @@ func readKeaReservationMetadata(metadata map[string]neighborMetadata, path strin
 // DiskMount décrit un point de montage avec son espace disque.
 // Zéro binaire externe | syscall.Statfs uniquement.
 type DiskMount struct {
-	Device    string `json:"device"`
-	Disk      string `json:"disk"`
-	Mount     string `json:"mount"`
-	FSType    string `json:"fstype"`
-	DiskType  string `json:"disk_type"`
-	Model     string `json:"model"`
-	Transport string `json:"transport"`
-	Icon      string `json:"icon"`
-	Total     uint64 `json:"total_mb"`
-	Used      uint64 `json:"used_mb"`
-	Free      uint64 `json:"free_mb"`
-	UsedPct   uint8  `json:"used_pct"`
-	Pal       string `json:"pal"`
-	BarCls    string `json:"bar_cls"`
+	Device     string `json:"device"`
+	Disk       string `json:"disk"`
+	Mount      string `json:"mount"`
+	FSType     string `json:"fstype"`
+	DiskType   string `json:"disk_type"`
+	Model      string `json:"model"`
+	Transport  string `json:"transport"`
+	Icon       string `json:"icon"`
+	Total      uint64 `json:"total_mb"`
+	Used       uint64 `json:"used_mb"`
+	Free       uint64 `json:"free_mb"`
+	UsedPct    uint8  `json:"used_pct"`
+	Pal        string `json:"pal"`
+	BarCls     string `json:"bar_cls"`
+	ReadBytes  uint64 `json:"read_bytes"`
+	WriteBytes uint64 `json:"write_bytes"`
+	ReadBps    uint64 `json:"read_bps"`
+	WriteBps   uint64 `json:"write_bps"`
+}
+
+type diskIOCounters struct {
+	readBytes  uint64
+	writeBytes uint64
+}
+
+func readDiskIOCounters() map[string]diskIOCounters {
+	data, err := os.ReadFile("/proc/diskstats")
+	if err != nil {
+		return nil
+	}
+	result := make(map[string]diskIOCounters)
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 10 {
+			continue
+		}
+		readSectors, errRead := strconv.ParseUint(fields[5], 10, 64)
+		writeSectors, errWrite := strconv.ParseUint(fields[9], 10, 64)
+		if errRead == nil && errWrite == nil {
+			result[fields[2]] = diskIOCounters{readBytes: readSectors * 512, writeBytes: writeSectors * 512}
+		}
+	}
+	return result
 }
 
 func rootBlockDevice(device string) string {
@@ -1798,12 +1875,34 @@ func rootBlockDevice(device string) string {
 	return strings.TrimRight(name, "0123456789")
 }
 
+func fallbackDiskModel(name, transport string) string {
+	switch {
+	case strings.HasPrefix(name, "nvme"):
+		return "NVMe disk"
+	case strings.HasPrefix(name, "mmcblk"):
+		return "eMMC storage"
+	case strings.HasPrefix(name, "xvd"):
+		return "Xen virtual disk"
+	case strings.HasPrefix(name, "vd"):
+		return "VirtIO block device"
+	case transport == "usb":
+		return "USB storage"
+	case strings.HasPrefix(name, "sd"):
+		return "SCSI/SATA disk"
+	default:
+		return "Block device"
+	}
+}
+
 func diskMetadata(device string) (diskType, model, transport, icon string) {
 	name := rootBlockDevice(device)
 	base := filepath.Join("/sys/class/block", name)
 	model = readFirstFileTrim(filepath.Join(base, "device/model"), filepath.Join(base, "device/name"))
 	if link, err := os.Readlink(filepath.Join(base, "device/subsystem")); err == nil {
 		transport = strings.ToLower(filepath.Base(link))
+	}
+	if model == "" {
+		model = fallbackDiskModel(name, transport)
 	}
 	rotational := readFirstFileTrim(filepath.Join(base, "queue/rotational")) == "1"
 	lowerModel := strings.ToLower(model)
@@ -1812,7 +1911,9 @@ func diskMetadata(device string) (diskType, model, transport, icon string) {
 		return "nvme", model, "nvme", "m2_nvme"
 	case strings.HasPrefix(name, "mmcblk"):
 		return "emmc", model, "mmc", "emmc_chip"
-	case strings.HasPrefix(name, "xvd"), strings.HasPrefix(name, "vd"):
+	case strings.HasPrefix(name, "xvd"):
+		return "virtual", model, "xen", "volume"
+	case strings.HasPrefix(name, "vd"):
 		return "virtual", model, "virtio", "volume"
 	case transport == "usb":
 		return "usb", model, transport, "usb_storage"
@@ -1876,6 +1977,7 @@ func collectDisks() []DiskMount {
 		}
 	}
 
+	ioCounters := readDiskIOCounters()
 	pals := []string{"res-cyan", "res-amber", "res-steel", "res-violet", "res-lime", "res-rose"}
 	var result []DiskMount
 
@@ -1899,11 +2001,14 @@ func collectDisks() []DiskMount {
 		} else if pct > 50 {
 			barCls = "warn"
 		}
+		diskName := rootBlockDevice(device)
 		diskType, model, transport, icon := diskMetadata(device)
+		ioCounter := ioCounters[diskName]
 		result = append(result, DiskMount{
-			Device: device, Disk: "/dev/" + rootBlockDevice(device), Mount: e.mount, FSType: e.fstype,
+			Device: device, Disk: "/dev/" + diskName, Mount: e.mount, FSType: e.fstype,
 			DiskType: diskType, Model: model, Transport: transport, Icon: icon,
 			Total: total, Used: used, Free: free, UsedPct: pct, Pal: pal, BarCls: barCls,
+			ReadBytes: ioCounter.readBytes, WriteBytes: ioCounter.writeBytes,
 		})
 	}
 	sort.Slice(result, func(i, j int) bool {

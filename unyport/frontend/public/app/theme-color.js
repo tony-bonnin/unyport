@@ -4,14 +4,14 @@
   var THEME_COLOR_BY_ROLE = {
     light: {
       dom0: '#3e3aab',
-      domu: '#a0284a',
-      container: '#b05a1a',
+      domu: '#c80039',
+      container: '#ff7800',
       alpine: '#28587c',
     },
     dark: {
       dom0: '#6864d4',
-      domu: '#d45c82',
-      container: '#de8d50',
+      domu: '#e55c80',
+      container: '#ff9b47',
       alpine: '#4d8cb0',
     },
   };
