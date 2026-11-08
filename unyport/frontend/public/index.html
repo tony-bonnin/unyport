@@ -72,7 +72,7 @@
   <script defer src="/app/networkmap-hover.js"></script>
   <script defer src="/app/metrics.js"></script>
   <script defer src="/app/disk-groups.js"></script>
-  <script defer src="/app/app.js"></script>
+  <script defer src="/app/app.js?v=20261107b"></script>
   <script defer src="/app/pwa-register.js"></script>
   <script defer src="/app/pwa-install.js"></script>
   <script defer src="/app/heatmap-hover.js"></script>
@@ -363,10 +363,12 @@
                 <i class="fa-regular fa-user"></i>
                 <span>My profile</span>
               </button>
-              <button class="topbar-dropdown-item" title="Switch light or dark theme" @click="toggleThemeMenu()">
-                <i class="fa-regular fa-moon" :hidden="!(themeIsLight)"></i>
-                <i class="fa-regular fa-sun" :hidden="!(themeIsDark)"></i>
+              <button class="topbar-dropdown-item" title="Cycle light, dark or automatic theme" @click="toggleThemeMenu()">
+                <i class="fa-regular fa-sun" :hidden="!(themeIsLight)"></i>
+                <i class="fa-regular fa-moon" :hidden="!(themeIsDark)"></i>
+                <i class="fa-regular fa-clock" :hidden="!(themeIsAuto)"></i>
                 <span x-text="themeToggleLabel"></span>
+                <span class="theme-schedule-label" :hidden="!(themeIsAuto)" x-text="themeScheduleLabel"></span>
               </button>
               <template x-if="isAdmin">
                 <button class="topbar-dropdown-item" title="Manage user accounts" @click="openAdminUsersMenu()">
@@ -1275,6 +1277,31 @@
             <div class="page-header">
               <h1><i class="fa-solid fa-gear"></i> Settings</h1>
               <p>Instance configuration | branding, colors and advanced options.</p>
+            </div>
+
+            <div class="settings-section">
+              <div class="settings-section-head">
+                <div>
+                  <h2>Appearance</h2>
+                  <p>Configure when the automatic theme switches between Light and Dark.</p>
+                </div>
+              </div>
+              <div class="settings-grid">
+                <div class="settings-card theme-schedule-card">
+                  <h3><i class="fa-regular fa-clock"></i> Automatic theme schedule</h3>
+                  <p class="settings-card-desc">Times use the local clock of this device and are saved automatically.</p>
+                  <div class="theme-schedule-fields">
+                    <label>
+                      <span>Light starts</span>
+                      <input type="time" x-model="themeLightStart" @change="saveThemeSchedule()" title="Set the start of Light theme">
+                    </label>
+                    <label>
+                      <span>Dark starts</span>
+                      <input type="time" x-model="themeDarkStart" @change="saveThemeSchedule()" title="Set the start of Dark theme">
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="settings-section">

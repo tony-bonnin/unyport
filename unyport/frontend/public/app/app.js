@@ -33,6 +33,16 @@ const SYS_STATE_MAP = {
   net_tx_bps: 'sysNetTxBps',
 };
 
+function _themeTimeSetting(key, fallback) {
+  const value = String(localStorage.getItem(key) || '');
+  return _themeTimeSettingValue(value, fallback);
+}
+
+function _themeTimeSettingValue(value, fallback) {
+  const normalized = String(value || '');
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(normalized) ? normalized : fallback;
+}
+
 // app.js | TRINITY · point d'entrée Alpine.js (CSP build)
 document.addEventListener('alpine:init', () => {
   Alpine.data('unyport', () => ({
@@ -40,7 +50,10 @@ document.addEventListener('alpine:init', () => {
     // ── État primitif ────────────────────────────────────────
     page: 'loading',
     currentPage: 'dashboard',
-    theme: localStorage.getItem('theme') || 'light',
+    theme: ['light', 'dark', 'auto'].includes(localStorage.getItem('theme')) ? localStorage.getItem('theme') : 'auto',
+    themeLightStart: _themeTimeSetting('theme_light_start', '08:00'),
+    themeDarkStart: _themeTimeSetting('theme_dark_start', '20:00'),
+    _themeTimer: null,
     searchOpen: false,
     searchQuery: '',
     searchIndex: 0,
@@ -1017,9 +1030,16 @@ document.addEventListener('alpine:init', () => {
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     },
 
-    get themeToggleLabel() { return this.theme === 'dark' ? 'Light theme' : 'Dark theme'; },
+    get themeToggleLabel() {
+      if (this.theme === 'light') return 'Light theme';
+      if (this.theme === 'dark') return 'Dark theme';
+      return 'Auto theme';
+    },
     get themeIsDark() { return this.theme === 'dark'; },
     get themeIsLight() { return this.theme === 'light'; },
+    get themeIsAuto() { return this.theme === 'auto'; },
+    get effectiveTheme() { return this._resolveTheme(); },
+    get themeScheduleLabel() { return ` · ${this.themeLightStart}–${this.themeDarkStart}`; },
 
     get isAdmin() { return this.userRole === 'admin'; },
     get isOperator() { return this.userRole === 'admin' || this.userRole === 'operator'; },
@@ -1139,11 +1159,8 @@ document.addEventListener('alpine:init', () => {
     // ── Init ─────────────────────────────────────────────────
     async init() {
       this._bindSearchShortcut();
-      document.documentElement.setAttribute('data-theme', this.theme);
-      if (window.__unyportSyncThemeColor) {
-        window.__unyportSyncThemeColor(this.theme, this.hostRoleRole || 'Dom0');
-      }
-      this._updateThemeMetaColor(this.hostRoleRole || 'Dom0');
+      this._applyTheme();
+      this._startThemeTimer();
 
       // Optimisation: Parallélisation des appels indépendants
       await Promise.all([fetchCSRF(), this._loadBranding(), this._loadPublicVersion(), this._loadOAuthProviders()]);
@@ -1240,29 +1257,65 @@ document.addEventListener('alpine:init', () => {
     },
 
     toggleTheme() {
-      this.theme = this.theme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', this.theme);
+      this.theme = this.theme === 'light' ? 'dark' : (this.theme === 'dark' ? 'auto' : 'light');
       localStorage.setItem('theme', this.theme);
+      this._applyTheme();
+      this._startThemeTimer();
+    },
+
+    _resolveTheme() {
+      if (this.theme !== 'auto') return this.theme === 'dark' ? 'dark' : 'light';
+      const now = new Date();
+      const current = (now.getHours() * 60) + now.getMinutes();
+      const lightStart = this._themeTimeMinutes(this.themeLightStart, 480);
+      const darkStart = this._themeTimeMinutes(this.themeDarkStart, 1200);
+      const isLight = lightStart < darkStart
+        ? current >= lightStart && current < darkStart
+        : current >= lightStart || current < darkStart;
+      return isLight ? 'light' : 'dark';
+    },
+
+    _themeTimeMinutes(value, fallback) {
+      const parts = String(value || '').split(':');
+      if (parts.length !== 2) return fallback;
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1]);
+      if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return fallback;
+      return (hours * 60) + minutes;
+    },
+
+    saveThemeSchedule() {
+      this.themeLightStart = _themeTimeSettingValue(this.themeLightStart, '08:00');
+      this.themeDarkStart = _themeTimeSettingValue(this.themeDarkStart, '20:00');
+      localStorage.setItem('theme_light_start', this.themeLightStart);
+      localStorage.setItem('theme_dark_start', this.themeDarkStart);
+      if (this.theme === 'auto') this._applyTheme();
+    },
+
+    _startThemeTimer() {
+      if (this._themeTimer) clearInterval(this._themeTimer);
+      this._themeTimer = null;
+      if (this.theme !== 'auto') return;
+      this._themeTimer = setInterval(() => this._applyTheme(), 60000);
+    },
+
+    _applyTheme() {
+      const effective = this._resolveTheme();
+      document.documentElement.setAttribute('data-theme', effective);
       this._updateThemeMetaColor(this.hostRoleRole || 'Dom0');
       if (window.__unyportSyncThemeColor) {
-        window.__unyportSyncThemeColor(this.theme, this.hostRoleRole || 'Dom0');
-      } else {
-        var evt;
-        if (typeof window.CustomEvent === 'function') {
-          evt = new CustomEvent('themechange');
-        } else if (document.createEvent) {
-          evt = document.createEvent('Event');
-          evt.initEvent('themechange', false, false);
-        } else {
-          evt = null;
-        }
-        if (evt && window.dispatchEvent) {
-          window.dispatchEvent(evt);
-        } else if (evt && window.fireEvent) {
-          window.fireEvent('on' + evt.type);
-        }
+        window.__unyportSyncThemeColor(effective, this.hostRoleRole || 'Dom0');
       }
-
+      var evt;
+      if (typeof window.CustomEvent === 'function') {
+        evt = new CustomEvent('themechange');
+      } else if (document.createEvent) {
+        evt = document.createEvent('Event');
+        evt.initEvent('themechange', false, false);
+      } else {
+        evt = null;
+      }
+      if (evt && window.dispatchEvent) window.dispatchEvent(evt);
     },
 
     // ── Profil ───────────────────────────────────────────────
@@ -1881,7 +1934,7 @@ document.addEventListener('alpine:init', () => {
       document.documentElement.setAttribute('data-role', map[roleKey] || 'alpine');
       this._updateThemeMetaColor(role || 'Dom0');
       if (window && window.__unyportSyncThemeColor) {
-        window.__unyportSyncThemeColor(this.theme, role || 'Dom0');
+        window.__unyportSyncThemeColor(this.effectiveTheme, role || 'Dom0');
       }
     },
 
@@ -1904,7 +1957,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     _updateThemeMetaColor(role) {
-      const currentTheme = (this.theme || document.documentElement.getAttribute('data-theme') || 'light');
+      const currentTheme = (document.documentElement.getAttribute('data-theme') || this.effectiveTheme || 'light');
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) {
         meta.setAttribute('content', this._themeColorByRole(currentTheme, role || this.hostRoleRole || 'Dom0'));

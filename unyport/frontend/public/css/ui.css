@@ -123,6 +123,11 @@
   flex-shrink: 0;
 }
 
+.theme-schedule-label {
+  margin-left: -10px;
+  opacity: .66;
+}
+
 .topbar-dropdown-danger { color: #dc2626; }
 .topbar-dropdown-danger i { color: #dc2626; }
 .topbar-dropdown-danger:hover { background: #fef2f2; }

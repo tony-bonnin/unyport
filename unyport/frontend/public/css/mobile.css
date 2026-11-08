@@ -120,6 +120,58 @@
   line-height: 1.5;
 }
 
+.theme-schedule-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-schedule-card {
+  grid-column: 1 / -1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.theme-schedule-card h3 i {
+  color: var(--brand);
+}
+
+.theme-schedule-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.theme-schedule-fields label {
+  display: grid;
+  gap: 6px;
+}
+
+.theme-schedule-fields label > span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.theme-schedule-fields input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  outline: none;
+  background: var(--surface-sunk);
+  color: var(--text);
+}
+
+.theme-schedule-fields input:focus {
+  border-color: color-mix(in srgb, var(--brand) 50%, var(--border));
+}
+
+@media (max-width: 520px) {
+  .theme-schedule-fields { grid-template-columns: 1fr; }
+}
+
 /* ============================================================
    LOGO PREVIEW
    ============================================================ */

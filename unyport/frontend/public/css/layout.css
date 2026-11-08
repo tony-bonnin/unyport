@@ -171,26 +171,22 @@
   background: var(--surface-sunk);
 }
 
-.lbu-status.dirty, .dirty .lbu-text * {
-    background: #fef0da;
-    color: #ffa30e;
-}
-
 .lbu-status.dirty {
-    border-color: #ffa30e1c;
+  background: rgba(245, 158, 11, .08);
+  border-color: rgba(245, 158, 11, .11);
+  color: #f59e0b;
 }
 
 .lbu-status.clean {
-    background: #00bf440d;
-    color: #16a34ac4;
+  background: #00bf440d;
+  border-color: transparent;
+  color: #16a34ac4;
 }
 
+.lbu-status.dirty .lbu-text *,
 .lbu-status.clean .lbu-text * {
-    color: #16a34ac4;
-}
-
-.lbu-status.clean {
-    border-color: transparent;
+  background: transparent;
+  color: inherit;
 }
 
 .lbu-dot {
