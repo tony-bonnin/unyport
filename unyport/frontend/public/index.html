@@ -466,28 +466,6 @@
               </div>
             </div>
 
-            <div class="section-head"><h2>Performance</h2><p>Live CPU and memory activity.</p></div>
-            <div class="resource-performance-grid dashboard-performance-grid">
-              <article class="resource-performance-card">
-                <header class="resource-performance-head">
-                  <div class="resource-performance-identity"><div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div><div><span>Processor</span><h3 x-text="cpuModelClean"></h3></div></div>
-                  <div class="resource-performance-value"><strong x-text="cpuPct + '%'">0%</strong><span>average load</span></div>
-                </header>
-                <div class="resource-performance-meta"><span><b x-text="cpuCoresDisplay"></b> cores</span><span><b x-text="cpuFreqFmt"></b> frequency</span><span><b x-text="cpuTempFmt"></b> temperature</span></div>
-                <div class="resource-performance-chart"><canvas id="chartFreqDashboard" data-resource-chart="freq"></canvas></div>
-              </article>
-              <article class="resource-performance-card">
-                <header class="resource-performance-head">
-                  <div class="resource-performance-identity"><div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div><div><span>Memory</span><h3>Physical RAM</h3></div></div>
-                  <div class="resource-performance-value"><strong x-text="memPct + '%'">0%</strong><span>used</span></div>
-                </header>
-                <div class="resource-memory-total"><strong x-text="memUsedFmt"></strong><span> of </span><b x-text="memTotalFmt"></b></div>
-                <div class="storage-volume-bar resource-memory-meter"><div class="storage-volume-fill mem-bar"></div></div>
-                <div class="resource-performance-chart"><canvas id="chartMemDashboard" data-resource-chart="mem"></canvas></div>
-                <dl class="resource-memory-breakdown"><div><dt>Used</dt><dd x-text="memUsedFmt"></dd></div><div><dt>Cached</dt><dd x-text="_fmtMB(sysMemCachedMb)"></dd></div><div><dt>Free</dt><dd x-text="memFreeFmt"></dd></div><div><dt>Total</dt><dd x-text="memTotalFmt"></dd></div></dl>
-              </article>
-            </div>
-
             <section class="reboot-heatmap-band">
               <div class="reboot-heatmap-head">
                 <div>
@@ -663,6 +641,28 @@
                   <dt>Interface</dt><dd x-text="netIfaceDisplay"></dd>
                   <dt>IP address</dt><dd x-text="netIpDisplay"></dd>
                 </dl>
+              </div>
+            </div>
+
+            <div class="section-head">
+              <h2>Real-time activity</h2>
+              <p>System load and traffic visualisation.</p>
+            </div>
+
+            <div class="charts-grid charts-2col">
+              <div class="chart-card">
+                <div class="chart-card-head">
+                  <i class="fa-solid fa-heart-pulse"></i>
+                  <h3>CPU frequency</h3>
+                </div>
+                <canvas id="chartFreqDashboard" data-resource-chart="freq"></canvas>
+              </div>
+              <div class="chart-card">
+                <div class="chart-card-head">
+                  <i class="fa-solid fa-memory"></i>
+                  <h3>Memory</h3>
+                </div>
+                <canvas id="chartMemDashboard" data-resource-chart="mem"></canvas>
               </div>
             </div>
 
