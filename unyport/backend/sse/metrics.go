@@ -257,7 +257,10 @@ func collectLBU() LBUStatus {
 		return lbuStatusCache.value
 	}
 	lbuStatusCache.value = collectLBUUncached()
-	lbuStatusCache.expires = time.Now().Add(30 * time.Second)
+	// lbu status builds and compares an archive of the protected filesystem.
+	// On larger hosts this takes several seconds, so avoid repeating the scan
+	// on every metrics cycle while still refreshing periodically.
+	lbuStatusCache.expires = time.Now().Add(5 * time.Minute)
 	return lbuStatusCache.value
 }
 
@@ -283,9 +286,10 @@ func collectLBUUncached() LBUStatus {
 	if patchedLibrary == string(library) || os.WriteFile(filepath.Join(workDir, "libalpine.sh"), []byte(patchedLibrary), 0o600) != nil {
 		return LBUStatus{Present: true, State: "dirty", Archive: archive}
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "lbu", "status")
+	cmd.Dir = "/var"
 	cmd.Env = append(os.Environ(), "TMPDIR="+workDir, "LIBDIR="+workDir)
 	cmd.Stderr = io.Discard
 	out, err := cmd.Output()

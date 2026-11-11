@@ -79,8 +79,13 @@ func (b *Broker) loop() {
 	var prevSnap Snapshot
 	var prevIfaces map[string]NetIfaceInfo
 	var prevXenCPU map[int]float64
+	var prevLBU LBUStatus
 	for {
 		snap := collect()
+		if snap.LBU != prevLBU {
+			b.logger.Info("lbu state changed", "present", snap.LBU.Present, "state", snap.LBU.State, "archive", snap.LBU.Archive)
+			prevLBU = snap.LBU
+		}
 
 		// Calcul débit réseau (bytes/s) entre deux snapshots
 		if prevSnap.Timestamp.IsZero() {
