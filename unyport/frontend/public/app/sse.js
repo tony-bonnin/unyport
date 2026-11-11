@@ -11,9 +11,16 @@ class SystemSSE {
     this.disconnect();
     const es = new EventSource('/sse/system', { withCredentials: true });
     this._es = es;
-    es.onopen = () => this._onStatus(true);
-    es.onmessage = (e) => { try { this._onSnap(JSON.parse(e.data)); } catch { } };
-    es.onerror = () => this._onStatus(false);
+    es.onopen = () => {
+      if (this._es === es) this._onStatus(true);
+    };
+    es.onmessage = (e) => {
+      if (this._es !== es) return;
+      try { this._onSnap(JSON.parse(e.data)); } catch { }
+    };
+    es.onerror = () => {
+      if (this._es === es) this._onStatus(false);
+    };
   }
 
   disconnect() {

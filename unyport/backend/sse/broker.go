@@ -36,6 +36,8 @@ type Broker struct {
 	versionsAlpine     string
 	versionsChecked    time.Time
 	versionsFetcher    func(*http.Client, string) (string, string, error)
+	done               chan struct{}
+	stopOnce           sync.Once
 }
 
 func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath string) *Broker {
@@ -63,6 +65,7 @@ func NewBroker(logger *slog.Logger, rebootLogPath string, startupHistoryPath str
 		rebootLogPath:      rebootLogPath,
 		startupHistoryPath: startupHistoryPath,
 		versionsFetcher:    fetchLatestRepoVersions,
+		done:               make(chan struct{}),
 	}
 	go b.loop()
 	return b
@@ -158,8 +161,20 @@ func (b *Broker) loop() {
 			}
 		}
 		b.mu.Unlock()
-		time.Sleep(pollInterval)
+		select {
+		case <-time.After(pollInterval):
+		case <-b.done:
+			return
+		}
 	}
+}
+
+// Close stops collection and releases every long-lived SSE handler.
+func (b *Broker) Close() {
+	if b == nil || b.done == nil {
+		return
+	}
+	b.stopOnce.Do(func() { close(b.done) })
 }
 
 func (b *Broker) subscribe() chan Snapshot {
@@ -199,7 +214,9 @@ func (b *Broker) Handler(w http.ResponseWriter, r *http.Request) {
 	if b.count > 0 {
 		last := b.ring[(b.head-1+ringSize)%ringSize]
 		b.mu.RUnlock()
-		writeSSE(w, flusher, last)
+		if writeSSE(w, flusher, last) != nil {
+			return
+		}
 	} else {
 		b.mu.RUnlock()
 	}
@@ -207,7 +224,11 @@ func (b *Broker) Handler(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case snap := <-ch:
-			writeSSE(w, flusher, snap)
+			if writeSSE(w, flusher, snap) != nil {
+				return
+			}
+		case <-b.done:
+			return
 		case <-r.Context().Done():
 			b.logger.Debug("sse client disconnected", "remote", r.RemoteAddr)
 			return
@@ -333,13 +354,16 @@ func mathMin(a, b float64) float64 {
 	return b
 }
 
-func writeSSE(w http.ResponseWriter, f http.Flusher, snap Snapshot) {
+func writeSSE(w http.ResponseWriter, f http.Flusher, snap Snapshot) error {
 	data, err := json.Marshal(snap)
 	if err != nil {
-		return
+		return err
 	}
-	fmt.Fprintf(w, "data: %s\n\n", data)
+	if _, err := fmt.Fprintf(w, "data: %s\n\n", data); err != nil {
+		return err
+	}
 	f.Flush()
+	return nil
 }
 
 // ============================================================

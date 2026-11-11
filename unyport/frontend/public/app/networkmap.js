@@ -297,11 +297,13 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
   el.innerHTML = ''; el.appendChild(root);
 
   if (el._nmLayoutFrame) cancelAnimationFrame(el._nmLayoutFrame);
-  el._nmLayoutFrame = requestAnimationFrame(function () {
+  var pendingIndex = 0;
+  function layoutNextConnector() {
     el._nmLayoutFrame = 0;
     if (el._nmRenderId !== renderId || !root.isConnected) return;
 
-    pending.forEach(function (p) {
+    if (pendingIndex < pending.length) {
+      var p = pending[pendingIndex++];
       var connR = p.connect.getBoundingClientRect();
 
       if (p.type === 'host-rake') {
@@ -365,6 +367,11 @@ function renderNetworkMap(netMap, hostRole, hostRuntime, hostName, hostIP, conta
           });
         }
       }
-    });
-  });
+    }
+
+    if (pendingIndex < pending.length) {
+      el._nmLayoutFrame = requestAnimationFrame(layoutNextConnector);
+    }
+  }
+  el._nmLayoutFrame = requestAnimationFrame(layoutNextConnector);
 }

@@ -23,9 +23,10 @@ import (
 
 // Server wraps http.Server et le serveur HTTP/3 optionnel.
 type Server struct {
-	HTTP  *http.Server
-	HTTP3 *http3.Server // nil si HTTP/3 désactivé
-	addr  string
+	HTTP   *http.Server
+	HTTP3  *http3.Server // nil si HTTP/3 désactivé
+	Broker *sse.Broker
+	addr   string
 }
 
 // Addr retourne l'adresse d'écoute principale.
@@ -107,6 +108,9 @@ func (s *Server) ListenAndServeHTTP() error {
 
 // Shutdown arrête proprement HTTP/1.1+2 et HTTP/3.
 func (s *Server) Shutdown(ctx context.Context) error {
+	if s.Broker != nil {
+		s.Broker.Close()
+	}
 	if s.HTTP3 != nil {
 		_ = s.HTTP3.Close()
 	}
@@ -214,7 +218,7 @@ func New(cfg config.Config, settings *config.Settings, logger *slog.Logger) *Ser
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	srv := &Server{HTTP: httpSrv, addr: httpAddr}
+	srv := &Server{HTTP: httpSrv, Broker: broker, addr: httpAddr}
 
 	// ---- HTTP/3 (QUIC) | optionnel ----
 	if settings.HTTP3.Enabled {

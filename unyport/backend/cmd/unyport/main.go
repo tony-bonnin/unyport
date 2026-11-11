@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -46,7 +47,7 @@ func main() {
 		} else {
 			err = srv.ListenAndServeHTTP()
 		}
-		if err != nil {
+		if err != nil && err != http.ErrServerClosed {
 			logger.Error("server error", "err", err)
 		}
 	}()
