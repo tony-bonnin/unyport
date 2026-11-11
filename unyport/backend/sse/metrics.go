@@ -110,6 +110,7 @@ type Snapshot struct {
 
 	// ── Températures CPU ──────────────────────────────────────
 	CPUTemps []CPUTemp `json:"cpu_temps"`
+	FanRPM   uint64    `json:"fan_rpm"`
 
 	// ── Top processus ─────────────────────────────────────────
 	TopProcs []ProcInfo `json:"top_procs"`
@@ -162,6 +163,7 @@ func collect() Snapshot {
 	disks := collectDisks()
 	loadAvg := collectLoadAvg()
 	cpuTemps := collectCPUTemps()
+	fanRPM := collectFanRPM()
 	topProcs := collectTopProcs(20, memTotal*1024)
 
 	// ── Échelles Y : initialisées à zéro ────────────────────────────
@@ -230,6 +232,7 @@ func collect() Snapshot {
 		Disks:          disks,
 		LoadAvg:        loadAvg,
 		CPUTemps:       cpuTemps,
+		FanRPM:         fanRPM,
 		TopProcs:       topProcs,
 	}
 }
@@ -238,16 +241,9 @@ func collect() Snapshot {
 // LBU | Alpine Linux Backup
 // ============================================================
 
-// collectLBU détecte l'état LBU via stat(2) uniquement.
-//
-// Algorithme :
-//  1. /etc/apk/protected-paths.d inexistant → LBU absent (state:"absent")
-//  2. Chercher la dernière *.tar.gz dans /var/cache/lbu/
-//     • Aucune archive → state:"dirty" (jamais commité)
-//     • Archive plus récente que protected-paths.d → state:"clean"
-//     • Protected-paths.d plus récent que archive → state:"dirty"
-//
-// Zéro binaire externe, zéro exec | uniquement os.Stat + os.ReadDir.
+// collectLBU interroge l'état réel de LBU. La commande travaille dans /var afin
+// qu'un timeout ne puisse jamais remplir le tmpfs racine. Son espace temporaire
+// dédié est supprimé au retour, succès comme erreur.
 var lbuStatusCache struct {
 	sync.Mutex
 	value   LBUStatus
@@ -270,9 +266,27 @@ func collectLBUUncached() LBUStatus {
 		return LBUStatus{Present: false, State: "absent"}
 	}
 	archive := latestLBUArchive()
+	workDir, err := os.MkdirTemp("/var/tmp", "unyport-lbu-")
+	if err != nil {
+		return LBUStatus{Present: true, State: "dirty", Archive: archive}
+	}
+	defer os.RemoveAll(workDir)
+	library, err := os.ReadFile("/usr/lib/libalpine.sh")
+	if err != nil {
+		return LBUStatus{Present: true, State: "dirty", Archive: archive}
+	}
+	patchedLibrary := strings.ReplaceAll(
+		string(library),
+		`"/tmp/$PROGRAM-`,
+		`"`+workDir+`/$PROGRAM-`,
+	)
+	if patchedLibrary == string(library) || os.WriteFile(filepath.Join(workDir, "libalpine.sh"), []byte(patchedLibrary), 0o600) != nil {
+		return LBUStatus{Present: true, State: "dirty", Archive: archive}
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "lbu", "status")
+	cmd.Env = append(os.Environ(), "TMPDIR="+workDir, "LIBDIR="+workDir)
 	cmd.Stderr = io.Discard
 	out, err := cmd.Output()
 	if err != nil || strings.TrimSpace(string(out)) != "" || archive == "" {
@@ -2090,6 +2104,27 @@ func collectLoadAvg() LoadAverage {
 // ============================================================
 // CPU TEMPERATURES | /sys/class/thermal
 // ============================================================
+
+// collectFanRPM returns the fastest running hardware fan. Some boards expose
+// an unused zero-valued header alongside the actual chassis fan.
+func collectFanRPM() uint64 {
+	paths, err := filepath.Glob("/sys/class/hwmon/hwmon*/fan*_input")
+	if err != nil {
+		return 0
+	}
+	var rpm uint64
+	for _, path := range paths {
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		value, err := strconv.ParseUint(strings.TrimSpace(string(raw)), 10, 64)
+		if err == nil && value > rpm {
+			rpm = value
+		}
+	}
+	return rpm
+}
 
 // CPUTemp décrit une zone thermique.
 type CPUTemp struct {

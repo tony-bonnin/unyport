@@ -31,6 +31,7 @@
 
 .sidebar-brand {
     display: flex;
+    position: relative;
     align-items: center;
     justify-content: center;
     border-bottom: 1px solid var(--side-border);

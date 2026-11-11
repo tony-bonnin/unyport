@@ -31,6 +31,8 @@
 @import url('./animations.css');
 @import url('./metrics.css');
 
+
+
 /* Hard rule: summary strips stay as the long Docker-style row on desktop. */
 .main-inner .stats-strip.stats-strip-wide {
   display: grid !important;

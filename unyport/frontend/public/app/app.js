@@ -31,6 +31,7 @@ const SYS_STATE_MAP = {
   net_tx_bytes: 'sysNetTxBytes',
   net_rx_bps: 'sysNetRxBps',
   net_tx_bps: 'sysNetTxBps',
+  fan_rpm: 'sysFanRPM',
 };
 
 function _themeTimeSetting(key, fallback) {
@@ -43,6 +44,10 @@ function _themeTimeSettingValue(value, fallback) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(normalized) ? normalized : fallback;
 }
 
+function _unyportExpertOnly() {
+  return true;
+}
+
 // app.js | TRINITY · point d'entrée Alpine.js (CSP build)
 document.addEventListener('alpine:init', () => {
   Alpine.data('unyport', () => ({
@@ -50,6 +55,8 @@ document.addEventListener('alpine:init', () => {
     // ── État primitif ────────────────────────────────────────
     page: 'loading',
     currentPage: 'dashboard',
+    expertOnly: _unyportExpertOnly(),
+    experienceMode: _unyportExpertOnly() || localStorage.getItem('unyport_experience_mode') === 'expert' ? 'expert' : 'simple',
     theme: ['light', 'dark', 'auto'].includes(localStorage.getItem('theme')) ? localStorage.getItem('theme') : 'auto',
     themeLightStart: _themeTimeSetting('theme_light_start', '08:00'),
     themeDarkStart: _themeTimeSetting('theme_dark_start', '20:00'),
@@ -181,6 +188,7 @@ document.addEventListener('alpine:init', () => {
     sysDisks: [],
     sysLoadAvg: { load1: 0, load5: 0, load15: 0 },
     sysCPUTemps: [],
+    sysFanRPM: 0,
     sysTopProcs: [],
     sysMemCachedMb: 0,
 
@@ -455,6 +463,22 @@ document.addEventListener('alpine:init', () => {
       return '';
     },
 
+    get hostHealthScore() {
+      return Math.max(0, 100 - Math.max(this.cpuPct, this.memPct));
+    },
+
+    get hostHealthLabel() {
+      if (this.hostHealthScore < 20) return 'Critical load';
+      if (this.hostHealthScore < 40) return 'Review recommended';
+      return 'Healthy';
+    },
+
+    get hostHealthTone() {
+      if (this.hostHealthScore < 20) return 'is-critical';
+      if (this.hostHealthScore < 40) return 'is-warning';
+      return 'is-healthy';
+    },
+
     get showLbu() { return this.lbuPresent; },
     get showLbuDirty() { return this.lbuPresent && this.lbuState === 'dirty'; },
     get showLbuClean() { return this.lbuPresent && this.lbuState === 'clean'; },
@@ -479,6 +503,15 @@ document.addEventListener('alpine:init', () => {
     get diskTotalFmt() {
       const total = this.sysDisks.reduce((s, d) => s + (d.total_mb || 0), 0);
       return this._fmtMB(total);
+    },
+
+    get fanRPMDigits() {
+      return String(Math.max(0, Math.min(9999, Math.round(Number(this.sysFanRPM) || 0))))
+        .padStart(4, '0');
+    },
+
+    fanDigitClass(index) {
+      return `is-${this.fanRPMDigits.charAt(index) || '0'}`;
     },
 
     get diskGroups() {
@@ -989,6 +1022,7 @@ document.addEventListener('alpine:init', () => {
 
     _authorizedPath(path) {
       const route = _ROUTES[path] || _ROUTES['/dashboard'];
+      if (this.simpleMode && route.key === 'hypervisor') return '/dashboard';
       if (route.role === 'admin' && !this.isAdmin) return '/dashboard';
       if (route.role === 'operator' && !this.isOperator) return '/dashboard';
       return _ROUTES[path] ? path : '/dashboard';
@@ -1040,6 +1074,13 @@ document.addEventListener('alpine:init', () => {
     get themeIsAuto() { return this.theme === 'auto'; },
     get effectiveTheme() { return this._resolveTheme(); },
     get themeScheduleLabel() { return ` · ${this.themeLightStart}–${this.themeDarkStart}`; },
+    get simpleMode() { return this.experienceMode === 'simple'; },
+    get expertMode() { return this.experienceMode === 'expert'; },
+    get experienceModeLabel() { return this.expertMode ? 'Expert' : 'Simple'; },
+    get resourcesMenuLabel() { return this.simpleMode ? 'System health' : 'Host resources'; },
+    get networkMenuLabel() { return this.simpleMode ? 'Connectivity' : 'Network'; },
+    get securityMenuLabel() { return this.simpleMode ? 'Protection' : 'Security'; },
+    get settingsMenuLabel() { return this.simpleMode ? 'Preferences' : 'Settings'; },
 
     get isAdmin() { return this.userRole === 'admin'; },
     get isOperator() { return this.userRole === 'admin' || this.userRole === 'operator'; },
@@ -1061,10 +1102,14 @@ document.addEventListener('alpine:init', () => {
 
     getPageTitle() {
       const titles = {
-        hypervisor: this.hostPageTitle, resources: 'Host Resources', network: 'Network',
-        storage: 'Storage', security: 'Security', settings: 'Settings'
+        hypervisor: this.hostPageTitle,
+        resources: this.resourcesMenuLabel,
+        network: this.networkMenuLabel,
+        storage: 'Storage',
+        security: this.securityMenuLabel,
+        settings: this.settingsMenuLabel
       };
-      return titles[this.currentPage] || 'Dashboard';
+      return titles[this.currentPage] || (this.simpleMode ? 'Overview' : 'Dashboard');
     },
 
     get roleBadgeClass() {
@@ -1158,7 +1203,12 @@ document.addEventListener('alpine:init', () => {
 
     // ── Init ─────────────────────────────────────────────────
     async init() {
+      if (this.expertOnly) {
+        this.experienceMode = 'expert';
+        localStorage.setItem('unyport_experience_mode', 'expert');
+      }
       this._bindSearchShortcut();
+      document.documentElement.setAttribute('data-experience', this.experienceMode);
       this._applyTheme();
       this._startThemeTimer();
 
@@ -1254,6 +1304,19 @@ document.addEventListener('alpine:init', () => {
     startOAuth(provider) {
       if (!this.oauthProviders[provider]) return;
       window.location.href = '/api/oauth/login?provider=' + encodeURIComponent(provider);
+    },
+
+    setExperienceMode(mode) {
+      this.experienceMode = this.expertOnly || mode === 'expert' ? 'expert' : 'simple';
+      localStorage.setItem('unyport_experience_mode', this.experienceMode);
+      document.documentElement.setAttribute('data-experience', this.experienceMode);
+      this.dropdownOpen = false;
+      this.mobileMenuOpen = false;
+      if (this.simpleMode && this.currentPage === 'hypervisor') this.navigate('/dashboard');
+    },
+
+    toggleExperienceMode() {
+      this.setExperienceMode(this.expertMode ? 'simple' : 'expert');
     },
 
     toggleTheme() {
@@ -1829,7 +1892,7 @@ document.addEventListener('alpine:init', () => {
       // Boucle optimisée sur SYS_STATE_MAP
       for (const [srcKey, destKey] of Object.entries(SYS_STATE_MAP)) {
         if (d[srcKey] !== undefined) {
-          this[destKey] = (srcKey.includes('_mb') || srcKey.includes('_bytes') || srcKey.includes('_bps') || srcKey.includes('cores') || srcKey.includes('usage'))
+          this[destKey] = (srcKey.includes('_mb') || srcKey.includes('_bytes') || srcKey.includes('_bps') || srcKey.includes('cores') || srcKey.includes('usage') || srcKey.includes('rpm'))
             ? n(d[srcKey])
             : s(d[srcKey], destKey.startsWith('sysNet') ? '|' : (destKey === 'sysOsRelease' ? 'Alpine Linux' : '|'));
         }
@@ -2087,6 +2150,7 @@ document.addEventListener('alpine:init', () => {
       this.sysDisks = [];
       this.sysLoadAvg = { load1: 0, load5: 0, load15: 0 };
       this.sysCPUTemps = [];
+      this.sysFanRPM = 0;
       this.sysTopProcs = [];
       this.sysMemCachedMb = 0;
       this.sysBoardName = ''; this.sysBoardVendor = ''; this.boardVersion = '';

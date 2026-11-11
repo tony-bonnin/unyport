@@ -963,3 +963,113 @@ canvas.chart-load-enter{animation:chart-load-enter .9s cubic-bezier(.22,1,.36,1)
 }
 
 .btn-danger-text:hover { text-decoration: underline; }
+
+/* UnyPort edition: progressive disclosure for novice and expert users. */
+.unyport-edition-label {
+  position: absolute;
+  right: 8px;
+  bottom: 3.33px;
+  margin: 0 !important;
+  color: rgba(255, 255, 255, .33) !important;
+  font-size: 5.66px !important;
+  font-weight: 700;
+  letter-spacing: .08em !important;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.experience-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 92px;
+  padding: .2rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border));
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
+  color: var(--brand);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.experience-switch.is-expert {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.unyport-mode-section {
+  margin-bottom: 24px;
+}
+
+.experience-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.experience-choice > button {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 12px;
+  min-height: 82px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.experience-choice > button > i:first-child {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--brand) 9%, transparent);
+  color: var(--brand);
+}
+
+.experience-choice > button span,
+.experience-choice > button strong,
+.experience-choice > button small {
+  display: block;
+}
+
+.experience-choice > button strong { font-size: 13px; }
+.experience-choice > button small { margin-top: 4px; color: var(--text-muted); font-size: 11px; line-height: 1.4; }
+.experience-choice > button.active { border-color: color-mix(in srgb, var(--brand) 55%, var(--border)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 10%, transparent); }
+.experience-choice-check { color: var(--brand); }
+
+.mobile-experience-switch {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 24px);
+  margin: 4px 12px 10px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--brand) 25%, var(--side-border));
+  border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--brand) 9%, var(--side-bg));
+  color: var(--side-text);
+  text-align: left;
+}
+
+.mobile-experience-switch span,
+.mobile-experience-switch strong,
+.mobile-experience-switch small { display: block; }
+.mobile-experience-switch strong { font-size: 12px; }
+.mobile-experience-switch small { margin-top: 2px; color: var(--side-text-dim); font-size: 9.5px; }
+
+@media (max-width: 760px) {
+  .experience-switch { min-width: 34px; width: 34px; padding: 0; }
+  .experience-switch span { display: none; }
+  .experience-choice { grid-template-columns: 1fr; }
+}

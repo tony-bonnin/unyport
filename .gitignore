@@ -3,6 +3,7 @@ unyport/backend/server/assets/*
 dist/
 unyport/backend/logs/*
 unyport/backend/tmp/*
+unyport/frontend/public/media/products/
 unyport-git-sync.env
 docker-compose.yml
 .gitignore

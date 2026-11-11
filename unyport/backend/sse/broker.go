@@ -409,6 +409,7 @@ type SystemInfo struct {
 	MemStackFree   uint64    `json:"mem_stack_free"`
 	MemUsedPct     uint8     `json:"mem_used_pct"`
 	MemCachedPct   uint8     `json:"mem_cached_pct"`
+	FanRPM         uint64    `json:"fan_rpm"`
 
 	// Compat legacy | certains appels utilisaient xen_role directement
 	XenRole string `json:"xen_role"`
@@ -507,6 +508,7 @@ func (b *Broker) SystemInfoHandler(w http.ResponseWriter, r *http.Request) {
 		MemStackFree:   snap.MemStackFree,
 		MemUsedPct:     snap.MemUsedPct,
 		MemCachedPct:   snap.MemCachedPct,
+		FanRPM:         snap.FanRPM,
 		LBU:            snap.LBU,
 		XenInfo:        snap.XenInfo,
 		XenDomains:     snap.XenDomains,
