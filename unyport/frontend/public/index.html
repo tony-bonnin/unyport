@@ -66,13 +66,13 @@
   <script defer src="/app/sse.js?v=2"></script>
   <script defer src="/app/extended-device-types.js"></script>
   <script defer src="/app/device-icons.js"></script>
-  <script defer src="/app/chart.js"></script>
+  <script defer src="/app/chart.js?v=20261111a"></script>
   <script defer src="/app/security-charts.js"></script>
   <script defer src="/app/networkmap.js?v=2"></script>
   <script defer src="/app/networkmap-hover.js"></script>
   <script defer src="/app/metrics.js"></script>
   <script defer src="/app/disk-groups.js"></script>
-  <script defer src="/app/app.js?v=20261111a"></script>
+  <script defer src="/app/app.js?v=20261111b"></script>
   <script defer src="/app/pwa-register.js"></script>
   <script defer src="/app/pwa-install.js"></script>
   <script defer src="/app/heatmap-hover.js"></script>
@@ -464,6 +464,28 @@
                   <div class="stat-label">Memory used</div>
                 </div>
               </div>
+            </div>
+
+            <div class="section-head"><h2>Performance</h2><p>Live CPU and memory activity.</p></div>
+            <div class="resource-performance-grid dashboard-performance-grid">
+              <article class="resource-performance-card">
+                <header class="resource-performance-head">
+                  <div class="resource-performance-identity"><div class="res-icon res-indigo"><i class="fa-solid fa-microchip"></i></div><div><span>Processor</span><h3 x-text="cpuModelClean"></h3></div></div>
+                  <div class="resource-performance-value"><strong x-text="cpuPct + '%'">0%</strong><span>average load</span></div>
+                </header>
+                <div class="resource-performance-meta"><span><b x-text="cpuCoresDisplay"></b> cores</span><span><b x-text="cpuFreqFmt"></b> frequency</span><span><b x-text="cpuTempFmt"></b> temperature</span></div>
+                <div class="resource-performance-chart"><canvas id="chartFreqDashboard" data-resource-chart="freq"></canvas></div>
+              </article>
+              <article class="resource-performance-card">
+                <header class="resource-performance-head">
+                  <div class="resource-performance-identity"><div class="res-icon res-purple"><i class="fa-solid fa-memory"></i></div><div><span>Memory</span><h3>Physical RAM</h3></div></div>
+                  <div class="resource-performance-value"><strong x-text="memPct + '%'">0%</strong><span>used</span></div>
+                </header>
+                <div class="resource-memory-total"><strong x-text="memUsedFmt"></strong><span> of </span><b x-text="memTotalFmt"></b></div>
+                <div class="storage-volume-bar resource-memory-meter"><div class="storage-volume-fill mem-bar"></div></div>
+                <div class="resource-performance-chart"><canvas id="chartMemDashboard" data-resource-chart="mem"></canvas></div>
+                <dl class="resource-memory-breakdown"><div><dt>Used</dt><dd x-text="memUsedFmt"></dd></div><div><dt>Cached</dt><dd x-text="_fmtMB(sysMemCachedMb)"></dd></div><div><dt>Free</dt><dd x-text="memFreeFmt"></dd></div><div><dt>Total</dt><dd x-text="memTotalFmt"></dd></div></dl>
+              </article>
             </div>
 
             <section class="reboot-heatmap-band">
@@ -870,7 +892,7 @@
                   <div class="resource-performance-value"><strong x-text="cpuPct + '%'">0%</strong><span>average load</span></div>
                 </header>
                 <div class="resource-performance-meta"><span><b x-text="cpuCoresDisplay"></b> cores</span><span><b x-text="cpuFreqFmt"></b> frequency</span><span><b x-text="cpuTempFmt"></b> temperature</span></div>
-                <div class="resource-performance-chart"><canvas id="chartFreq"></canvas></div>
+                <div class="resource-performance-chart"><canvas id="chartFreq" data-resource-chart="freq"></canvas></div>
                 <div id="per-core-grid" class="per-core-grid resource-core-grid"></div>
               </article>
               <article class="resource-performance-card">
@@ -880,7 +902,7 @@
                 </header>
                 <div class="resource-memory-total"><strong x-text="memUsedFmt"></strong><span> of </span><b x-text="memTotalFmt"></b></div>
                 <div class="storage-volume-bar resource-memory-meter"><div class="storage-volume-fill mem-bar"></div></div>
-                <div class="resource-performance-chart"><canvas id="chartMem"></canvas></div>
+                <div class="resource-performance-chart"><canvas id="chartMem" data-resource-chart="mem"></canvas></div>
                 <dl class="resource-memory-breakdown"><div><dt>Used</dt><dd x-text="memUsedFmt"></dd></div><div><dt>Cached</dt><dd x-text="_fmtMB(sysMemCachedMb)"></dd></div><div><dt>Free</dt><dd x-text="memFreeFmt"></dd></div><div><dt>Total</dt><dd x-text="memTotalFmt"></dd></div></dl>
               </article>
             </div>

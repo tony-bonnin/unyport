@@ -1030,7 +1030,7 @@ document.addEventListener('alpine:init', () => {
 
     _applyRoute(key) {
       this.currentPage = key;
-      if (key === 'resources') this.$nextTick(() => typeof initCharts === 'function' && initCharts());
+      if (key === 'resources' || key === 'dashboard') this.$nextTick(() => typeof initCharts === 'function' && initCharts());
       if (key === 'storage') this.$nextTick(() => typeof initDiskCharts === 'function' && initDiskCharts());
       if (key === 'network') {
         this.$nextTick(() => {

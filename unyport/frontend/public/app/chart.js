@@ -39,7 +39,7 @@ const _state = {
 };
 
 function _refreshFreq(chart) {
-  if (_chartsSuspended || !chart?.canvas?.isConnected) return;
+  if (_chartsSuspended || !chart?.canvas?.isConnected || chart.canvas.offsetParent === null) return;
   chart.data.datasets[0].data.push({ x: Date.now(), y: _state.freqAvg });
   chart.data.datasets[0].borderColor = _brand(0.85);
   chart.data.datasets[0].backgroundColor = _brand(0.09);
@@ -52,7 +52,7 @@ function _refreshFreq(chart) {
 }
 
 function _refreshMem(chart) {
-  if (_chartsSuspended || !chart?.canvas?.isConnected) return;
+  if (_chartsSuspended || !chart?.canvas?.isConnected || chart.canvas.offsetParent === null) return;
   chart.data.datasets[0].data.push({ x: Date.now(), y: _state.memUsedMb });
   chart.data.datasets[0].borderColor = _brand(0.85);
   chart.data.datasets[0].backgroundColor = _brand(0.09);
@@ -64,8 +64,8 @@ function _refreshMem(chart) {
   }
 }
 
-let _freqChart = null;
-let _memChart = null;
+const _freqCharts = new Map();
+const _memCharts = new Map();
 let _initTimer = null;
 let _chartsSuspended = false;
 
@@ -76,20 +76,30 @@ let _chartsSuspended = false;
 // Solution : observer la visibilité du canvas, init seulement quand visible.
 function initCharts() {
   _chartsSuspended = false;
-  _resumeChart(_freqChart);
-  _resumeChart(_memChart);
+  _freqCharts.forEach(_resumeChart);
+  _memCharts.forEach(_resumeChart);
   _tryInit();
 }
 
 function _tryInit() {
-  const elFreq = document.getElementById('chartFreq');
-  const elMem = document.getElementById('chartMem');
+  const freqCanvases = document.querySelectorAll('canvas[data-resource-chart="freq"]');
+  const memCanvases = document.querySelectorAll('canvas[data-resource-chart="mem"]');
+  let initialized = false;
 
-  if (!elFreq || !elMem) { _scheduleRetry(); return; }
-  if (elFreq.offsetParent === null || elMem.offsetParent === null) { _scheduleRetry(); return; }
+  freqCanvases.forEach((canvas) => {
+    if (canvas.offsetParent !== null) {
+      _initFreq(canvas);
+      initialized = true;
+    }
+  });
+  memCanvases.forEach((canvas) => {
+    if (canvas.offsetParent !== null) {
+      _initMem(canvas);
+      initialized = true;
+    }
+  });
 
-  _initFreq(elFreq);
-  _initMem(elMem);
+  if (!initialized) _scheduleRetry();
 }
 
 function _scheduleRetry() {
@@ -98,11 +108,11 @@ function _scheduleRetry() {
 }
 
 function _initFreq(el) {
-  if (_freqChart) return;
+  if (_freqCharts.has(el)) return;
   const ctx = el.getContext('2d');
   if (!ctx) return;
 
-  _freqChart = new Chart(ctx, {
+  const chart = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{
@@ -135,15 +145,17 @@ function _initFreq(el) {
       plugins: { legend: { display: false } },
     },
   });
+  chart.$resourceMetric = 'freq';
+  _freqCharts.set(el, chart);
   _animateChartCanvas(el);
 }
 
 function _initMem(el) {
-  if (_memChart) return;
+  if (_memCharts.has(el)) return;
   const ctx = el.getContext('2d');
   if (!ctx) return;
 
-  _memChart = new Chart(ctx, {
+  const chart = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{
@@ -176,6 +188,8 @@ function _initMem(el) {
       plugins: { legend: { display: false } },
     },
   });
+  chart.$resourceMetric = 'mem';
+  _memCharts.set(el, chart);
   _animateChartCanvas(el);
 }
 
@@ -281,7 +295,7 @@ function pushSnapshot(snap) {
 
   // Si les charts n'ont pas encore pu s'initialiser (section masquée),
   // réessayer à chaque snapshot reçu.
-  if (!_freqChart || !_memChart) _tryInit();
+  _tryInit();
 }
 
 // ── Network gauge ─────────────────────────────────────────────────────────────
@@ -302,7 +316,8 @@ function _fmtBps(bps) {
 function destroyCharts() {
   if (_initTimer) { clearTimeout(_initTimer); _initTimer = null; }
   _chartsSuspended = true;
-  [_freqChart, _memChart].forEach(_suspendChart);
+  _freqCharts.forEach(_suspendChart);
+  _memCharts.forEach(_suspendChart);
   _diskCharts.forEach((chart) => chart.destroy());
   _diskCharts.clear();
 }
@@ -325,8 +340,8 @@ function _resumeChart(chart) {
     const rt = chart.options?.scales?.x?.realtime;
     if (rt) {
       rt.pause = false;
-      if (chart === _freqChart) rt.onRefresh = _refreshFreq;
-      if (chart === _memChart) rt.onRefresh = _refreshMem;
+      if (chart.$resourceMetric === 'freq') rt.onRefresh = _refreshFreq;
+      if (chart.$resourceMetric === 'mem') rt.onRefresh = _refreshMem;
     }
     chart.update('none');
   } catch (_) { }
