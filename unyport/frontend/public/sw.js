@@ -1,4 +1,4 @@
-const CACHE_NAME = "unyport-shell-v19";
+const CACHE_NAME = "unyport-shell-v20";
 const OFFLINE_URL = "/offline.html";
 const CACHEABLE_PREFIXES = [
   "/app/",

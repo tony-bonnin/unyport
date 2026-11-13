@@ -2,6 +2,6 @@
   if (!("serviceWorker" in navigator)) return;
 
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js?v=unyport-19").catch(() => {});
+    navigator.serviceWorker.register("/sw.js?v=unyport-20").catch(() => {});
   });
 })();
