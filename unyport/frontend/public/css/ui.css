@@ -262,7 +262,7 @@
   height: 15px;
   padding: 0;
   justify-content: center;
-  border: 1px solid #fff;
+  border: 1.66px solid #fff;
   border-radius: 999px;
   box-sizing: border-box;
   color: #fff;
@@ -273,19 +273,19 @@
 }
 
 .role-sticker.role-admin {
-  background: #dc2626;
+  background: #16a34a;
   border-color: #fff;
   color: #fff;
 }
 
 .role-sticker.role-operator {
-  background: #ea580c;
+  background: #0891b2;
   border-color: #fff;
   color: #fff;
 }
 
 .role-sticker.role-viewer {
-  background: #0284c7;
+  background: #795548;
   border-color: #fff;
   color: #fff;
 }
