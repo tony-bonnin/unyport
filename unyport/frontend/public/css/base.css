@@ -141,7 +141,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .login-left {
   flex: 0 0 500px;
   background:
-    linear-gradient(180deg, rgba(5, 9, 20, .24) 0%, rgba(7, 10, 21, .08) 38%, rgba(7, 8, 18, .88) 82%, #080914 100%),
+    linear-gradient(180deg, rgba(5, 9, 20, .24) 0%, rgba(7, 10, 21, .08) 38%, rgb(11 7 18) 82%, #0b0814 100%),
     radial-gradient(circle at 78% 56%, color-mix(in srgb, var(--brand) 32%, transparent), transparent 42%),
     url('/media/img/backgrounds/unyport-background.jpg') center center / cover no-repeat,
     #090b14;
