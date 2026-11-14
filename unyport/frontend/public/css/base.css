@@ -139,7 +139,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .login-left {
-  flex: 0 0 460px;
+  flex: 0 0 500px;
   background:
     linear-gradient(180deg, rgba(5, 9, 20, .24) 0%, rgba(7, 10, 21, .08) 38%, rgba(7, 8, 18, .88) 82%, #080914 100%),
     radial-gradient(circle at 78% 56%, color-mix(in srgb, var(--brand) 32%, transparent), transparent 42%),
@@ -151,6 +151,19 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   color: #fff;
   position: relative;
   overflow: hidden;
+}
+
+.login-left-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(5, 8, 18, .14);
+  pointer-events: none;
+}
+
+.login-left > :not(.login-left-overlay) {
+  position: relative;
+  z-index: 1;
 }
 
 .login-brand {
