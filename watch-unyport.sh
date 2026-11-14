@@ -7,6 +7,7 @@ ENV_FILE=${UNYPORT_GIT_SYNC_ENV:-"$ROOT_DIR/unyport-git-sync.env"}
 GIT_SYNC_SCRIPT=${GIT_SYNC_SCRIPT:-"$ROOT_DIR/scripts/sync-unyport-git.sh"}
 BUILD_SCRIPT=${BUILD_SCRIPT:-"$ROOT_DIR/scripts/build-unyport.sh"}
 SECURITY_SCAN_SCRIPT=${SECURITY_SCAN_SCRIPT:-"$ROOT_DIR/scripts/security-scan.sh"}
+DEPLOY_SCRIPT=${DEPLOY_SCRIPT:-"$ROOT_DIR/scripts/deploy-unyport.sh"}
 POLL_INTERVAL=${POLL_INTERVAL:-30}
 WATCH_DEBOUNCE=${WATCH_DEBOUNCE:-6}
 WATCH_QUIET_CHECKS=${WATCH_QUIET_CHECKS:-3}
@@ -99,9 +100,11 @@ build_and_sync() {
   fi
   rc=0
   load_env
-  # The watcher validates and builds only. Commits, versions, tags and
-  # publications are explicit release operations.
-  if "$SECURITY_SCAN_SCRIPT" && "$BUILD_SCRIPT"; then
+  if "$GIT_SYNC_SCRIPT" prepare-version \
+    && "$SECURITY_SCAN_SCRIPT" \
+    && "$BUILD_SCRIPT" \
+    && UNYPORT_GIT_BUILD_VERIFIED=1 UNYPORT_GIT_PREPARED_VERSION=1 "$GIT_SYNC_SCRIPT" sync \
+    && "$DEPLOY_SCRIPT"; then
     mark_clean
   else
     rc=$?

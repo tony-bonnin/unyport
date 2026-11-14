@@ -5,6 +5,7 @@ set -eu
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 ENV_FILE=${UNYPORT_GIT_SYNC_ENV:-"$ROOT_DIR/unyport-git-sync.env"}
 VERSION_SCRIPT=${VERSION_SCRIPT:-"$ROOT_DIR/scripts/unyport-version.sh"}
+VERSION_FILE=${UNYPORT_VERSION_FILE:-"$ROOT_DIR/unyport/backend/config/version.go"}
 
 UNYPORT_GIT_SYNC_ENABLED=${UNYPORT_GIT_SYNC_ENABLED:-0}
 UNYPORT_GIT_SYNC_PUSH=${UNYPORT_GIT_SYNC_PUSH:-1}
@@ -150,7 +151,17 @@ commit_and_push() {
 }
 
 prepare_version_for_build() {
-  log "prepare-version ne modifie plus la version; utiliser release <version>"
+  git -C "$ROOT_DIR" add -A
+  git -C "$ROOT_DIR" diff --cached --quiet && { log "aucune modification a versionner"; return 0; }
+  version_path=${VERSION_FILE#"$ROOT_DIR/"}
+  if git -C "$ROOT_DIR" diff --cached --name-only | grep -Fx "$version_path" >/dev/null 2>&1; then
+    log "version deja preparee: $(release_version)"
+    return 0
+  fi
+  kind=$(detect_release_kind)
+  "$VERSION_SCRIPT" bump "$kind" >/dev/null
+  git -C "$ROOT_DIR" add "$version_path"
+  log "version preparee: $(release_version) ($kind)"
 }
 
 create_release_tag() {
