@@ -1028,7 +1028,7 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
     box-sizing: border-box;
     padding: 2.33rem 2.33rem max(2.33rem, env(safe-area-inset-bottom));
     background:
-      url('/media/img/logos/logo-unyport-white-full.png') center 2rem / 7.77rem auto no-repeat,
+      url('/media/img/logos/logo-unyport-white-full.png') center 2rem / 6.66rem auto no-repeat,
       linear-gradient(rgb(7 3 12 / 82%), rgb(7 3 12 / 90%)),
       url('/media/img/backgrounds/unyport-background.jpg') center / cover no-repeat,
       #090b14;

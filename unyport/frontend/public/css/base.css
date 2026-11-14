@@ -181,7 +181,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .login-brand img {
-  width: 7.77rem;
+  width: 6.66rem;
   -o-object-fit: contain;
      object-fit: contain;
   -webkit-filter: brightness(10);
