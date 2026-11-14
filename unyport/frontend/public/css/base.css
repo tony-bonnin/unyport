@@ -161,7 +161,6 @@ button:disabled { opacity: .5; cursor: not-allowed; }
     180deg,
     rgb(10 5 18) 0%,
     rgb(255 255 255 / 0%) 30%,
-    rgb(255 255 255 / 0%) 80%,
     rgb(9 5 18) 100%
   );
   pointer-events: none;
