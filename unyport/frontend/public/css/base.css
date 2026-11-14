@@ -160,8 +160,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   background: linear-gradient(
     180deg,
     rgb(10 5 18) 0%,
-    rgba(5, 8, 18, 0) 38%,
-    rgba(5, 8, 18, 0) 62%,
+    rgb(255 255 255 / 0%) 30%,
+    rgb(255 255 255 / 0%) 80%,
     rgb(9 5 18) 100%
   );
   pointer-events: none;
