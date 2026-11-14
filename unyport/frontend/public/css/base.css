@@ -141,9 +141,10 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .login-left {
   flex: 0 0 460px;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,255,255,.10) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 70% at 90% 100%, rgba(0,0,0,.22) 0%, transparent 60%),
-    linear-gradient(165deg, var(--brand) 0%, var(--brand-700) 70%, #1f1d5e 100%);
+    linear-gradient(180deg, rgba(5, 9, 20, .24) 0%, rgba(7, 10, 21, .08) 38%, rgba(7, 8, 18, .88) 82%, #080914 100%),
+    radial-gradient(circle at 78% 56%, color-mix(in srgb, var(--brand) 32%, transparent), transparent 42%),
+    url('/media/img/backgrounds/login-appliance-v2.png') -33rem center / cover no-repeat,
+    #090b14;
   display: flex;
   flex-direction: column;
   padding: 44px 48px;
