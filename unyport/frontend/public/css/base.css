@@ -139,11 +139,11 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 }
 
 .login-left {
-  flex: 0 0 500px;
+  flex: 0 0 50%;
   background:
     linear-gradient(180deg, rgba(5, 9, 20, .24) 0%, rgba(7, 10, 21, .08) 38%, rgba(7, 8, 18, .88) 82%, #080914 100%),
     radial-gradient(circle at 78% 56%, color-mix(in srgb, var(--brand) 32%, transparent), transparent 42%),
-    url('/media/img/backgrounds/unyport-background.jpg') -26rem center / cover no-repeat,
+    url('/media/img/backgrounds/unyport-background.jpg') center center / cover no-repeat,
     #090b14;
   display: flex;
   flex-direction: column;
@@ -159,10 +159,10 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   z-index: 0;
   background: linear-gradient(
     180deg,
-    rgba(5, 8, 18, .46) 0%,
+    rgb(10 5 18) 0%,
     rgba(5, 8, 18, 0) 38%,
     rgba(5, 8, 18, 0) 62%,
-    rgba(5, 8, 18, .58) 100%
+    rgb(9 5 18) 100%
   );
   pointer-events: none;
 }
