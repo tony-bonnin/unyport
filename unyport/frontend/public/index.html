@@ -720,13 +720,13 @@
                 </div>
               </div>
               <div class="virtual-health-card">
-                <div class="virtual-health-head"><div><span>Host health</span><h2>System status</h2></div></div>
                 <div class="virtual-health-body">
                   <div class="virtual-health-ring" :class="hostHealthTone">
                     <svg viewBox="0 0 42 42" aria-hidden="true"><circle class="virtual-health-track" cx="21" cy="21" r="16" pathLength="100"></circle><circle class="virtual-health-progress" cx="21" cy="21" r="16" pathLength="100" :stroke-dasharray="hostHealthScore + ' 100'"></circle></svg>
                     <div><strong x-text="hostHealthScore + '%'">0%</strong><span>headroom</span></div>
                   </div>
                   <div class="virtual-health-copy">
+                    <div class="virtual-health-head"><div><span>Host health</span><h2>System status</h2></div></div>
                     <strong x-text="hostHealthLabel"></strong>
                     <span>Current host resources</span>
                     <div class="virtual-health-legend">

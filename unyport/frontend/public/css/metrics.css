@@ -271,8 +271,8 @@
 .virtual-health-head { display: flex; align-items: flex-start; justify-content: space-between; }
 .virtual-health-head span { color: var(--text-muted); font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
 .virtual-health-head h2 { margin: 3px 0 0; color: var(--text); font-size: 15px; line-height: 1.2; }
-.virtual-health-body { display: flex; align-items: center; gap: 20px; margin-top: 12px; }
-.virtual-health-ring { position: relative; display: grid; width: 112px; height: 112px; flex: 0 0 112px; place-items: center; }
+.virtual-health-body { display: flex; align-items: center; gap: 28px; height: 100%; }
+.virtual-health-ring { position: relative; display: grid; width: 176px; height: 176px; flex: 0 0 176px; place-items: center; }
 .virtual-health-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
 .virtual-health-ring circle { fill: none; stroke-width: 7; }
 .virtual-health-track { stroke: color-mix(in srgb, var(--brand) 12%, var(--surface-sunk)); }
@@ -282,10 +282,10 @@
 .virtual-health-ring.is-critical .virtual-health-track { stroke: rgb(220 91 91 / 12%); }
 .virtual-health-ring.is-critical .virtual-health-progress { stroke: #dc5b5b; }
 .virtual-health-ring > div { z-index: 1; display: grid; place-items: center; }
-.virtual-health-ring strong { color: var(--text); font: 800 20px 'JetBrains Mono', monospace; line-height: 1; }
+.virtual-health-ring strong { color: var(--text); font: 800 30px 'JetBrains Mono', monospace; line-height: 1; }
 .virtual-health-ring span { margin-top: 4px; color: var(--text-muted); font-size: 8px; text-transform: uppercase; }
 .virtual-health-copy { display: flex; min-width: 0; flex-direction: column; }
-.virtual-health-copy > strong { color: var(--text); font-size: 14px; }
+.virtual-health-copy > strong { margin-top: 18px; color: var(--text); font-size: 14px; }
 .virtual-health-copy > span { margin-top: 3px; color: var(--text-muted); font-size: 10px; }
 .virtual-health-legend { display: grid; margin-top: 12px; gap: 6px; }
 .virtual-health-legend span { display: flex; min-width: 0; align-items: center; gap: 6px; color: var(--text-muted); font-size: 10px; }
@@ -474,6 +474,8 @@
   .virtual-host-icon { width: 52px; height: 52px; flex-basis: 52px; border-radius: 12px; }
   .virtual-identity { gap: 14px; }
   .virtual-identity h1 { font-size: 22px; }
+  .virtual-health-body { gap: 18px; }
+  .virtual-health-ring { width: 144px; height: 144px; flex-basis: 144px; }
   .virtual-panel { padding: 19px; }
   .virtual-facts > div { grid-template-columns: 92px minmax(0, 1fr); }
 }
