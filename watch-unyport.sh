@@ -100,12 +100,22 @@ build_and_sync() {
   fi
   rc=0
   load_env
-  if "$GIT_SYNC_SCRIPT" prepare-version \
-    && "$SECURITY_SCAN_SCRIPT" \
+  if "$GIT_SYNC_SCRIPT" prepare-version; then
+    prepared_fp=$(watch_fingerprint)
+  else
+    rc=$?
+    release_build_lock
+    return "$rc"
+  fi
+  if "$SECURITY_SCAN_SCRIPT" \
     && "$BUILD_SCRIPT" \
     && UNYPORT_GIT_BUILD_VERIFIED=1 UNYPORT_GIT_PREPARED_VERSION=1 "$GIT_SYNC_SCRIPT" sync \
     && "$DEPLOY_SCRIPT"; then
-    mark_clean
+    if [ "$(watch_fingerprint)" = "$prepared_fp" ]; then
+      mark_clean
+    else
+      echo '[unyport] nouveau changement conserve pour la prochaine transaction'
+    fi
   else
     rc=$?
   fi
