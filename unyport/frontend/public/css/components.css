@@ -1027,10 +1027,12 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
     width: 100%;
     box-sizing: border-box;
     padding: 2.33rem 2.33rem max(2.33rem, env(safe-area-inset-bottom));
-    background: url(/media/img/logos/logo-unyport-white-full.png) no-repeat #3e3aab;
+    background:
+      url('/media/img/logos/logo-unyport-white-full.png') center 2rem / 10rem auto no-repeat,
+      linear-gradient(rgb(3 5 12 / 88%), rgb(3 5 12 / 95%)),
+      url('/media/img/backgrounds/unyport-background.jpg') center / cover no-repeat,
+      #090b14;
     color: white;
-    background-size: 10rem;
-    background-position: center 2rem;
 }
 .login-box-header h2 {
     color: white;
