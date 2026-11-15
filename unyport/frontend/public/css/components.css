@@ -1001,6 +1001,54 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
   .chart-sm { grid-column: auto; }
 }
 
+@media (min-width: 701px) and (max-width: 900px) {
+  .login-left {
+    flex-basis: 45vw;
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+
+  .login-right {
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  .login-info-panel {
+    gap: .5rem;
+    padding: .75rem;
+  }
+
+  .login-info-panel-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-basis: 2.25rem;
+  }
+
+  .login-info-panel-copy {
+    min-width: 0;
+  }
+
+  .login-info-panel-copy strong,
+  .login-info-panel-copy span {
+    white-space: nowrap;
+  }
+
+  .login-info-panel-copy strong {
+    font-size: .62rem;
+    letter-spacing: .07em;
+  }
+
+  .login-info-panel-copy span {
+    font-size: 11px;
+  }
+
+  .login-info-panel-action {
+    width: 1.5rem;
+    height: 1.5rem;
+    min-width: 1.5rem;
+  }
+}
+
 @media (max-width: 640px) {
   .stats-strip {
     grid-template-columns: repeat(4, minmax(120px, 1fr));
