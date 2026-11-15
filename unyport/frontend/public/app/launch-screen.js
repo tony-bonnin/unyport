@@ -1,13 +1,6 @@
 (() => {
-  const roleKey = 'unyport-host-role';
-  const applyRole = (role) => {
-    const normalized = String(role || '').trim().toLowerCase();
-    if (!['dom0', 'domu', 'container', 'alpine'].includes(normalized)) return;
-    document.documentElement.setAttribute('data-role', normalized);
-    try { window.localStorage.setItem(roleKey, normalized); } catch { /* no-op */ }
-  };
-
-  try { applyRole(window.localStorage.getItem(roleKey)); } catch { /* no-op */ }
+  document.documentElement.removeAttribute('data-role');
+  try { window.localStorage.removeItem('unyport-host-role'); } catch { /* no-op */ }
 
   const dismiss = () => {
     const screen = document.getElementById('launch-screen');

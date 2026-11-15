@@ -1996,7 +1996,6 @@ document.addEventListener('alpine:init', () => {
       const map = { dom0: 'dom0', domu: 'domu', container: 'container', alpine: 'alpine' };
       const normalizedRole = map[roleKey] || 'alpine';
       document.documentElement.setAttribute('data-role', normalizedRole);
-      try { window.localStorage.setItem('unyport-host-role', normalizedRole); } catch { /* no-op */ }
       this._updateThemeMetaColor(role || 'Dom0');
       if (window && window.__unyportSyncThemeColor) {
         window.__unyportSyncThemeColor(this.effectiveTheme, role || 'Dom0');
