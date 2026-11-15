@@ -100,8 +100,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .loading-panel .spinner {
   position: fixed;
   top: calc(50% + 76px);
-  left: 50%;
-  transform: translateX(-50%);
+  left: calc(50% - 16px);
 }
 
 .loading-panel > span {
