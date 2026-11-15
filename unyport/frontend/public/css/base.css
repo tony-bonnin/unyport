@@ -68,8 +68,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 
 .launch-screen img,
 .loading-logo img {
-  width: 52px;
-  height: 52px;
+  width: 60px;
+  height: 60px;
   -o-object-fit: contain;
      object-fit: contain;
 }
