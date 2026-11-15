@@ -1994,7 +1994,9 @@ document.addEventListener('alpine:init', () => {
     _applyRoleColor(role) {
       const roleKey = (String(role || '').trim().toLowerCase()) || 'alpine';
       const map = { dom0: 'dom0', domu: 'domu', container: 'container', alpine: 'alpine' };
-      document.documentElement.setAttribute('data-role', map[roleKey] || 'alpine');
+      const normalizedRole = map[roleKey] || 'alpine';
+      document.documentElement.setAttribute('data-role', normalizedRole);
+      try { window.localStorage.setItem('unyport-host-role', normalizedRole); } catch { /* no-op */ }
       this._updateThemeMetaColor(role || 'Dom0');
       if (window && window.__unyportSyncThemeColor) {
         window.__unyportSyncThemeColor(this.effectiveTheme, role || 'Dom0');
