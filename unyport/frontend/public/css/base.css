@@ -119,7 +119,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 3px solid var(--border);
+  border: 3px solid color-mix(in srgb, var(--brand) 18%, transparent);
   border-top-color: var(--brand);
   animation: spin .9s linear infinite;
 }
