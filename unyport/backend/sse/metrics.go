@@ -1649,6 +1649,7 @@ func deviceTypeForHostname(hostname string) string {
 		deviceType string
 		words      []string
 	}{
+		{"virtual_machine", []string{"vm-"}},
 		{"reverse_proxy", []string{"reverse-proxy", "reverseproxy"}},
 		{"smart_tv", []string{"hisense", "bravia", "webos", "smarttv"}},
 		{"tv", []string{"tv", "television"}},
@@ -1674,7 +1675,7 @@ func deviceTypeForHostname(hostname string) string {
 }
 
 func hostnameContainsToken(name, token string) bool {
-	if token == "cam-" {
+	if token == "cam-" || token == "vm-" {
 		return strings.HasPrefix(name, token)
 	}
 	for _, part := range strings.FieldsFunc(name, func(r rune) bool {
@@ -1726,6 +1727,7 @@ func readKeaNeighborMetadata() map[string]neighborMetadata {
 	metadata := make(map[string]neighborMetadata)
 	readKeaLeaseMetadata(metadata, "/var/lib/kea")
 	readKeaReservationMetadata(metadata, "/etc/kea/kea-dhcp4.conf")
+	readHostsMetadata(metadata, "/run/worker/dnsmasq/hosts")
 	readHostsMetadata(metadata, "/etc/hosts")
 	return metadata
 }

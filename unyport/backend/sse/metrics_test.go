@@ -72,7 +72,7 @@ func TestDeviceTypeForNeighborAlwaysReturnsAType(t *testing.T) {
 		{"NAS accepted on network", "192.168.4.25", "aa:bb:cc:dd:ee:05", "br-wan", "192.168.4.25=nas", "nas"},
 		{"SAN accepted on network", "192.168.4.26", "aa:bb:cc:dd:ee:06", "br-wan", "192.168.4.26=san", "san"},
 		{"explicit network NAS", "192.168.4.24", "aa:bb:cc:dd:ee:04", "br-wan", "192.168.4.24=network_nas", "network_nas"},
-		{"xen guest", "192.168.4.3", "00:16:3e:61:75:64", "br-wan", "", "server"},
+		{"xen guest", "192.168.4.3", "00:16:3e:61:75:64", "br-wan", "", "virtual_machine"},
 		{"unidentified", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "", "unknown"},
 		{"invalid explicit type", "192.168.4.99", "aa:bb:cc:dd:ee:ff", "br-wan", "192.168.4.99=spaceship", "unknown"},
 	}
@@ -92,6 +92,7 @@ func TestDeviceTypeForHostname(t *testing.T) {
 		"WINDOWS-WORKSTATION": "desktop",
 		"TRINITY-INSTALL":     "desktop",
 		"ALPINE-XEN":          "hypervisor",
+		"vm-lbseowmmqn":       "virtual_machine",
 		"unknown-client":      "unknown",
 	}
 	for hostname, want := range tests {

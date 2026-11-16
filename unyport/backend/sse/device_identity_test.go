@@ -125,14 +125,14 @@ func TestNeighborIdentityAgreementRaisesConfidence(t *testing.T) {
 func TestNeighborIdentityVirtualMACAndInterface(t *testing.T) {
 	resetNeighborIdentityCache(t)
 	identity := neighborIdentityFor("192.168.2.60", "00:16:3e:01:02:03", "vif3.0", "", "", nil)
-	if identity.DeviceType != "server" {
-		t.Fatalf("DeviceType = %q, want server", identity.DeviceType)
+	if identity.DeviceType != "virtual_machine" {
+		t.Fatalf("DeviceType = %q, want virtual_machine", identity.DeviceType)
 	}
 	if identity.Vendor != "Xen" {
 		t.Fatalf("Vendor = %q, want Xen", identity.Vendor)
 	}
 	// MAC Xen + interface virtuelle + OUI hyperviseur : trois signaux
-	// concordants vers "server", confiance plafonnée à 1.
+	// concordants vers "virtual_machine", confiance plafonnée à 1.
 	assertSources(t, identity.Sources, "mac", "oui", "interface")
 	if identity.Confidence != 1 {
 		t.Fatalf("Confidence = %v, want 1 (plafond)", identity.Confidence)

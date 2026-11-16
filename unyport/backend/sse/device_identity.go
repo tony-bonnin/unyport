@@ -238,14 +238,14 @@ func computeNeighborIdentity(ip, mac, iface, inventory, hostname string, service
 		add("public-ip", "router_wan", weightPublicIP)
 	}
 	if _, known := virtualOUIs[ouiPrefix(mac)]; known {
-		add("mac", "server", weightVirtualMAC)
+		add("mac", "virtual_machine", weightVirtualMAC)
 	}
 	add("oui", oui.DeviceType, weightOUI)
 	for _, service := range services {
 		add("service", serviceDeviceType(service), weightService)
 	}
 	if isVirtualInterface(iface) {
-		add("interface", "server", weightVirtualIface)
+		add("interface", "virtual_machine", weightVirtualIface)
 	}
 
 	identity := neighborIdentity{
@@ -275,8 +275,9 @@ func computeNeighborIdentity(ip, mac, iface, inventory, hostname string, service
 		}
 	}
 	// A rôle explicite dans le hostname est plus précis que les indices
-	// génériques "server" d'une MAC d'hyperviseur ou d'une interface virtuelle.
-	if hostnameType != "unknown" && hostnameType != "server" && winner == "server" {
+	// génériques d'une MAC d'hyperviseur ou d'une interface virtuelle.
+	if hostnameType != "unknown" && hostnameType != "server" &&
+		(winner == "server" || winner == "virtual_machine") {
 		winner = hostnameType
 	}
 
@@ -375,7 +376,7 @@ func lookupOUI(mac string) neighborOUI {
 		return neighborOUI{}
 	}
 	if vendor, ok := virtualOUIs[prefix]; ok {
-		return neighborOUI{Vendor: vendor, DeviceType: "server"}
+		return neighborOUI{Vendor: vendor, DeviceType: "virtual_machine"}
 	}
 	firstByte := hexByte(prefix[0])<<4 | hexByte(prefix[1])
 	if firstByte&0x01 != 0 || firstByte&0x02 != 0 {
