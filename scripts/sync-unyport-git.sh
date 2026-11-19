@@ -19,6 +19,9 @@ UNYPORT_GIT_AUTO_RELEASE=${UNYPORT_GIT_AUTO_RELEASE:-1}
 UNYPORT_GIT_REQUIRE_BUILD=${UNYPORT_GIT_REQUIRE_BUILD:-1}
 UNYPORT_GIT_BUILD_VERIFIED=${UNYPORT_GIT_BUILD_VERIFIED:-0}
 GH_TOKEN_FILE=${GH_TOKEN_FILE:-${GITHUB_TOKEN_FILE:-}}
+CB_TOKEN_FILE=${CB_TOKEN_FILE:-${CODEBERG_TOKEN_FILE:-}}
+GITHUB_REPO=${GITHUB_REPO:-tony-bonnin/unyport}
+CODEBERG_REPO=${CODEBERG_REPO:-tony-bonnin/unyport}
 GIT_TERMINAL_PROMPT=0
 GIT_ASKPASS=/bin/false
 export GIT_TERMINAL_PROMPT GIT_ASKPASS
@@ -40,20 +43,31 @@ load_env() {
 }
 
 auth_header() {
-  [ -f "$GH_TOKEN_FILE" ] || return 0
-  token=$(tr -d '\r\n' < "$GH_TOKEN_FILE")
+  token_file=$1
+  username=$2
+  [ -f "$token_file" ] || return 0
+  token=$(tr -d '\r\n' < "$token_file")
   [ -n "$token" ] || return 0
-  printf '%s' "x-access-token:$token" | base64 | tr -d '\n'
+  printf '%s' "$username:$token" | base64 | tr -d '\n'
   printf '\n'
 }
 
 git_auth() {
-  header=$(auth_header || true)
+  token_file=$1
+  username=$2
+  shift 2
+  header=$(auth_header "$token_file" "$username" || true)
   if [ -n "$header" ]; then
     git -C "$ROOT_DIR" -c credential.helper= -c core.askPass=/bin/false -c "http.extraHeader=Authorization: Basic $header" "$@"
   else
     git -C "$ROOT_DIR" -c credential.helper= -c core.askPass=/bin/false "$@"
   fi
+}
+
+push_all() {
+  ref=$1
+  git_auth "$GH_TOKEN_FILE" x-access-token push "https://github.com/$GITHUB_REPO.git" "$ref"
+  git_auth "$CB_TOKEN_FILE" tony-bonnin push "https://codeberg.org/$CODEBERG_REPO.git" "$ref"
 }
 
 release_kind_rank() {
@@ -146,7 +160,7 @@ commit_and_push() {
   fi
 
   if [ "$UNYPORT_GIT_SYNC_PUSH" = "1" ]; then
-    git_auth push origin "$UNYPORT_GIT_BRANCH"
+    push_all "$UNYPORT_GIT_BRANCH"
   fi
 }
 
@@ -178,7 +192,7 @@ create_release_tag() {
   fi
 
   if [ "$UNYPORT_GIT_SYNC_PUSH" = "1" ] && [ "$UNYPORT_GIT_RELEASE_PUSH_TAGS" = "1" ]; then
-    git_auth push origin "refs/tags/$tag"
+    push_all "refs/tags/$tag"
   fi
 }
 
@@ -251,7 +265,7 @@ run_sync() {
     log "build non verifiee: commit/push refuse"
     return 1
   fi
-  git_auth fetch origin --prune >/dev/null 2>&1 || true
+  git_auth "$GH_TOKEN_FILE" x-access-token fetch origin --prune >/dev/null 2>&1 || true
   commit_and_push
   create_release_tag
   publish_github_release
