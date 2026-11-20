@@ -1,6 +1,7 @@
 // Theme-color synchronizer for <meta name="theme-color">.
 (function () {
   var FALLBACK_THEME_COLOR = '#3e3aab';
+  var MOBILE_LOGIN_THEME_COLOR = 'rgb(7 3 12)';
   var THEME_COLOR_BY_ROLE = {
     light: {
       dom0: '#3e3aab',
@@ -49,7 +50,8 @@
       rootTheme = document.documentElement;
     }
     if (rootTheme && rootTheme.getAttribute('data-auth-page') === 'login') {
-      themeColorMeta.setAttribute('content', FALLBACK_THEME_COLOR);
+      var isMobileLogin = window.matchMedia && window.matchMedia('(max-width: 700px)').matches;
+      themeColorMeta.setAttribute('content', isMobileLogin ? MOBILE_LOGIN_THEME_COLOR : FALLBACK_THEME_COLOR);
       return;
     }
 
@@ -92,13 +94,14 @@
     themeColorObserver = new MutationObserver(function () {
       syncThemeColor();
     });
-    themeColorObserver.observe(rootTheme, { attributes: true, attributeFilter: ['data-theme', 'data-role'] });
+    themeColorObserver.observe(rootTheme, { attributes: true, attributeFilter: ['data-theme', 'data-role', 'data-auth-page'] });
   }
 
   function bindEvents() {
     if (document.addEventListener) {
       document.addEventListener('DOMContentLoaded', setThemeColor);
       window.addEventListener('themechange', function () { syncThemeColor(); });
+      window.addEventListener('resize', function () { syncThemeColor(); });
       window.__unyportSyncThemeColor = syncThemeColor;
       setThemeColor();
       watchThemeChange();

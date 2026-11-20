@@ -2030,7 +2030,8 @@ document.addEventListener('alpine:init', () => {
 
     _setLoginThemeMetaColor() {
       const meta = document.querySelector('meta[name="theme-color"]');
-      if (meta) meta.setAttribute('content', '#3e3aab');
+      const isMobileLogin = window.matchMedia && window.matchMedia('(max-width: 700px)').matches;
+      if (meta) meta.setAttribute('content', isMobileLogin ? 'rgb(7 3 12)' : '#3e3aab');
     },
 
     _updateCSS() {
