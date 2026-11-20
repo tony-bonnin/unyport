@@ -1076,10 +1076,10 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
     box-sizing: border-box;
     padding: 2.33rem 2.33rem max(2.33rem, env(safe-area-inset-bottom));
     background:
-      url('/media/img/logos/logo-unyport-white-full.png') center 2rem / 6.66rem auto no-repeat,
-      linear-gradient(rgb(7 3 12 / 82%), rgb(7 3 12 / 90%)),
+      url('/media/img/logos/logo-unyport-white-full.png') 4rem 1.66rem / 6.66rem auto no-repeat,
+      linear-gradient(rgb(7 3 12 / 5%) 6.66%, rgb(7 3 12), rgb(7 3 12), rgb(7 3 12)),
       url('/media/img/backgrounds/unyport-background.jpg') center / cover no-repeat,
-      #090b14;
+      #0e091400;
     color: white;
 }
 .login-box-header h2 {
@@ -1093,9 +1093,6 @@ a.action-tile:has(.action-purple):hover .action-tile-icon {
 }
 label.remember-me span {
     color: #ffffffad;
-}
-.btn-login {
-    background: #1a177b;
 }
 .btn-login:hover {
     background: #211f6b;
