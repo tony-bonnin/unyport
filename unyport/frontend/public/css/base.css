@@ -418,17 +418,6 @@ button.oauth:hover {
   border-color: var(--text-muted);
 }
 
-#login button.oauth {
-  background: #181b24;
-  border-color: #2e3448;
-  color: #b8bdd0;
-}
-
-#login button.oauth:hover {
-  background: #13161e;
-  border-color: #7a8099;
-}
-
 button.oauth img { width: 16px; }
 
 button.oauth:disabled {
@@ -436,6 +425,6 @@ button.oauth:disabled {
   opacity: .48;
 }
 
-#login button.oauth img[alt="GitHub"] {
+[data-theme="dark"] button.oauth img[alt="GitHub"] {
   filter: invert(1);
 }
