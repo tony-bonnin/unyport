@@ -150,11 +150,7 @@ func collect() Snapshot {
 	t2 := readCPUTimes()
 
 	cpuUsage, perCore := cpuPercentAll(t1, t2)
-	_, freqMax, freqCore := readFreqsPerCore()
-	// Fréquence effective depuis les jiffies /proc/stat × freq_max.
-	// Même source que cpuUsage | cohérent, pas de relecture /proc/cpuinfo.
-	// freq_eff_core[i] = (dActive[i]/dTotal[i]) × freqMax
-	freqAvg := computeEffectiveFreq(t1, t2, freqMax)
+	freqAvg, freqMax, freqCore := readFreqsPerCore()
 	memTotal, memFree, memCached, memUsed := readMemFull()
 	rxBytes, txBytes := readNetBytes()
 	netIface, netIP := readMainIface()
