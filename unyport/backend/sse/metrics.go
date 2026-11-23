@@ -150,7 +150,11 @@ func collect() Snapshot {
 	t2 := readCPUTimes()
 
 	cpuUsage, perCore := cpuPercentAll(t1, t2)
-	freqAvg, freqMax, freqCore := readFreqsPerCore()
+	_, freqMax, freqCore := readFreqsPerCore()
+	// Fréquence effective : activité mesurée sur /proc/stat × fréquence maximale.
+	// Une VM Xen annonce souvent une fréquence matérielle fixe ; ce calcul garde
+	// le graphe représentatif de l'activité CPU réelle.
+	freqAvg := computeEffectiveFreq(t1, t2, freqMax)
 	memTotal, memFree, memCached, memUsed := readMemFull()
 	rxBytes, txBytes := readNetBytes()
 	netIface, netIP := readMainIface()
