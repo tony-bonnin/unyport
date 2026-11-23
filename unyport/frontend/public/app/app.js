@@ -1840,10 +1840,15 @@ document.addEventListener('alpine:init', () => {
       if (snap.mem_cached_mb !== undefined) this.sysMemCachedMb = Number(snap.mem_cached_mb) || 0;
       this._applyXenState(snap);
 
-      // Bridges globaux
-      if (typeof _updateNetGauge === 'function') _updateNetGauge(this, snap.net_rx_bps || 0, snap.net_tx_bps || 0);
-      if (typeof pushSnapshot === 'function') pushSnapshot(snap);
-
+      // Chaque vue temps réel est isolée : un graphe défaillant ne doit jamais
+      // empêcher la topologie réseau de recevoir le même instantané SSE.
+      if (typeof _updateNetGauge === 'function') {
+        try {
+          _updateNetGauge(this, snap.net_rx_bps || 0, snap.net_tx_bps || 0);
+        } catch (error) {
+          console.error('Network gauge update failed:', error);
+        }
+      }
       if (typeof renderNetworkMap === 'function' && snap.net_map) {
         const _role = this.hostRoleRole || 'Alpine';
         const _runtime = this.hostRoleRuntime || '';
@@ -1851,8 +1856,20 @@ document.addEventListener('alpine:init', () => {
         const _ip = this.sysNetIp || '';
         window._nmLastArgs = [snap.net_map, _role, _runtime, _host, _ip];
         document.querySelectorAll('.netmap-container').forEach(el => {
-          if (el.id && el.offsetParent !== null) renderNetworkMap(snap.net_map, _role, _runtime, _host, _ip, el.id);
+          if (!el.id || el.offsetParent === null) return;
+          try {
+            renderNetworkMap(snap.net_map, _role, _runtime, _host, _ip, el.id);
+          } catch (error) {
+            console.error('Network map rendering failed:', error);
+          }
         });
+      }
+      if (typeof pushSnapshot === 'function') {
+        try {
+          pushSnapshot(snap);
+        } catch (error) {
+          console.error('Resource chart update failed:', error);
+        }
       }
 
       _updatePerCoreGrid(snap.cpu_per_core, snap.cpu_freq_core);

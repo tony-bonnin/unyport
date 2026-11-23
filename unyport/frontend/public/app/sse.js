@@ -16,7 +16,18 @@ class SystemSSE {
     };
     es.onmessage = (e) => {
       if (this._es !== es) return;
-      try { this._onSnap(JSON.parse(e.data)); } catch { }
+      let snapshot;
+      try {
+        snapshot = JSON.parse(e.data);
+      } catch (error) {
+        console.error('Invalid system snapshot:', error);
+        return;
+      }
+      try {
+        this._onSnap(snapshot);
+      } catch (error) {
+        console.error('System snapshot processing failed:', error);
+      }
     };
     es.onerror = () => {
       if (this._es === es) this._onStatus(false);
