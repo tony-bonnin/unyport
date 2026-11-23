@@ -85,6 +85,8 @@ document.addEventListener('alpine:init', () => {
     lbuState: 'absent',
     lbuArchive: '',
     _sse: null,
+    _sseFallbackTimer: null,
+    _sseFallbackBusy: false,
     _postLoginTimer: null,
 
     // Remarque: netRxVal/netTxVal non assignés ici, gérés par _updateNetGauge si nécessaire
@@ -1806,9 +1808,34 @@ document.addEventListener('alpine:init', () => {
       if (this._sse) return;
       this._sse = new SystemSSE(
         (snap) => this._onSnapshot(snap),
-        (ok) => { this.sseConnected = ok; },
+        (ok) => {
+          this.sseConnected = ok;
+          if (ok) this._stopSSEFallback();
+          else if (this._sse) this._startSSEFallback();
+        },
       );
       this._sse.connect();
+    },
+
+    _startSSEFallback() {
+      if (this._sseFallbackTimer || this.page !== 'app') return;
+      const poll = async () => {
+        if (this.sseConnected || this.page !== 'app' || this._sseFallbackBusy) return;
+        this._sseFallbackBusy = true;
+        try {
+          const snap = await apiFetch('/api/system?_=' + Date.now());
+          if (snap && !this.sseConnected) this._onSnapshot(snap);
+        } catch { /* SSE or the next poll will retry. */ }
+        finally { this._sseFallbackBusy = false; }
+      };
+      poll();
+      this._sseFallbackTimer = setInterval(poll, 5000);
+    },
+
+    _stopSSEFallback() {
+      if (this._sseFallbackTimer) clearInterval(this._sseFallbackTimer);
+      this._sseFallbackTimer = null;
+      this._sseFallbackBusy = false;
     },
 
     _stopSSE() {
@@ -1816,8 +1843,10 @@ document.addEventListener('alpine:init', () => {
         clearTimeout(this._postLoginTimer);
         this._postLoginTimer = null;
       }
-      this._sse?.disconnect();
+      const sse = this._sse;
       this._sse = null;
+      sse?.disconnect();
+      this._stopSSEFallback();
     },
 
     _onSnapshot(snap) {
