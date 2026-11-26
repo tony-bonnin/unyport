@@ -2,7 +2,7 @@
 // #chartFreq → Effective CPU frequency (MHz) = usage × freqMax / 100
 // #chartMem  → Memory used (MiB)
 //
-// Go computes the mean of the frequencies reported by every CPU core.
+// Go computes each core's effective frequency, then their arithmetic mean.
 // Go computes oscilloscope scales → cpu_freq_y_min/max, mem_y_min/max
 // JS: pushSnapshot writes _state, onRefresh reads _state + applies ys.options.min/max
 
@@ -275,7 +275,7 @@ function initDiskCharts() {
 }
 
 // ── pushSnapshot ──────────────────────────────────────────────────────────────
-// Go sends cpu_freq_avg_mhz = arithmetic mean of all reported core frequencies.
+// Go sends cpu_freq_avg_mhz = mean of all effective core frequencies.
 // and oscilloscope scales: cpu_freq_y_min/max, mem_y_min/max
 function pushSnapshot(snap) {
   if (!snap) return;

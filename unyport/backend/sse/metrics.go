@@ -150,9 +150,10 @@ func collect() Snapshot {
 	t2 := readCPUTimes()
 
 	cpuUsage, perCore := cpuPercentAll(t1, t2)
-	freqAvg, freqMax, freqCore := readFreqsPerCore()
-	// La fréquence globale est la moyenne des fréquences réellement annoncées
-	// par tous les cœurs, et non une estimation dérivée de leur taux d'activité.
+	_, freqMax, _ := readFreqsPerCore()
+	// Sous Xen, la fréquence annoncée reste souvent figée à sa valeur nominale.
+	// On calcule donc la fréquence effective de chaque cœur, puis leur moyenne.
+	freqAvg, freqCore := computeEffectiveFreqs(t1, t2, freqMax)
 	memTotal, memFree, memCached, memUsed := readMemFull()
 	rxBytes, txBytes := readNetBytes()
 	netIface, netIP := readMainIface()
@@ -911,15 +912,17 @@ func cpuPercentAll(t1, t2 map[string]cpuTimes) (float64, []float64) {
 	return global, perCore
 }
 
-// computeEffectiveFreq calcule la fréquence CPU effective depuis les jiffies /proc/stat.
-// freq_eff = (dActive / dTotal) × freqMax | varie avec la charge réelle.
-// Cohérent avec cpuPercentAll : même t1/t2, pas de relecture /proc.
-func computeEffectiveFreq(t1, t2 map[string]cpuTimes, freqMax int) int {
+// computeEffectiveFreqs calcule la fréquence effective de chaque cœur depuis
+// /proc/stat, puis retourne leur moyenne arithmétique.
+func computeEffectiveFreqs(t1, t2 map[string]cpuTimes, freqMax int) (int, []int) {
 	if freqMax <= 0 {
-		return 0
+		return 0, nil
 	}
-	var totalRatio float64
-	var count int
+	type coreFreq struct {
+		idx int
+		mhz int
+	}
+	var cores []coreFreq
 	for name, a := range t1 {
 		b, ok := t2[name]
 		if !ok || !strings.HasPrefix(name, "cpu") || name == "cpu" {
@@ -931,13 +934,27 @@ func computeEffectiveFreq(t1, t2 map[string]cpuTimes, freqMax int) int {
 			continue
 		}
 		active := 1.0 - dIdle/dTotal
-		totalRatio += active
-		count++
+		if active < 0 {
+			active = 0
+		} else if active > 1 {
+			active = 1
+		}
+		idx, err := strconv.Atoi(strings.TrimPrefix(name, "cpu"))
+		if err == nil {
+			cores = append(cores, coreFreq{idx: idx, mhz: int(active * float64(freqMax))})
+		}
 	}
-	if count == 0 {
-		return 0
+	if len(cores) == 0 {
+		return 0, nil
 	}
-	return int(totalRatio / float64(count) * float64(freqMax))
+	sort.Slice(cores, func(i, j int) bool { return cores[i].idx < cores[j].idx })
+	perCore := make([]int, len(cores))
+	total := 0
+	for i, core := range cores {
+		perCore[i] = core.mhz
+		total += core.mhz
+	}
+	return total / len(perCore), perCore
 }
 
 func readFreqsPerCore() (avg, max int, perCore []int) {
